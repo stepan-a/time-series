@@ -1,0 +1,278 @@
+\documentclass[10pt,a4paper,notitlepage,onecolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage[paperwidth=20cm,paperheight=28cm]{geometry}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\expectation}[1]{\mathbb E \left[ #1 \right]}
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Maine (Correction du partiel, L3)}}
+\date{}
+
+
+\maketitle
+
+\exercice{1} On remarque que  la fonction d'autocorrélation décroît de
+façon géométrique  et que la fonction  d'autocorrélation partielle est
+nulle à partir  du rang deux. Ces fonctions sont  donc générées par un
+processus ARMA($p$,$q$) avec $p=1$ et  $q=0$, il s'agit d'un processus
+autorégressif d'ordre 1. Nous savons que la fonction d'autocorrélation
+d'un AR(1) est de la forme :
+\[
+\rho(h) = \rho^{h}
+\]
+pour  tout $h>0$.  Clairement le  paramètre autorégressif  est égal  à
+0,7. On ne peut rien dire  de la variance de l'innovation du processus
+stochastique.\newline
+
+\bigskip
+\bigskip
+
+
+\exercice{2} Commençons par écrire  la vraisemblance conditionnelle du
+processus   AR(1).   Notons   $\mathcal   Y_T   =   \{y_1,\dots,y_T\}$
+l'échantillon disponible. Le processus générateur des données et de la forme :
+\[
+y_t = \rho y_{t-1}  + \varepsilon_t
+\]
+avec $\varepsilon_t$ un  bruit blanc Gaussien d'espérance  nulle et de
+variance  $\sigma_{\varepsilon}^{2}$   que  nous   supposerons  connue
+(c'est-à-dire que nous ne cherchons pas à estimer). La vraisemblance est la densité de l'échantillon :
+\[
+\mathcal L(\rho; \mathcal Y_T) = p(y_1,\dots,y_T)
+\]
+Puisque les $y_t$ ne sont pas indépendants, il n'est pas possible d'écrire cette densité jointe comme un produit de densités marginales. Mais en utilisant le théorème de Bayes, on peut écrire cette densité jointe comme un produit de densité conditionnelle :
+\[
+\mathcal L(\rho; \mathcal Y_T) = p(y_T|y_{T-1},\dots,y_{1})p(y_{T-1}|y_{t-2},\dots,y_{1})\dots p(y_{t}|y_{t-1},\dots,y_{1}) \dots p(y_2|y_1)
+\]
+ou, puisque $y_t$ ne dépend que de $y_{t-1}$, de façon équivalente :
+\[
+\mathcal L(\rho; \mathcal Y_T) = p(y_T|y_{T-1})p(y_{T-1}|y_{t-2})\dots p(y_{t}|y_{t-1})\dots p(y_2|y_1)
+\]
+soit de façon plus ramassée :
+\[
+\mathcal L(\rho; \mathcal Y_T) = \prod_{t=2}^T p(y_{t}|y_{t-1})
+\]
+Or nous savons que :
+\[
+y_t|y_{t-1} \sim \mathcal N \left(\rho y_{t-1},\sigma_{\varepsilon}^2\right)
+\]
+et que donc la densité conditionnelle de $y_t|y_{t-1}$ est :
+\[
+p(y_t|y_{t-1}) = \frac{1}{\sigma_{\varepsilon}\sqrt{2\pi}}e^{-\frac{1}{2\sigma_{\varepsilon}^2}\left(y_t-\rho y_{t-1}\right)^2}
+\]
+En substituant dans l'expression de la vraisemblance, on obtient :
+\[
+\mathcal L(\rho; \mathcal Y_T) = \prod_{t=2}^T\frac{1}{\sigma_{\varepsilon}\sqrt{2\pi}}e^{-\frac{1}{2\sigma_{\varepsilon}^2}\left(y_t-\rho y_{t-1}\right)^2}
+\]
+ou de façon équivalente :
+\[
+\mathcal L(\rho; \mathcal Y_T) = \left(2\pi\sigma_{\varepsilon}^2\right)^{-\frac{T-1}{2}}e^{-\frac{1}{2\sigma_{\varepsilon}^2}\sum_{t=2}^T\left(y_t-\rho y_{t-1}\right)^2}
+\]
+maximiser la vraisemblance par rapport à $\rho$ revient à minimiser la
+somme  sous l'exponentielle.   C'est  précisément  l'objectif des  MCO
+puisque    l'on   reconnaît    ici   la    somme   des    carrés   des
+résidus.  L'estimateur des  MCO,  obtenu en  minimisant  la somme  des
+carrés des  résidus ou en maximisant  la vraisemblance conditionnelle,
+est :
+\[
+\hat \rho_T = \frac{\sum_{t=2}^T y_t y_{t-1}}{\sum_{t=2}^T y_{t-1}^2}
+\] 
+
+\bigskip
+\bigskip
+
+\exercice{3} Soit $\{y_t,t\in\mathbb Z\}$ un ARMA($1,1$) de la forme :
+
+\[
+y_t = \frac{1}{2}y_{t-1} + \varepsilon_t - \frac{1}{3} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un  bruit blanc d'espérance nulle  et de variance
+1.   \question{1} Ce  processus est  asymptotiquement stationnaire  et
+inversible  car  les  racines  des   polynôme  retards  de  la  partie
+autorégressive  et  de  la  partie   moyenne  mobile  (2  et  3)  sont
+supérieures à un  en module. \question{2} Si  les conditions initiales
+sont telles que  le processus stochastique est  stationnaire au second
+ordre, alors les  moments d'ordre un et deux sont  invariants. Dans la
+suite on exploite cette propriété. \question{3} Appliquons l'opérateur
+espérance à la définition du processus stochastique :
+\[
+\mathbb E [y_t] = \frac{1}{2}\mathbb E [y_{t-1}] + \mathbb E [\varepsilon_t] - \frac{1}{3} \mathbb E [\varepsilon_{t-1}]
+\]
+Par définition de $\varepsilon_t$, il vient :
+\[
+\mathbb E [y_t] = \frac{1}{2}\mathbb E [y_{t-1}]
+\]
+puisque le moment d'ordre un est invariant, on a encore :
+\[
+\mathbb E [y_t] = \frac{1}{2}\mathbb E [y_{t}]
+\]
+et donc
+\[
+\mathbb E [y_t] = 0
+\]
+\question{4}  En  multipliant  l'équation  qui  définit  le  processus
+stochastique par  $y_t$ puis  en appliquant l'opérateur  espérance, il
+vient :
+\[
+\mathbb E [y_t^2] = \frac{1}{2}\mathbb E [y_ty_{t-1}] + \mathbb E [y_t\varepsilon_t] - \frac{1}{3} \mathbb E [y_t\varepsilon_{t-1}]
+\]
+c'est-à-dire, par définition de la fonction d'autocovariance :
+\[
+\gamma(0) = \frac{1}{2}\gamma(1) + \mathbb E [y_t\varepsilon_t] - \frac{1}{3} \mathbb E [y_t\varepsilon_{t-1}]
+\]
+En substituant la définition de $y_t$ dans les deux derniers termes :
+\[
+\gamma(0) = \frac{1}{2}\gamma(1) + \mathbb E \left[\left(\frac{1}{2}y_{t-1} + \varepsilon_t - \frac{1}{3} \varepsilon_{t-1}\right)\varepsilon_t\right]
+- \frac{1}{3} \mathbb E \left[\left(\frac{1}{2}y_{t-1} + \varepsilon_t - \frac{1}{3} \varepsilon_{t-1}\right)\varepsilon_{t-1}\right]
+\]
+En développant (sachant que $\mathbb E[\varepsilon_t\varepsilon_s] = 0$ pour tout $t\neq s$ et $\mathbb E[\varepsilon_ty_{t-s}] = 0$ pour tout $s>0$ car $\varepsilon_t$ est une innovation), il vient :
+\[
+\gamma(0) = \frac{1}{2}\gamma(1) + \sigma_{\varepsilon}^2
++ \frac{1}{9}\sigma_{\varepsilon}^2 - \frac{1}{6} \mathbb E \left[y_{t-1}\varepsilon_{t-1}\right]
+\]
+\[
+\Leftrightarrow \gamma(0) = \frac{1}{2}\gamma(1) + \sigma_{\varepsilon}^2
++ \frac{1}{9}\sigma_{\varepsilon}^2 - \frac{1}{6}\sigma_{\varepsilon}^2
+\]
+\[
+\gamma(0) = \frac{1}{2}\gamma(1) + \frac{17}{18}\sigma_{\varepsilon}^2
+\]
+En  multipliant  l'équation  qui  définit  le  processus
+stochastique par  $y_{t-1}$ puis  en appliquant l'opérateur  espérance, il
+vient :
+\[
+\gamma(1) = \frac{1}{2}\gamma(0) + \mathbb E [y_{t-1}\varepsilon_t] - \frac{1}{3} \mathbb E [y_{t-1}\varepsilon_{t-1}]
+\]
+\[
+\Leftrightarrow\gamma(1) = \frac{1}{2}\gamma(0) - \frac{1}{3}\sigma_{\varepsilon}^2
+\]
+Les autocovariances $\gamma(0)$ et $\gamma(1)$ sont donc la solution d'un système de deux équations linéaires :
+\[
+\begin{cases}
+\gamma(0) &= \frac{1}{2}\gamma(1) + \frac{17}{18}\sigma_{\varepsilon}^2\\  
+\gamma(1) &= \frac{1}{2}\gamma(0) - \frac{1}{3}\sigma_{\varepsilon}^2
+\end{cases}
+\]
+En substituant la seconde équation dans la première, on obtient :
+\[
+\gamma(0) = \frac{28}{27}\sigma_{\varepsilon}^2
+\]
+puis en substituant ce résultat dans la seconde équation :
+\[
+\gamma(1) = \frac{5}{27}\sigma_{\varepsilon}^2
+\]
+\question{5} En  multipliant  l'équation  qui  définit  le  processus
+stochastique par  $y_{t-2}$ puis  en appliquant l'opérateur  espérance, il
+vient :
+\[
+\gamma(2) = \frac{1}{2}\gamma(1) + \mathbb E [y_{t-2}\varepsilon_t] - \frac{1}{3} \mathbb E [y_{t-2}\varepsilon_{t-1}]
+\]
+\[
+\Leftrightarrow\gamma(2) = \frac{1}{2}\gamma(1)
+\]
+et donc :
+\[
+\gamma(2) = \frac{5}{54}\sigma_{\varepsilon}^2
+\]
+\question{6} Plus généralement, on a :
+\[
+\gamma(h) = \frac{1}{2}\gamma(h-1)
+\]
+pour  tout  $h\geq   2$.  À  partir  de  l'ordre   deux,  la  fonction
+d'autocorrélation  est  gouvernée  par  la  partie  autorégressive  du
+processus stochastique.\newline
+
+\bigskip
+\bigskip
+
+\exercice{4} Soit le processus ARMA(2,2) stationnaire :
+\[
+y_t = c + \varphi_1 y_{t-1} + \varphi_2 y_{t-2} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance $\sigma^2$. En appliquant l'opérateur espérance il vient :
+\[
+\expectation{y_t} = c + \varphi_1 \expectation{y_{t-1}} + \varphi_2 \expectation{y_{t-2}}
+\]
+puisque $\varepsilon_t$ est une variable aléatoire d'espérance nulle. Comme l'espérance est invariante, on a encore :
+\[
+\expectation{y_t} = c + \varphi_1 \expectation{y_{t}} + \varphi_2 \expectation{y_{t}}
+\]
+soit de façon équivalente :
+\[
+\expectation{y_t} = \frac{c}{1-\varphi_1-\varphi_2}
+\]
+En multipliant l'équation qui définit l'ARMA(2,2) par $z_t = y_t-\expectation{y_t}$ (le processus centré) puis en appliquant l'espérance, il vient :
+\[
+\gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \expectation{z_t\varepsilon_t} - \theta_1\expectation{z_t\varepsilon_{t-1}} - \theta_2\expectation{z_t\varepsilon_{t-2}}
+\]
+\[
+\begin{split}
+\Leftrightarrow \gamma(0) = \varphi_1 \gamma(1) &+ \varphi_2 \gamma(2) + \sigma_{\varepsilon}^2\\ 
+&- \theta_1\expectation{\left(\varphi_1 z_{t-1} + \varphi_2 z_{t-2} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}\right)\varepsilon_{t-1}}\\
+&- \theta_2\expectation{\left(\varphi_1 z_{t-1} + \varphi_2 z_{t-2} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}\right)\varepsilon_{t-2}}  
+\end{split}
+\]
+\[
+\begin{split}
+\Leftrightarrow \gamma(0) = \varphi_1 \gamma(1) &+ \varphi_2 \gamma(2) + \sigma_{\varepsilon}^2 -\theta_1\varphi_1\sigma_{\varepsilon}^2 + \theta_1^2\sigma_{\varepsilon}^2 -\theta_2\varphi_2\sigma_{\varepsilon}^2+ \theta_2^2\sigma_{\varepsilon}^2\\ 
+&- \theta_2\varphi_1 \expectation{z_{t-1}\varepsilon_{t-2}}  
+\end{split}
+\]
+\[
+\begin{split}
+\Leftrightarrow \gamma(0) = \varphi_1 \gamma(1) &+ \varphi_2 \gamma(2) + \sigma_{\varepsilon}^2 -\theta_1\varphi_1\sigma_{\varepsilon}^2 + \theta_1^2\sigma_{\varepsilon}^2 -\theta_2\varphi_2\sigma_{\varepsilon}^2+ \theta_2^2\sigma_{\varepsilon}^2\\ 
+&- \theta_2\varphi_1 \expectation{\left(\varphi_1 z_{t-2} + \varphi_2 z_{t-3} + \varepsilon_{t-1} - \theta_1 \varepsilon_{t-2} - \theta_2 \varepsilon_{t-3}\right)\varepsilon_{t-2}}  
+\end{split}
+\]
+\[
+\Leftrightarrow \gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \sigma_{\varepsilon}^2 -\theta_1\varphi_1\sigma_{\varepsilon}^2 + \theta_1^2\sigma_{\varepsilon}^2 -\theta_2\varphi_2\sigma_{\varepsilon}^2+ \theta_2^2\sigma_{\varepsilon}^2-\theta_2\varphi_1^2\sigma_{\varepsilon}^2+\theta_2\theta_1\varphi_1\sigma_{\varepsilon}^2
+\]
+\[
+\Leftrightarrow \gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \left(1+\theta_1^2 + \theta_2^2 - \theta_1\varphi_1 - \theta_2\varphi_2 -\theta_2\varphi_1^2 +\theta_2\theta_1\varphi_1\right)\sigma_{\varepsilon}^2
+\]
+Nous avons une expression de l'autocovariance d'ordre zéro en fonction
+des  autocovariances d'ordre  un et  deux  inconnues. Il  nous reste  à
+obtenir des  expressions pour  ces moments. En  multipliant l'équation
+qui  définit   l'ARMA(2,2)  centré   par  $z_{t-1}$  puis   en  appliquant
+l'espérance, il vient :
+\[
+\gamma(1) = \varphi_1 \gamma(0) + \varphi_2 \gamma(1) + \expectation{z_{t-1}\varepsilon_t} - \theta_1\expectation{z_{t-1}\varepsilon_{t-1}} - \theta_2\expectation{z_{t-1}\varepsilon_{t-2}}
+\]
+\[
+\Leftrightarrow (1-\varphi_2)\gamma(1) = \varphi_1 \gamma(0) - \theta_1\sigma_{\varepsilon}^2 - \theta_2\expectation{\left(\varphi_1 z_{t-2} + \varphi_2 z_{t-3} + \varepsilon_{t-1} - \theta_1 \varepsilon_{t-2} - \theta_2 \varepsilon_{t-3}\right)\varepsilon_{t-2}}
+\]
+\[
+\Leftrightarrow \gamma(1) = \frac{\varphi_1}{1-\varphi_2}\gamma(0) + \frac{\theta_2\theta_1-\theta_1-\theta_2\varphi_1}{1-\varphi_2}\sigma_{\varepsilon}^2
+\]
+En suivant la même démarche, on trouve aussi :
+\[
+\gamma(2) = \varphi_1\gamma(1) + \varphi_2\gamma(0) - \theta_2\sigma_{\varepsilon}^2
+\]
+Nous disposons donc d'un système à trois équations -- trois inconnues pour $\gamma(0)$, $\gamma(1)$ et $\gamma(2)$. Les autocovariances suivantes sont données par :
+\[
+\gamma(h) = \varphi_1\gamma(h-1) + \varphi_2\gamma(h-2)
+\]
+À partir du rang trois, la fonction d'autocovariance est déterminée à partir de la partie autorégressive du processus ARMA(2,2). Après quelques manipulations que je n'ai pas le courage de reporter ici, j'obtiens :
+\[
+\gamma(0) = \frac{\varphi_1(1+\varphi_2)(\theta_2\theta_1-\theta_1-\theta_2\varphi_1)-(1-\varphi_2)\left[1+\theta_1^2+\theta_2^2-\theta_1\varphi_1-\theta_2\varphi_1^2+\theta_2\theta_1\varphi_1\right]}{1-\varphi_2-\varphi_1^2-\varphi_2^2-\varphi_2(\varphi_1-\varphi_2)(\varphi_1+\varphi_2)}\sigma_{\varepsilon}^2
+\]
+On déduit facilement $\gamma(1)$ et $\gamma(2)$
+\end{document}
