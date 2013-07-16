@@ -1,5 +1,4 @@
 LATEX = pdflatex
-TARGET = kirikou.cepremap.org:~/public_html/university/time-series/l3/ds
 
 partiel-05-2013.pdf: partiel-05-2013.tex
 	while ($(LATEX) partiel-05-2013.tex ; \
@@ -24,8 +23,4 @@ clean:
 clean-all: clean
 	rm *.pdf
 
-push:
-	rsync -avz --delete-after ./*.pdf $(TARGET)
-	rsync -avz --delete-after ./*.tex $(TARGET)
-
-all: partiel-05-2013.pdf correction-partiel-05-2013.pdf clean push
+all: partiel-05-2013.pdf correction-partiel-05-2013.pdf clean
