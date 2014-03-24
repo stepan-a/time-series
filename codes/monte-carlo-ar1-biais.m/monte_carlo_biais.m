@@ -1,4 +1,4 @@
-% stephane.adjemian@univ-lemans.fr
+% stephane.adjemian@univ-lemans.fr, 2014
 
 % Evaluate the biais of the OLS estimator of the autoregressive parameter in an AR(1) model,
 % for different sample sizes.
