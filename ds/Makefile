@@ -15,6 +15,11 @@ rattrapage-2013.pdf: rattrapage-2013.tex
 	grep -q "Rerun to get cross" rattrapage-2013.log ) do true ; \
 	done
 
+rattrapage-2014.pdf: rattrapage-2014.tex
+	while ($(LATEX) rattrapage-2014.tex ; \
+	grep -q "Rerun to get cross" rattrapage-2014.log ) do true ; \
+	done
+
 correction-partiel-05-2013.pdf: correction-partiel-05-2013.tex
 	while ($(LATEX) correction-partiel-05-2013.tex ; \
 	grep -q "Rerun to get cross" correction-partiel-05-2013.log ) do true ; \
@@ -28,4 +33,4 @@ clean:
 clean-all: clean
 	rm *.pdf
 
-all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf clean
+all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf rattrapage-2014.pdf clean
