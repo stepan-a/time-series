@@ -1,0 +1,68 @@
+\documentclass[10pt,a4paper,notitlepage]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{float}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{nicefrac}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+
+ \usepackage[active]{srcltx}
+\usepackage{scrtime}
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{\textsc{Séries temporelles\\ \small{(Fiche de TD n°1)}}}
+\author{Stéphane Adjemian\thanks{Université du Maine, Gains. \texttt{stephane DOT adjemian AT univ DASH lemans DOT fr}}}
+\date{Le \today\ à \thistime}
+
+\maketitle
+
+\exercice{1} Soient $X$ et $Y$ deux variables aléatoires. Montrer que la covariance entre ces deux variables peut s'écrire sous la forme :
+\[
+\mathbb Cov(X,Y) = \mathbb E [XY] - \mathbb E [X]\mathbb E [Y]
+\]
+
+\bigskip
+
+\exercice{2} Soit le processus MA(1) :
+\[
+y_t = 1 + \epsilon_t - \frac{1}{2}\epsilon_{t-1}
+\]
+Calculer la fonction d'autocorrélation et donner une représentation graphique.
+
+\bigskip
+
+\exercice{3} Montrer que l'autocorrélation d'ordre 1 d'un processus MA(1), $y_t=\epsilon_t+\theta\epsilon_{t-1}$, ne peut être supérieure à $\nicefrac{1}{2}$ (en valeur absolue). Pourquoi est-il raisonnable de travailler sous l'hypothèse que le paramètre $\theta$ est compris entre -1 et 1 ?
+
+\bigskip
+
+\exercice{4} Soit le processus MA(2) :
+\[
+y_t = \epsilon_t - \theta_1\epsilon_{t-1} - \theta_2\epsilon_{t-2}
+\]
+Calculer la fonction d'autocovariance et la fonction d'autocorrélation.
+
+\bigskip
+
+\exercice{5} La densité spectrale d'un processus stochastique $\{y_t\}$ dont la fonction d'autocovariance est notée $\gamma_y (h)$ est définie par :
+\[
+f_y(\omega) = (2\pi)^{-1}\sum_{h=-\infty}^{\infty}\gamma_y(h)e^{-i \omega h}
+\]
+On suppose que le processus stochastique est tel que la somme soit définie pour tout $\omega$ réel. \textbf{(1)} Montrer que la fonction $f_y$ est réelle, symétrique sur l'intervalle $[-\pi,\pi]$ et périodique. \textbf{(2)} Représenter graphiquement la densité spectrale d'un bruit blanc. \textbf{(3)} Représenter la densité spectrale d'un MA(1). \textbf{(4)} Même question avec un MA(2).
+
+
+\end{document}
+
+
+% Exo 2.
+
+ 
