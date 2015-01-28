@@ -6,6 +6,12 @@ ds-build:
 ds-clean:
 	$(MAKE) -C $(ROOT_PATH)/ds clean-all
 
-all: ds-build
+td-build:
+	$(MAKE) -C $(ROOT_PATH)/td all
 
-clean-all: ds-clean
+td-clean:
+	$(MAKE) -C $(ROOT_PATH)/td clean-all
+
+all: ds-build td-build
+
+clean-all: ds-clean td-clean
