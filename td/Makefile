@@ -1,6 +1,6 @@
 ROOT_PATH = .
 
-all: td1-build
+all: td1-build td2-build
 
 td1-build:
 	$(MAKE) -C $(ROOT_PATH)/1 all
@@ -14,4 +14,4 @@ td2-build:
 td2-clean:
 	$(MAKE) -C $(ROOT_PATH)/2 clean-all
 
-clean-all: td1-clean
+clean-all: td1-clean td2-clean
