@@ -1,0 +1,81 @@
+\documentclass[10pt,a4paper,notitlepage]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{float}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{nicefrac}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+
+\usepackage[active]{srcltx}
+\usepackage{scrtime}
+\usepackage{enumerate}
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{\textsc{Séries temporelles\\ \small{(Fiche de TD n°2)}}}
+\author{Stéphane Adjemian\thanks{Université du Maine, Gains. \texttt{stephane DOT adjemian AT univ DASH lemans DOT fr}}}
+\date{Le \today\ à \thistime}
+
+\maketitle
+
+\exercice{1} Soit le processus AR(1):
+\[
+y_t = \frac{1}{2}y_{t-1} + \varepsilon_t
+\]
+avec ${\varepsilon_t}$ un bruit blanc gaussien d'espérance nulle et de variance unitaire. On suppose que la condition initiale est déterministe : $y_0 = 1$. \question{1} Ce processus est-il stationnaire ? \question{2} Calculer la probabilité que $y_t$ soit inférieur à zéro pour $t=1, 2, 10, 100$ et $500$.
+ 
+\bigskip
+
+\exercice{2} Soit le processus AR(1) :
+\[
+y_t = \varphi y_{t_1} + \varepsilon_t
+\]
+avec ${\varepsilon_t}$ un bruit blanc gaussien d'espérance nulle et de variance $\sigma^2_{\varepsilon}$, on suppose que $|\varphi|<1$. \question{1} Calculer la fonction d'autocovariance. \question{2} Donner l'expression de la densité spectrale. \question{3} Représenter graphiquement la densité spectrale. \question{4} Quelles sont les conséquences d'une augmentation du paramètre autorégressif (sur la forme de la densité spectrale) ?
+
+\bigskip
+
+\exercice{3} Soit le processus AR(2) :
+\[
+y_t = \varphi_1 y_{t-1} + \varphi_2 y_{t-2} + \varepsilon_t
+\]
+où ${\varepsilon_t}$ est un bruit blanc gaussien d'espérance nulle et de variance $\sigma^2_{\varepsilon}$. \question{1} Caractériser les conditions sur les paramètres autorégressifs pour que le processus stochastique soit asymptototiquement stationnaire. \question{2} Quelle(s) condition(s) supplémentaire(s) faut-il poser pour que le processus stochastique soit stationnaire ? 
+
+\bigskip
+
+\exercice{4} Les processus suivants sont-ils asymptotiquement stationnaires :
+\begin{enumerate}[(a)]
+	\item $y_t = \frac{1}{2}y_{t-1} - \frac{1}{4} y_{t_2} + \varepsilon_t$
+	\item $y_t = \frac{1}{4}y_{t-1} + \frac{1}{8} y_{t_2} + \varepsilon_t$
+	\item $y_t = \frac{1}{2}y_{t_1} + \frac{1}{16}y_{t_2} - \frac{1}{32}y_{t_3} + \varepsilon_t$
+\end{enumerate}
+avec ${\varepsilon_t}$ un bruit blanc gaussien d'espérance nulle et de variance unitaire.
+
+\bigskip
+
+\exercice{5} Soit le processus AR(2) :
+\[
+y_t = \frac{5}{6}y_{t-1} - \frac{1}{6}y_{t-1} + \varepsilon_t
+\]
+avec ${\varepsilon_t}$ un bruit blanc gaussien d'espérance nulle et de variance unitaire. Écrire la forme MA($\infty$) de ce processus stochastique.
+
+\exercice{6} Soit le processus AR(3) :
+\[
+y_t = \frac{1}{2}y_{t_1} + \frac{1}{16}y_{t_2} - \frac{1}{32}y_{t_3} + \varepsilon_t
+\]
+avec ${\varepsilon_t}$ un bruit blanc gaussien d'espérance nulle et de variance unitaire. Calculer la fonction d'autocovariance.
+
+\end{document}
+
+
+% Exo 2.
+
+ 
