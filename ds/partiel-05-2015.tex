@@ -1,0 +1,73 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,onecolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Maine (Partiel, L3)}}
+\date{}
+
+
+\maketitle
+
+
+\exercice{1} Donnez l'expression de la vraisemblance exacte d'un
+processus MA(1) d'espérance nulle. On notera $\mathcal Y_T \equiv
+\{y_1,y_2,\dots,y_T\}$ l'échantillon et on supposera que les
+innovations sont normalement distribuées d'espérance nulle et de
+variance $\sigma_{\epsilon}^2$. Serait-il possible d'estimer les
+paramètres de ce modèle par les MCO ?
+
+\bigskip
+\bigskip
+
+\exercice{2} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,1$) de la forme :
+
+\[
+y_t = 1 + \frac{1}{2}y_{t-1} + \varepsilon_t - \frac{1}{4} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance 1.\newline
+
+\question{1}   Le    processus   est-il   asymptotiquement
+stationnaire  au   second  ordre   et  inversible~?   Justifiez  votre
+réponse.\newline
+
+On suppose maintenant que le processus est stationnaire au second
+ordre.\newline
+
+\question{2} Quelles sont les implications de cette hypothèse sur les
+moments d'ordre 1 et 2 ? \question{3} Calculez l'espérance (on notera
+$\mu$ l'espérance). \question{4} Calculez les autocovariances d'ordre
+0 et 1 (on notera $\gamma(0)$ et $\gamma(1)$). \question{5} Calculez
+l'autocovariance d'ordre 2 (on notera $\gamma(2)$). \question{6}
+Calculez l'autocovariance d'ordre h (on notera $\gamma(h)$) pour tout
+$h>2$.  \question{7} Définissez la fonction d'autocorrélation.
+
+\bigskip
+\bigskip
+
+\exercice{3} Calculez les moments d'ordre 1 et 2 d'un processus ARMA(1,2) que nous supposerons stationnaire :
+\[
+y_t = c + \varphi y_{t-1} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance $\sigma^2$.
+
+\end{document}
