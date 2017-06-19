@@ -1,0 +1,186 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}\\(Éléments de correction)}
+\author{\textsc{Université du Maine (Partiel, L3)}}
+\date{}
+
+
+\maketitle
+
+\exercice{1} Dans une très majorité de copies, les étudiants
+confondent le processus MA(1) et le processus AR(1). Un processus
+MA(1) est défini de la façon suivante :
+\[
+y_t = \varepsilon_t - \theta \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc gaussien d'espérance nulle et de
+variance $\sigma_{\varepsilon}^2$. L'hypothèse de normalité de
+$\varepsilon$ est essentielle pour écrire (simplement) la
+vraisemblance.\newline
+
+Il n'est pas possible d'estimer ce processus par les MCO car les
+variables explicatives ($\varepsilon_t$ et $\varepsilon_{t-1}$) ne sont
+pas observées.\newline
+
+Pour l'écriture des fonctions de vraisemblance (exacte et
+conditionnelle), se reporter au cours.\newline
+
+Pour écrire la vraisemblance exacte, on procède en écrivant la densité
+jointe de l'échantillon $ \mathbf y =
+(y_1,y_2,\dots,y_T)'$. L'échantillon suit une loi normale multivariée
+d'espérance nulle, la variance est donnée par la fonction
+d'autocovariance du processus :
+\[
+\gamma(0) = (1+\theta^2)\sigma_{\varepsilon}^2
+\]
+\[
+\gamma(1) = -\theta\sigma_{\varepsilon}^2
+\]
+et
+\[
+\gamma(h) = 0 \quad \forall h>1
+\]
+On a
+\[
+y \sim \mathcal N (\mathbf 0, \Sigma)
+\]
+avec
+\[
+  \Sigma =
+  \begin{pmatrix}
+    1+\theta^2 & -\theta & 0 & \dots & \dots & 0 \\
+    -\theta & 1+\theta^2 & -\theta & 0 & \dots & 0\\
+    0& & & & & \\
+    0& \dots& \dots & 0& -\theta & 1+\theta^2 
+  \end{pmatrix}
+\]
+et $\mathbf 0$ un vecteur nul de dimension $T\time 1$. La
+vraisemblance exacte est donc de la forme :
+\[
+\mathcal L(\theta, \sigma_{\varepsilon}^2; \mathbf y) = (2\pi)^{-\frac{T}{2}}|\Sigma|^{-\frac{1}{2}}e^{-\frac{1}{2}\mathbf y' \Sigma^{-1} \mathbf y}
+\]
+Dans le cours on donne plus de détail sur l'inversion de la matrice
+$\Sigma$ et le calcul de son déterminant en exploitant sa forme très
+particulière.\newline
+
+Pour écrire la vraisemblance conditionnelle, on note que l'on peut
+exprimer $\varepsilon_t$ en fonction de $y_t$ et de
+$\varepsilon_{t-1}$ :
+\[
+\varepsilon_t = y_t + \theta \varepsilon_{t-1}
+\]
+En initialisant $\varepsilon_0$ à 0 (par exemple) et en utilisant les
+observables, il est alors possible de construire récursivement la
+chronique des $\varepsilon_t$ pour $t$ allant de 1 à $T$. On sait que
+ces $\varepsilon_t$ sont identiquement et indépendemment normalement
+distribués d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$. On déduit la vraisemblance directement (voir
+le cours).
+
+\bigskip
+\bigskip
+
+
+\exercice{2} \textbf{(1)} Le processus est asymptotiquement
+stationnaire au second ordre car la racine du polynôme retard
+auto-régressif (3) est supérieure à 1 en module. Le processus est
+inversible car la racine du polynôme retard moyenne mobile (3/2) est
+supérieure à 1 en module. On note que les racines sont différentes,
+nous travaillons donc bien sur la représentation minimale d'une
+ARMA(1,1). \textbf{(2)} Les moments d'ordres 1 et 2 sont donc
+invariants. \textbf{(3)} L'espérance est donnée par :
+\[
+\mathbb E [y_t] = \frac{1}{1-\frac{1}{3}} = \frac{3}{2} 
+\]
+\textbf{(4)} On doit trouver :
+\[
+\gamma(0) = \frac{9}{8} 
+\]
+et
+\[
+\gamma(1) = -\frac{7}{24}
+\]
+\textbf{(5)} L'autocovariance d'ordre 2 est :
+\[
+\gamma(2) = -\frac{7}{72}
+\]
+\textbf{(6)} Plus généralement, on a :
+\[
+\gamma(h) = \frac{1}{3}\gamma(h-1)
+\]
+pour tout $h>1$. La fonction d'auto-corrélation est une normalisation de la fonction d'auto-covariance, de façon générale on a :
+\[
+\rho(h) = \frac{\gamma(h)}{\gamma(0)}
+\]
+et donc :
+\[
+\rho(0) = 1
+\]
+\[
+\rho(1) = -21/64
+\]
+et
+\[
+\rho(h) = \frac{1}{3}\rho(h-1)
+\]
+pour $h>1$.
+
+\bigskip
+\bigskip
+
+\exercice{3} Une solution détaillée est disponible sur ma page (dans la section vieilleries en vrac).
+
+\exercice{4} \textbf{(1)} Par définition, nous avons :
+\[
+\gamma_c(h) = \mathbb E [y^c_ty^c_{t-h}]
+\]
+en supposant que la composante cyclique est de moyenne nulle (sinon il
+faut retrancher la moyenne). En substituant la définition, il vient :
+\[
+  \begin{split}
+    \gamma_c(h) &= \mathbb E [\Delta y_t \Delta y_{t-h}]\\
+    &= \mathbb E [(y_t-y_{t-1})(y_{t-h}-y_{t-h-1})]\\
+    &= \mathbb E [ y_ty_{t-h} - y_ty_{t-h-1} - y_{t-1}y_{t-h} + y_{t-1}y_{t-h-1} ]\\
+    &= \mathbb E [ y_ty_{t-h}] + E [ y_{t-1}y_{t-h-1} ] - \mathbb E [ y_{t-1}y_{t-h}] - \mathbb E [ y_ty_{t-h-1} ] \\
+    &= 2\gamma(h) - \gamma(h-1) - \gamma(h+1)
+  \end{split}
+\]
+où $\gamma(h)$ est la fonction d'autocovariance du processus
+$y_t$. \textbf{(2)} On montre facilement que la fonction
+d'auto-covariance du processus AR(1) est :
+\[
+\gamma(h) = \rho^h\frac{\sigma_{\varepsilon}^2}{1-\rho^2}
+\]
+En substituant dans l'expression de la fonction d'auto-covariance de la composante cyclique :
+\[
+  \begin{split}
+    \gamma_c(h) &= (2 \rho^h - \rho^{h-1} - \rho^{h+1})\frac{\sigma_{\varepsilon}^2}{1-\rho^2}\\
+    &= (2 \rho - 1 - \rho^2)\rho^{h-1}\frac{\sigma_{\varepsilon}^2}{1-\rho^2}\\
+    &= -(\rho-1)^2\rho^{h-1}\frac{\sigma_{\varepsilon}^2}{1-\rho^2}\\
+  \end{split}
+\]
+Clairement $\gamma_c(h)<0$ dès lors que $\rho\in]0,1[$, sinon le signe
+de la fonction d'autocovariance est alterné.
+
+\end{document}
