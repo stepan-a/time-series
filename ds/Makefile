@@ -1,6 +1,6 @@
 LATEX = pdflatex
 
-all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf rattrapage-2014.pdf partiel-05-2015.pdf partiel-05-2017.pdf correction-05-2017.pdf clean
+all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf rattrapage-2014.pdf partiel-05-2015.pdf partiel-05-2017.pdf correction-05-2017.pdf rattrapage-2017.pdf clean
 
 
 partiel-05-2013.pdf: partiel-05-2013.tex
@@ -36,6 +36,11 @@ rattrapage-2013.pdf: rattrapage-2013.tex
 rattrapage-2014.pdf: rattrapage-2014.tex
 	while ($(LATEX) rattrapage-2014.tex ; \
 	grep -q "Rerun to get cross" rattrapage-2014.log ) do true ; \
+	done
+
+rattrapage-2017.pdf: rattrapage-2017.tex
+	while ($(LATEX) rattrapage-2017.tex ; \
+	grep -q "Rerun to get cross" rattrapage-2017.log ) do true ; \
 	done
 
 correction-partiel-05-2013.pdf: correction-partiel-05-2013.tex
