@@ -1,0 +1,133 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Maine (Rattrapage, L3)}\\\textsc{Éléments de correction}}
+\date{}
+
+\maketitle
+
+\exercice{1} \textbf{(1)} Il s'agit d'une modèle MA(2). \textbf{(2)}
+Non, car les $\varepsilon_t$ ne sont pas observés.  \textbf{(3)} Pour
+calculer la vraisemblance exacte, il faut caractériser la loi de
+l'échantillon. Nous savons que celle-ci est gaussienne d'espérance
+nulle, puisqu'il n'y a pas de constante dans le processus MA(2), il
+nous reste à déterminer la matrice de variance covariance du vecteur
+$\mathbf y = (y_1,\dots,y_T)'$. Celle-ci est obtenue directement par la
+définition de la fonction d'autocovariance du processus
+stochastique. Nous avons :
+\[
+ \gamma(0) = (1+\theta^2)\sigma_{\varepsilon}^2
+\]
+\[
+  \begin{split}
+    \gamma(1) &= \mathbb E [y_{t}y_{t-1}]\\
+    &= \mathbb E [(\varepsilon_t - \theta \varepsilon_{t-2})(\varepsilon_{t-1} - \theta \varepsilon_{t-3})]\\
+    &= 0
+  \end{split}
+\]
+\[
+  \begin{split}
+    \gamma(2) &= \mathbb E [y_{t}y_{t-2}]\\
+    &= \mathbb E [(\varepsilon_t - \theta \varepsilon_{t-2})(\varepsilon_{t-2} - \theta \varepsilon_{t-4})]\\
+    &= -\theta \sigma_{\varepsilon}^2
+  \end{split}
+\]
+et
+\[
+\gamma(h) = 0\quad\forall h>2
+\]
+La matrice de variance-covariance de $\mathbf y$ est donc :
+\[
+  \Omega(\theta, \sigma_{\varepsilon}^2) = \sigma_{\varepsilon}^2
+  \begin{pmatrix}
+    1+\theta^2 & 0 & -\theta & 0 & \dots & \dots & 0\\
+    0 & 1+\theta^2 & 0 & -\theta & 0 &  \dots & 0\\
+    -\theta & 0 & 1+\theta^2 & 0 & -\theta & 0 & 0\\
+    &&&&&&\\
+    &&&&&&\\
+    0 & \dots & \dots  & 0  & -\theta  & 0 & 1+\theta^2
+  \end{pmatrix}
+\]
+La vraisemblance exacte est donc :
+\[
+\mathcal L(\theta, \sigma_{\varepsilon}^2; \mathcal Y_T) = (2\pi)^{-\frac{T}{2}}|\Omega(\theta, \sigma_{\varepsilon}^2)|^{-\frac{1}{2}}e^{-\frac{1}{2}\mathbf y'\Omega(\theta, \sigma_{\varepsilon}^2)^{-1}\mathbf y} 
+\]
+\textbf{(4)} On remarque que pour tout $t$ on a
+$\varepsilon_t = y_t + \theta\varepsilon_{t-2}$. En considérant les
+conditions initiales $\varepsilon_{0}=\varepsilon_{-1}=0$, on peut
+construire récursivement la suite
+$\varepsilon_1, \varepsilon_2, \dots, \varepsilon_{T}$ en utilisant
+l'échantillon. Comme $\varepsilon_{t}$ est normalement distribué
+d'espérance nulle et de variance $\sigma_{\varepsilon}^2$, nous avons directement l'expression de la vraisemblance conditionnelle :
+\[
+\mathcal L(\theta, \sigma_{\varepsilon}^2; \mathcal Y_T) = (2\pi)^{-\frac{T}{2}}\sigma_{\varepsilon}^{-1}e^{-\frac{1}{2\sigma_{\varepsilon}^2}\sum_{t=1}^T\varepsilon_t^2} 
+\]
+
+\bigskip
+\bigskip
+
+\exercice{2} \question{1} Oui, car les racines des polynômes retard
+des parties auto-régressive et moyenne mobiles (respectivement
+$\nicefrac{3}{2}$ et 3) sont supérieures à 1 en module. \question{2}
+Les moments sont donc invariants, dès lors que la distribution de la
+condition initiale est égale à la distribution limite du processus
+stochastique. \question{3} L'espérance est telle que :
+\[
+\mathbb E [y_t] = 1 + \frac{2}{3}\mathbb E [y_{t-1}]
+\]
+soit, puisque les moments sont invariants :
+\[
+\mathbb E [y_t] = 1 + \frac{2}{3}\mathbb E [y_{t}]
+\]
+ou encore :
+\[
+\left(1-\frac{2}{3}\right)\mathbb E [y_t] = 1
+\]
+et donc :
+\[
+\mathbb E [y_t] = 3
+\]
+\question{4} Nous avons vu le calcul de la fonction d'autocovariance
+en cours plusieurs fois. Vous devriez trouver :
+\[
+\gamma(0) = \frac{6}{5}, \quad\quad \text{ et }\quad \gamma(1) = \frac{7}{15}
+\]
+\question{5} L'autocovariance d'ordre 2 est :
+\[
+\gamma(2) = \frac{14}{45}
+\]
+\question{6} Plus généralement, on a :
+\[
+\gamma(h) = \frac{2}{3}\gamma(h-1)
+\]
+pour tout $h>1$. \question{7} La fonction d'autocorrélation est
+$\rho(h) = \nicefrac{\gamma(h)}{\gamma(0)}$.
+
+\bigskip
+\bigskip
+
+\exercice{3} \textbf{(1)} La condition de stationnarité du processus stochastique ne porte que sur $\varphi_1$ et $\varphi_2$ (les paramètres de la partie auto-régressive). Le conditions sont les mêmes que pour le processus AR(2) vu en cours (triangle de stabilité). \textbf{(2)} La condition ne porte que sur $\theta$ qui doit être inférieur à 1. \textbf{(3)} Il faut que les racines des deux polynômes retard (ou caractéristique) soient différentes. \textbf{(4)} L'espérance est :
+\[
+  \mathbb E [y_t] = \frac{c}{1-\varphi_1-\varphi_2}
+\]
+\textbf{(5)} Voir la correction pour le processus ARMA(2,2), disponible sur ma page, et poser $\theta_1 = \theta$ et $\theta_2=0$.
+
+\end{document}
