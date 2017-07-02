@@ -43,6 +43,11 @@ rattrapage-2017.pdf: rattrapage-2017.tex
 	grep -q "Rerun to get cross" rattrapage-2017.log ) do true ; \
 	done
 
+correction-rattrapage-2017.pdf: correction-rattrapage-2017.tex
+	while ($(LATEX) correction-rattrapage-2017.tex ; \
+	grep -q "Rerun to get cross" correction-rattrapage-2017.log ) do true ; \
+	done
+
 correction-partiel-05-2013.pdf: correction-partiel-05-2013.tex
 	while ($(LATEX) correction-partiel-05-2013.tex ; \
 	grep -q "Rerun to get cross" correction-partiel-05-2013.log ) do true ; \
