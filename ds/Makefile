@@ -1,6 +1,6 @@
 LATEX = pdflatex
 
-all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf rattrapage-2014.pdf partiel-05-2015.pdf partiel-05-2017.pdf correction-05-2017.pdf rattrapage-2017.pdf clean
+all: partiel-05-2013.pdf correction-partiel-05-2013.pdf partiel-05-2014.pdf rattrapage-2014.pdf partiel-05-2015.pdf partiel-05-2017.pdf correction-05-2017.pdf rattrapage-2017.pdf correction-rattrapage-2017.pdf clean
 
 
 partiel-05-2013.pdf: partiel-05-2013.tex
