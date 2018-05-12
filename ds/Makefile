@@ -23,6 +23,11 @@ partiel-05-2017.pdf: partiel-05-2017.tex
 	grep -q "Rerun to get cross" partiel-05-2017.log ) do true ; \
 	done
 
+partiel-05-2018.pdf: partiel-05-2018.tex
+	while ($(LATEX) partiel-05-2018.tex ; \
+	grep -q "Rerun to get cross" partiel-05-2018.log ) do true ; \
+	done
+
 correction-05-2017.pdf: correction-05-2017.tex
 	while ($(LATEX) correction-05-2017.tex ; \
 	grep -q "Rerun to get cross" correction-05-2017.log ) do true ; \
