@@ -1,0 +1,139 @@
+\documentclass[12pt,a4paper,notitlepage]{article}
+\synctex=1
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}\\(Éléments de correction)}
+\author{\textsc{Université du Maine (Partiel, L3)}}
+\date{}
+
+
+\maketitle
+
+\exercice{1} Dans le cas du premier processus stochastique, $y_{t}$ et
+$y_{t-2}$ ne sont pas indépendants car $y_{t-1}$ dépend de $y_{t-2}$
+(et bien sûr $\varepsilon_{t-1}$) via $y_{t-1}$. Il suffit d'écrire la
+définition du processus en $t-1$ pour s'en convaincre. Dans le cas du
+deuxième processus, il y a indépendance entre $y_{t}$ et
+$y_{t-2}$. Dans ce cas, puisque le processus stochastique est un
+MA(1), $y_{t}$ dépend de $\varepsilon_{t}$ et $\varepsilon_{t-1}$
+alors que $y_{t-2}$ dépend de $\varepsilon_{t-2}$ et
+$\varepsilon_{t-3}$. Il n'y a donc pas d'innovations communes ; comme
+ces innovations sont indépendantes (${\varepsilon_{t}}$ est un bruit
+blanc) on a nécessairement l'indépendance de $y_{t}$ et
+$y_{t-2}$. Enfin, dans le cas du troisième processus stochastique, on
+n'a pas la propriété d'ndépendance. En notant qu'il s'agit d'un MA(2),
+on voit que $y_{t}$ et $y_{t-2}$ dépendent de $\varepsilon_{t-2}$.\newline
+
+\bigskip
+
+\exercice{2} Reportez-vous au cours... Vous devez trouver que
+l'esimateur des MCO est identique à l'estimateur du maximum de
+vraisemblance conditionnelle, et noter que celui converge vers
+l'estimateur du maximum de vraisemblance exacte lorque la taille de
+l'échantillon tend vers l'infini.\newline
+
+\bigskip
+
+\exercice{3} \textbf{(1)} Le processus est asymptotiquement
+stationnaire au second ordre car les racines du polynôme retard
+auto-régressif ($
+\nicefrac{1}{2}\pm\frac{\sqrt{11}}{2}$) sont supérieures à 1 en module. Le processus est
+inversible car la racine du polynôme retard moyenne mobile (3) est
+supérieure à 1 en module. On note que les racines sont différentes,
+nous travaillons donc bien sur la représentation minimale d'une
+ARMA(2,1). \textbf{(2)} Les moments d'ordres 1 et 2 sont donc
+invariants. \textbf{(3)} L'espérance est donnée par :
+\[
+\mathbb E [y_t] = \frac{1}{1-\frac{1}{3}+\frac{1}{3}} = 1 
+\]
+\textbf{(4)} On doit trouver :
+\[
+\gamma(0) = \frac{17}{15} 
+\]
+\[
+\gamma(1) = \frac{1}{30}
+\]
+et
+\[
+\gamma(2) = -\frac{11}{30}
+\]
+\textbf{(5)} L'autocovariance d'ordre 3 est :
+\[
+\gamma(2) = -\frac{2}{15}
+\]
+\textbf{(6)} Plus généralement, on a :
+\[
+\gamma(h) = \frac{1}{3}\gamma(h-1)-\frac{1}{3}\gamma(h-2)
+\]
+dès lors que l'on a passé l'influcence de la partie MA (ie $h>1$).
+\textbf{(7)} La fonction d'auto-corrélation est une normalisation de la fonction d'auto-covariance, de façon générale on a :
+\[
+\rho(h) = \frac{\gamma(h)}{\gamma(0)}
+\]
+
+\bigskip
+
+\exercice{4} Une solution détaillée est disponible sur ma page (dans la section vieilleries en vrac).\newline
+
+\bigskip
+
+\exercice{5} \textbf{(1)} On peut réécrire la loi d'évolution du stock de capital physique en utilisant des polynômes retard. On a :
+\[
+  (1-\eta_{kk}L)k_{t} = \eta_{ka} a_{t-1}
+\]
+Par ailleurs on a :
+\[
+(1-\rho L) a_{t} = \varepsilon_{t} 
+\]
+Soit par inversion du polynôme retard et substitution dans la loi d'évolution du stock de capital physique :
+\[
+  (1-\eta_{kk}L)k_{t} = \eta_{ka} (1-\rho L)^{-1} \varepsilon_{t-1}
+\]
+soit encore en multipliant les deux membres par $(1-\rho L)$  :
+\[
+(1-\eta_{kk}L)(1-\rho L)k_{t} = \eta_{ka} \varepsilon_{t-1}
+\]
+Le stock de capital est donc un processus stochastipe de type AR(2). En substiuant dans la fonction de production (en log) il vient :
+\[
+y_{t} = \alpha (1-\eta_{kk}L)^{-1}(1-\rho L)^{-1} \eta_{ka} \varepsilon_{t-1} + (1-\rho L)^{-1}\varepsilon_{t}
+\]
+Soit en inversant le polynôme retard d'ordre 2 :
+\[
+(1-\eta_{kk}L)(1-\rho L) y_{t} = \alpha \eta_{ka} \varepsilon_{t-1} + (1-\eta_{kk})\varepsilon_{t}
+\]
+ou encore :
+\[
+(1-\eta_{kk}L)(1-\rho L) y_{t} = \varepsilon_{t} - (\eta_{kk}-\alpha\eta_{ka}) \varepsilon_{t-1}
+\]
+et en développant le polynôme retard d'ordre deux sur le membre de gauche :
+\[
+y_{t} = (\eta_{kk}+\rho)y_{t-1} - \eta_{kk}\rho y_{t-2} + \varepsilon_{t} - (\eta_{kk}-\alpha\eta_{ka}) \varepsilon_{t-1}
+\]
+Il s'agit bien dn processus ARMA(2,1). \textbf{(2)} De ce qui précède, on voit directement que les racines du polynôme retard associé à la partie auto-régressive sont $\eta_{kk}$ et $\rho$. La condition de stationarité est donc $\eta_{kk}$ plus peit que 1 (en valeur absolue), c'est-à-dire la stabilité de la dynmique du capital physique (en plus de celle de la productivité). 
+
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
