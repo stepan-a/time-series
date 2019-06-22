@@ -1,0 +1,109 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Maine (Examen, L3)}}
+\date{}
+
+
+\maketitle
+
+\exercice{1} Soient les fonctions d'auto-corrélation et de corrélation
+partielle suivantes :
+\begin{table}[H]
+  \centering
+  \begin{tabular}{r|cccccc}
+    \hline\hline
+    $h$ & 0 & 1 & 2 & 3 & 4 & 5 \\\hline
+    $\rho (h)$ & -- & 0,70 & 0,00 & 0,00 & 0,00 & 0,00\\
+    $r (h)$ & 1 & 0,70 & 0,49 & 0,34 & 0,24 & 0,17\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+\noindent Ces  fonctions sont générées par  un processus ARMA($p$,$q$)
+avec $p$ égal à zéro ou un, $q$ égal  à zéro ou un et $p+q \leq 2$. En
+justifiant  votre réponse,  déterminer  la forme  du  processus qui  a
+généré $\rho(h)$ et $r(h)$. Que  pouvez-vous dire des paramètres de ce
+modèle~?
+
+\bigskip
+\bigskip
+
+\exercice{2} Écrire la vraisemblance exacte d'un processus MA(1)
+inversible. Écrire la vraisemblance conditionnelle du même
+processus. On notera $\mathcal Y_T = \{y_1, y_2, \dots, y_T\}$
+l'échantillon.
+
+\bigskip
+\bigskip
+
+\exercice{3} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,2$) de la forme :
+
+\[
+y_t = c + \varphi y_{t-1} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance $\sigma_{\varepsilon}^2$.\newline
+
+\question{1} Sous quelles conditions le processus est-il stationnaire ?\newline
+
+On suppose que ces conditions sont satisfaites et que le processus est stationnaire au second ordre.\newline
+
+\question{2} Donnez les conditions sur $\theta_1$ et $\theta_2$ pour
+que le processus soit inversible. Justifier la réponse.  \question{3}
+Quelles sont les implications de l'hypothèse de stationnarité sur les
+moments d'ordre 1 et 2 ? \question{3} Calculer l'espérance (on notera
+$\mu$ l'espérance). \question{4} Calculer la fonction d'autocovariance que nous noterons $\gamma(h)$.
+
+\bigskip
+\bigskip
+
+\exercice{4} Soit le modèle état mesure suivant :
+\[
+  \begin{split}
+    y_t &= z_t + \varepsilon_t\\
+    z_t &= z_{t-1} + \eta_t
+  \end{split}
+\]
+avec $\varepsilon_t \equiv BB(0,\sigma_{\varepsilon}^2)$ et
+$\eta_t \equiv BB(0,\sigma_{\eta}^2)$. Le second processus,
+$\left\{z_t\right\}_{t\in \mathbb Z}$ est une marche aléatoire,
+$\left\{y_t\right\}_{t\in \mathbb Z}$ et une marche aléatoire
+<<bruitée>> et on notera
+$\kappa = \nicefrac{\sigma_{\eta}^2}{\sigma_{\varepsilon}^2}$ le ratio
+signal-bruit. \question{1} Montrer que la variance de
+$\left\{y_t\right\}_{t\in \mathbb Z}$ n'est pas définie. Donner
+l'intuition. \question{2} Calculer la fonction d'autocovariance de
+$\left\{\Delta y_t\right\}_{t\in \mathbb Z}$. \question{3} Conclure
+sur la nature du processus
+$\left\{\Delta y_t\right\}_{t\in \mathbb Z}$. \question{4} Identifier
+les paramètres du modèle.
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
