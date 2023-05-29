@@ -1,0 +1,32 @@
+* Éléments de correction
+** Exercice 1
+Il s'agit d'un AR(1). Le paramètre autorégressif est égal à 0.9.
+** Exercice 2
+(1)-(2) Voir le cours. Pour la première question le plus simple est d'utiliser
+le théorème de Bayes qui permet d'écrire la densité de l'échantillon comme un
+produit de densités conditionnelles et d'une densité marginale pour la première
+observation. (3) Dans l'expression de la vraisemblance conditionnelle, on
+retrouve sous l'exponentielles l'opposé de la somme des carrés des résidus
+(erreurs de prévisions). Maximiser la vraisemblance conditionnelle revient donc
+à minimiser cette somme de carrés, d'où l'équivalence entre l'estimateur des MCO
+et l'estimateur du maximum de vraisemblance conditionnelle.
+** Exercice 3
+(1) La racine du polynôme retard pour la partie autorégressive est $3/2$, le
+modèle est donc asymptotiquement stationnaire. La racine du polynôme retard pour
+la partie moyenne mobile est $2$, le modèle est donc inversible. (2) La
+stationnarité au second ordre implique l'invariance des moments d'ordre 1 et 2
+(espérance, variance autocovariance). (3) L'espérance est nulle, $\mu=0$. (4) On
+doit trouver $\gamma(0)=21/20$, $\gamma(1)=1/5$. (5) On trouve $\gamma(2) =
+2/15$. Plus généralement on a $\gamma(h)=\frac{2}{3}\gamma(h-1)$.
+** Exercice 4
+(1) Les racines du polynôme caractéristique sont $\rho_1$ et $\rho_2$. Par
+hypothèse sur ces paramètres, le modèle est donc asymptotiquement stationnaire.
+(2) L'espérance est : \[ \mu = \frac{c}{1-\rho_1-\rho_2+\rho_1\rho_2} \] (3)
+Voir le cours (en remplaçant $\varphi_1$ par $\rho_1+\rho_2$ et $\varphi_2$ par
+$-\rho_1\rho_2$). (4) On montre que : \[ \gamma(h) =
+(\rho_1+\rho_2)\gamma(h-1)-\rho_1\rho_2\gamma(h-2) \] Il s'agit d'une équation
+récurrente d'ordre deux. Le terme général (la solution) est une combinaison
+linéaire des $\rho_1^h$ et $\rho_2^h$ qui tendent vers 0 quand $h$ tend vers
+l'infini car ces paramètres sont plus petits que 1 en valeur absolue. Voir
+
+https://stephane-adjemian.fr/posts/representation-ma-du-processus-ar2/

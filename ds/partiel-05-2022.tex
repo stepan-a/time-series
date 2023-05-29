@@ -1,0 +1,110 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Mans (Examen, L3)}}
+\date{}
+
+
+\maketitle
+
+\exercice{1} Soient les fonctions d'autocovariance et de d'autocorrélation
+partielle suivantes :
+\begin{table}[H]
+  \centering
+  \begin{tabular}{r|cccccc}
+    \hline\hline
+    $h$ & 0 & 1 & 2 & 3 & 4 & 5 \\\hline
+    $\rho (h)$ & $\nicefrac{4}{3}$ & $\nicefrac{2}{3}$ & $\nicefrac{1}{3}$ & $\nicefrac{1}{6}$ & $\nicefrac{1}{12}$ & $\nicefrac{1}{24}$\\
+    $r (h)$ & -- & 0,50 & 0,00 & 0,00 & 0,00 & 0,00\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+\noindent Ces  fonctions sont générées par  un processus ARMA($p$,$q$)
+avec $p\geq 0$, $q\geq 0$ et $p+q \leq 2$. En
+justifiant  votre réponse,  déterminez la forme  du  processus qui  a
+généré $\rho(h)$ et $r(h)$. Que pouvez vous dire des paramètres de ce
+modèle~?
+
+\bigskip
+\bigskip
+
+\exercice{2} Soît $(Y_t,t\in\mathbb Z)$ un processus AR(1) stationnaire de
+moyenne non nulle. On observe une réalisation de ce processus, un échantillon,
+que nous noterons $\mathcal Y_T = \{y_1,y_2,\dots,y_T\}$. \question{1} Écrire la
+vraisemblance exacte. \question{2} Écrire la vraisemblance conditionnelle.
+\question{3} Montrez l'équivalence entre l'estimateur du maximum de
+vraisemblance conditionnelle et l'estimateur des MCO.
+
+
+\bigskip
+\bigskip
+
+\exercice{3} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,1$) de la forme :
+\[
+y_t = \frac{2}{3}y_{t-1} + \varepsilon_t - \frac{1}{2} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance 1.\newline
+
+\question{1} Le processus est-il asymptotiquement stationnaire au second ordre
+et inversible~? Justifiez votre réponse.\newline
+
+On suppose  que les conditions initiales sont telles que le
+processus est stationnaire au second ordre.\newline
+
+\question{2} Quelles sont les implications de cette hypothèse sur les
+moments d'ordre 1 et 2 ? \question{3} Calculez l'espérance (on notera
+$\mu$ l'espérance). \question{4} Calculez les autocovariances d'ordre
+0 et 1 (on notera $\gamma(0)$ et $\gamma(1)$). \question{5} Calculez
+l'autocovariance d'ordre 2 (on notera $\gamma(2)$). \question{6}
+Calculez l'autocovariance d'ordre $h$ (on notera $\gamma(h)$) pour tout
+$h>2$.
+
+\bigskip
+\bigskip
+
+\exercice{4} Soit le processus AR(2) :
+\[
+Y_t = c + (\rho_1+\rho_2)Y_{t-1} - \rho_1\rho_2 Y_{t-2} + \varepsilon_t
+\]
+avec $(\varepsilon_t, t\in\mathbb Z)$ un bruit blanc d'espérance nulle et de
+variance $\sigma^2$, $|\rho_1|<1$, $|\rho_2|<1$ et $\rho_1\neq\rho_2$.
+\question{1} Montrez que le processus est asymptotiquement stationnaire au
+second ordre. On supposera dans la suite que le processus est stationnaire au
+second ordre. \question{2} Calculez l'espérance inconditionnelle de $Y_t$.
+\question{3} Calculez la fonction les autocovariances d'ordre 0, 1 et 2.
+\question{4} Donnez une expression récursive de l'autocovariance d'ordre $h$
+(c'est-à-dire exprimez $\gamma(h)$ en fonction de $\gamma(h-1)$ et
+$\gamma(h-2)$). \question{5} Calculez le terme général de la récurrence d'ordre
+deux caractérisant la fonction d'autocovariance et concluez sur le comportement
+asymptotique de la fonction d'autocovariance (c'est-à-dire quand $h$ tend vers
+l'infini).
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
