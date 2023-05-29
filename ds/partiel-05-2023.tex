@@ -1,0 +1,123 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Mans (Examen, L3)}}
+\date{}
+
+\pagenumbering{gobble}
+
+\maketitle
+
+\exercice{1} Soient les fonctions d'autocorrélation et de d'autocorrélation
+partielle suivantes :
+\begin{table}[H]
+  \centering
+  \begin{tabular}{r|cccccc}
+    \hline\hline
+    $h$ & 0 & 1 & 2 & 3 & 4 & 5 \\\hline
+    $\rho (h)$ & 1 & .9 & .81 & .729 & .6561 & .59049\\
+    $r (h)$ & -- & .9 & 0,00 & 0,00 & 0,00 & 0,00\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+\noindent Ces fonctions sont générées par un processus ARMA($p$,$q$) avec
+$p\geq 0$, $q\geq 0$ et $p+q \leq 2$. \question{1} En justifiant votre réponse,
+déterminez la forme du processus qui a généré $\rho(h)$ et $r(h)$. \question{2}
+Que pouvez-vous dire des paramètres de ce modèle~? \question{3} En supposant que
+la variance de l'innovation du modèle est égale à $\nicefrac{1}{10}$, calculez
+la variance du processus stochastique.\newline
+
+\bigskip
+
+\exercice{2} Soit $\{\varepsilon_t\}$ un bruit blanc d'espérance nulle
+et de variance $\sigma_{\varepsilon}^2>0$, déterminer quels sont les
+processus stochastiques pour lesquels $y_t$ et $y_{t-2}$ sont
+indépendants:
+\begin{enumerate}
+\item $y_t = \frac{1}{2}y_{t-1} + \varepsilon_t$
+\item $y_t = 1 + \varepsilon_t - \frac{1}{4} \varepsilon_{t-1}$
+\item $y_t = 3 + \varepsilon_t + \frac{2}{10} \varepsilon_{t-1} - \frac{1}{10} \varepsilon_{t-2}$
+\end{enumerate}
+Justifier vos réponse.\newline
+
+\bigskip
+
+\exercice{3} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,1$) de la forme :
+\[
+y_t = 1 + \frac{2}{3}y_{t-1} + \varepsilon_t - \frac{1}{3} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance 1.\newline
+
+\question{1} Le processus est-il asymptotiquement stationnaire au second ordre
+et inversible~? Justifiez votre réponse.\newline
+
+On suppose  que les conditions initiales sont telles que le
+processus est stationnaire au second ordre.\newline
+
+\question{2} Quelles sont les implications de cette hypothèse sur les
+moments d'ordre 1 et 2~? \question{3} Calculez l'espérance (on notera
+$\mu$ l'espérance). \question{4} Calculez les autocovariances d'ordre
+0 et 1 (on notera $\gamma(0)$ et $\gamma(1)$). \question{5} Calculez
+l'autocovariance d'ordre 2 (on notera $\gamma(2)$). \question{6}
+Calculez l'autocovariance d'ordre $h$ (on notera $\gamma(h)$) pour tout
+$h>2$.\newline
+
+\bigskip
+
+\exercice{4} Soit le processus AR(2) :
+\[
+Y_t = c + (\rho_1+\rho_2)Y_{t-1} - \rho_1\rho_2 Y_{t-2} + \varepsilon_t
+\]
+avec $(\varepsilon_t, t\in\mathbb Z)$ un bruit blanc d'espérance nulle et de
+variance $\sigma^2$, $|\rho_1|<1$, $|\rho_2|<1$ et $\rho_1\neq\rho_2$.
+\question{1} Montrer que le processus est asymptotiquement stationnaire au
+second ordre. \question{2} Écrire la vraisemblance exacte du processus (en
+utilisant le théorème de Bayes et détaillant le plus possible l'expression de la
+vraisemblance). \question{3} Écrire la vraisemblance conditionnelle du
+processus, en prenant soin d'expliquer son intérêt par rapport à la
+vraisemblance exacte.\newline
+
+\bigskip
+
+\exercice{5} Soit le processus stochastique défini par~:
+\[
+  \begin{cases}
+    y_t &= \varphi y_{t-1} + u_t\\
+    u_t &= \varepsilon_t - \theta \varepsilon_{t-1}
+  \end{cases}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}2$, avec $\varphi$ et $\theta$ plus petits que 1 en valeur
+absolue. \question{1} Montrer qu'il est possible d'écrire ce processus
+stochastique sous la forme $y_t = \sum_{i=0}^{\infty}\psi_i\varepsilon_{t-i}$,
+en explicitant $\psi_i$. \question{2} Calculer la variance de $y_t$ à partir de
+la représentation alternative obtenue à la question 1.
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
