@@ -1,0 +1,71 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,onecolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Maine (Examen, L3)}}
+\date{}
+
+
+\maketitle
+
+\thispagestyle{empty}
+
+\exercice{1} Soit un processus stochastique AR(1) avec constante,
+écrire la vraisemblance conditionnelle et déterminer l'estimateur du
+maximum de vraisemblance du paramètre autorégressif sur la base de
+cette expression de la vraisemblance. L'estimateur est-il biaisé~?
+Pourquoi~? Écrire la vraisemblance exacte. Est-il possible d'obtenir
+une expression analytique de l'estimateur du maximum de vraisemblance
+sur la base de cette expression de la vraisemblance~?
+
+
+
+\bigskip\bigskip
+
+
+
+\exercice{2} Soit le processus AR(2) défini par~:
+\[
+  Y_t = \frac{1}{2}Y_{t-1} - \frac{1}{4}Y_{t-2} + \varepsilon_t
+\]
+avec $\varepsilon_t$ une variable aléatoire normalement distribuée (d'espérance nulle et de variance 1) indépendante du passé de $Y$ vérifiant $\varepsilon_t \perp \varepsilon_s$ pour tout $t\neq s$.\newline
+
+\question{1} Montrer que ce processus est asymptotiquement stationnaire.\newline
+
+\question{2} Calculer les moments d'ordre 1 et 2 du processus.\newline
+
+\question{3} Déterminer les conditions sous lesquelles le processus est stationnaire au second ordre.\newline
+
+
+
+\bigskip\bigskip
+
+
+
+\exercice{3} Calculez les moments d'ordre 1 et 2 d'un processus ARMA(1,2) que nous supposerons stationnaire~:
+\[
+y_t = c + \varphi y_{t-1} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance $\sigma^2$.
+
+\end{document}

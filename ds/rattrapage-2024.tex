@@ -1,0 +1,92 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[frenchb]{babel}
+\usepackage{float}
+
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+\begin{document}
+
+\title{\textsc{Séries temporelles}}
+\author{Stéphane Adjemian}
+\date{Mardi 11 juin 2024}
+
+\maketitle
+
+\exercice{1} Soient les fonctions d'auto-corrélation et de corrélation
+partielle suivantes~:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{r|cccccc}
+    \hline\hline
+    $h$ & 0 & 1 & 2 & 3 & 4 & 5 \\\hline
+    $\rho (h)$ & 1 & 0,70 & 0,00 & 0,00 & 0,00 & 0,00\\
+    $r (h)$ & -- & 0,70 & 0,49 & 0,34 & 0,24 & 0,17\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+\noindent Ces  fonctions sont générées par  un processus ARMA($p$,$q$)
+avec $p\geq 0$, $q\geq 0$ et $p+q \leq 2$. En
+justifiant  votre réponse,  déterminez  la forme  du  processus qui  a
+généré $\rho(h)$ et $r(h)$. Que pouvez-vous dire des paramètres du ce
+modèle~?
+
+\bigskip
+\bigskip
+
+
+\exercice{2} Soit le processus stochastique défini par~:
+\[
+  y_t = \varepsilon_t - \theta \varepsilon_{t-2}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de
+variance $\sigma_{\varepsilon}^2$. \textbf{(1)} Quel est le nom de ce
+processus~? \textbf{(2)} Est-il possible d'estimer les paramètres de
+ce modèle ($\theta$ et $\sigma_{\varepsilon}^2$) par les MCO~?
+\textbf{(3)} On note $\mathcal Y_T = \{y_1,\dots,y_T\}$ l'échantillon,
+donner l'expression de la vraisemblance exacte. \textbf{(4)} Comment
+évaluer la vraisemblance conditionnelle~?
+
+\bigskip
+\bigskip
+
+\exercice{3} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,1$) de la forme~:
+
+\[
+y_t = 1 + \frac{2}{3}y_{t-1} + \varepsilon_t - \frac{1}{3} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance 1.\newline
+
+\question{1} Le processus est-il asymptotiquement stationnaire au second ordre
+et inversible~? Justifier votre réponse. \question{2} On suppose dans la suite
+que le processus est stationnaire au second ordre. Quelles sont les implications
+de cette hypothèse sur les moments d'ordre 1 et 2~? \question{3} Calculer
+l'espérance (on notera $\mu$). \question{4} Calculer les autocovariances d'ordre
+0 et 1 (on notera $\gamma(0)$ et $\gamma(1)$). \question{5} Calculer
+l'autocovariance d'ordre 2 (on notera $\gamma(2)$). \question{6} Calculer
+l'autocovariance d'ordre $h$ (on notera $\gamma(h)$) pour tout $h>2$.
+\question{7} Définir la fonction d'autocorrélation.
+
+\bigskip
+\bigskip
+
+\exercice{4} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,2$) stationnaire et inversible de la forme~:
+
+\[
+y_t = c + \varphi y_{t-1} + \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de
+variance $\sigma_{\varepsilon}^2$. Calculer les moments d'ordre 1 et 2
+de ce processus stochastique.\newline
+
+\end{document}
