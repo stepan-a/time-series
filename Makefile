@@ -1,5 +1,9 @@
 ROOT_PATH = .
 
+all: ds-build td-build cours-build
+
+clean-all: ds-clean td-clean cours-clean
+
 ds-build:
 	$(MAKE) -C $(ROOT_PATH)/ds all
 
@@ -12,6 +16,11 @@ td-build:
 td-clean:
 	$(MAKE) -C $(ROOT_PATH)/td clean-all
 
-all: ds-build td-build
+cours-build:
+	$(MAKE) -C $(ROOT_PATH)/cours all
 
-clean-all: ds-clean td-clean
+cours-clean:
+	$(MAKE) -C $(ROOT_PATH)/cours clean-all
+
+
+.PHONY: all clean-all ds-build td-build cours-build ds-clean td-clean cours-clean 

@@ -1,5 +1,7 @@
 LATEX = pdflatex
 
+all: td.pdf clean
+
 td.pdf: td.tex
 	while ($(LATEX) td.tex ; \
 	grep -q "Rerun to get cross" td.log ) do true ; \
@@ -12,4 +14,3 @@ clean:
 clean-all: clean
 	rm *.pdf
 
-all: td.pdf clean

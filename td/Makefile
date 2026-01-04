@@ -1,17 +1,15 @@
 ROOT_PATH = .
 
-all: td1-build td2-build
+all: 1/td.pdf 2/td.pdf
 
-td1-build:
-	$(MAKE) -C $(ROOT_PATH)/1 all
+1/td.pdf: 1/td.tex
+	$(MAKE) -C $(ROOT_PATH)/1
 
-td1-clean:
-	$(MAKE) -C $(ROOT_PATH)/1 clean-all
+2/td.pdf: 2/td.tex
+	$(MAKE) -C $(ROOT_PATH)/2
 
-td2-build:
-	$(MAKE) -C $(ROOT_PATH)/2 all
+clean-all:
+	rm 1/td.pdf
+	rm 2/td.pdf
 
-td2-clean:
-	$(MAKE) -C $(ROOT_PATH)/2 clean-all
-
-clean-all: td1-clean td2-clean
+.PHONY: all clean-all
