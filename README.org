@@ -1,0 +1,12 @@
+[[https://git.ithaca.fr/stepan/time-series/badges/master/pipeline.svg]]
+#+html:<div align="center">
+* Cours de Séries Temporelles
+   (Le Mans, L3)
+#+html:</div>
+
+\\
+
+ - [[https://le-mans.adjemian.eu/séries-temporelles/introduction][Introduction]].
+ - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-1.pdf][Chapitre 1]]. Processus stochastiques stationnaires.
+
+\\
