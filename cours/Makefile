@@ -1,12 +1,11 @@
-all: chapitre-1.pdf clean
+TEXFILES := $(wildcard *.tex)
+PDFS     := $(TEXFILES:.tex=.pdf)
 
-chapitre-1.pdf: chapitre-1.tex
-	@rubber --src-specials --unsafe --pdf chapitre-1
-	@rubber --clean chapitre-1
+all: $(PDFS)
 
-clean:
-	@rm -f *.aux *.log *.out *.nav *.rel *.toc *.snm *.synctex.gz *.vrb *.rubbercache
-	@rm -rf auto
+%.pdf: %.tex
+	@rubber --src-specials --unsafe --pdf $<
+	@rubber --clean $<
 
 clean-all:
 	@rm -f *.pdf
