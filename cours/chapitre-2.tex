@@ -1,0 +1,2031 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+
+% Couleurs personnalisées
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{lightblue}{RGB}{230,240,250}
+\setbeamercolor{structure}{fg=darkblue}
+\setbeamercolor{block title}{bg=darkblue,fg=white}
+\setbeamercolor{block body}{bg=lightblue,fg=black}
+
+% Commandes personnalisées
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Corr}{\mathrm{Corr}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{Modèles ARMA}
+\subtitle{Séries Temporelles}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Plan}
+\tableofcontents
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Les modèles ARMA}
+Dans ce chapitre, nous allons considérer une large classe de modèles linéaires qui permettent de construire des processus stochastiques à partir d'un bruit blanc $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$.
+
+\vspace{0.5cm}
+
+\begin{block}{ARMA = AR + MA}
+\begin{itemize}
+\item \textbf{AR} : Auto-Régressif (Auto-Regressive)
+\item \textbf{MA} : Moyenne Mobile (Moving Average)
+\end{itemize}
+\end{block}
+
+\vspace{0.5cm}
+
+Ces modèles permettent de capturer différentes structures de dépendance temporelle de manière parcimonieuse.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle Moyenne Mobile (MA)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le modèle MA(1)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc de variance $\sigma^2$ et d'espérance nulle. On définit le processus MA(1) $(Y_t, t \in \Z)$ par :
+\[
+Y_t = \varepsilon_t - \theta \varepsilon_{t-1}
+\]
+où $\theta$ est une constante réelle.
+\end{block}
+
+\vspace{0.5cm}
+
+Le processus $Y_t$ est une combinaison linéaire des innovations $\varepsilon$ à différentes dates.
+
+\vspace{0.5cm}
+
+Caractérisons ce processus en calculant ses moments d'ordre 1 et 2.
+\end{frame}
+
+\begin{frame}{Espérance du MA(1)}
+\textbf{Calcul de l'espérance :}
+\begin{align*}
+\E[Y_t] &= \E[\varepsilon_t - \theta \varepsilon_{t-1}] \\
+&= \E[\varepsilon_t] - \theta \E[\varepsilon_{t-1}] \quad \text{(linéarité de l'espérance)} \\
+&= 0 - \theta \cdot 0 \\
+&= 0
+\end{align*}
+
+\vspace{0.5cm}
+
+L'espérance du processus MA(1) est nulle pour tout $t$.
+\end{frame}
+
+\begin{frame}{Variance du MA(1)}
+\textbf{Calcul de la variance :}
+\begin{align*}
+\Var[Y_t] &= \E[Y_t^2] \quad \text{(car } \E[Y_t] = 0\text{)} \\
+&= \E[(\varepsilon_t - \theta \varepsilon_{t-1})^2] \\
+&= \E[\varepsilon_t^2 - 2\theta \varepsilon_t \varepsilon_{t-1} + \theta^2 \varepsilon_{t-1}^2] \\
+&= \E[\varepsilon_t^2] - 2\theta \underbrace{\E[\varepsilon_t \varepsilon_{t-1}]}_{= 0 \text{ (bruit blanc)}} + \theta^2 \E[\varepsilon_{t-1}^2] \\
+&= \sigma^2 + \theta^2 \sigma^2 \\
+&= (1 + \theta^2) \sigma^2
+\end{align*}
+
+La variance est constante et ne dépend pas de $t$.
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du MA(1) (1/2)}
+\textbf{Calcul de $\gamma(1)$ :}
+\begin{align*}
+\gamma(1) &= \E[Y_t Y_{t-1}] \\
+&= \E[(\varepsilon_t - \theta \varepsilon_{t-1})(\varepsilon_{t-1} - \theta \varepsilon_{t-2})] \\
+&= \E[\varepsilon_t \varepsilon_{t-1}] - \theta \E[\varepsilon_t \varepsilon_{t-2}] - \theta \E[\varepsilon_{t-1}^2] + \theta^2 \E[\varepsilon_{t-1} \varepsilon_{t-2}]
+\end{align*}
+
+Les termes $\E[\varepsilon_t \varepsilon_{t-1}]$, $\E[\varepsilon_t \varepsilon_{t-2}]$ et $\E[\varepsilon_{t-1} \varepsilon_{t-2}]$ sont nuls (bruit blanc).
+
+\vspace{0.3cm}
+
+Donc :
+\[
+\gamma(1) = -\theta \E[\varepsilon_{t-1}^2] = -\theta \sigma^2
+\]
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du MA(1) (2/2)}
+\textbf{Calcul de $\gamma(h)$ pour $|h| \geq 2$ :}
+
+Pour $|h| \geq 2$, les produits $Y_t$ et $Y_{t-h}$ n'ont aucune innovation $\varepsilon$ en commun :
+\[
+\gamma(h) = \E[(\varepsilon_t - \theta \varepsilon_{t-1})(\varepsilon_{t-h} - \theta \varepsilon_{t-h-1})] = 0
+\]
+
+\vspace{0.3cm}
+
+\begin{block}{Résumé}
+\[
+\gamma(h) = \begin{cases}
+(1 + \theta^2) \sigma^2 & \text{si } h = 0 \\
+-\theta \sigma^2 & \text{si } |h| = 1 \\
+0 & \text{si } |h| \geq 2
+\end{cases}
+\]
+\end{block}
+
+La fonction d'autocovariance est nulle au-delà du rang 1.
+\end{frame}
+
+\begin{frame}{Fonction d'autocorrélation du MA(1)}
+La fonction d'autocorrélation est :
+\[
+\rho(h) = \frac{\gamma(h)}{\gamma(0)} = \begin{cases}
+1 & \text{si } h = 0 \\[0.2cm]
+\dfrac{-\theta}{1 + \theta^2} & \text{si } |h| = 1 \\[0.3cm]
+0 & \text{si } |h| \geq 2
+\end{cases}
+\]
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Propriété importante}
+On peut vérifier que $|\rho(1)| \leq \frac{1}{2}$ pour tout $\theta \in \R$.
+
+En effet, en étudiant la fonction $f(\theta) = \frac{-\theta}{1+\theta^2}$, on montre que son maximum est $\frac{1}{2}$ (atteint en $\theta = -1$) et son minimum est $-\frac{1}{2}$ (atteint en $\theta = 1$).
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Processus MA(1) centré}
+\begin{block}{Définition}
+On peut ajouter une constante dans la définition :
+\[
+Y_t = \mu + \varepsilon_t - \theta \varepsilon_{t-1}
+\]
+\end{block}
+
+Cela n'affecte que l'espérance, pas les moments d'ordre 2 :
+\begin{itemize}
+\item $\E[Y_t] = \mu$
+\item $\Var[Y_t] = (1 + \theta^2) \sigma^2$ (inchangée)
+\item $\gamma(h)$ inchangée pour $h \neq 0$
+\end{itemize}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Stationnarité}
+Le processus MA(1) est \textbf{toujours stationnaire}, quelle que soit la valeur de $\theta$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Problème d'identification du MA(1)}
+\begin{alertblock}{Observation}
+Si $\theta = a$, alors $\rho(1) = \dfrac{-a}{1+a^2}$.
+
+Si $\theta = \dfrac{1}{a}$, alors $\rho(1) = \dfrac{-1/a}{1+1/a^2} = \dfrac{-1/a}{(a^2+1)/a^2} = \dfrac{-a}{1+a^2}$.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+Autrement dit, pour $\theta = a$ et $\theta = 1/a$, le processus a les \textbf{mêmes propriétés} en termes de dépendance !
+
+\vspace{0.3cm}
+
+$\Rightarrow$ Cela pose un \textbf{problème d'identification} : on ne peut pas distinguer ces deux modèles à partir des données.
+
+\vspace{0.3cm}
+
+\begin{block}{Convention d'inversibilité}
+Pour résoudre ce problème d'équivalence observationnelle, on impose $|\theta| < 1$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Structure de dépendance du MA(1)}
+\begin{block}{Remarque}
+La structure de dépendance du MA(1) est très limitée :
+\begin{itemize}
+\item $Y_t$ est corrélé avec $Y_{t-1}$ (covariance non nulle)
+\item $Y_t$ n'est \textbf{pas} corrélé avec $Y_{t-h}$ pour $|h| \geq 2$
+\end{itemize}
+\end{block}
+
+\vspace{0.3cm}
+
+La corrélation non nulle apparaît car deux $Y$ consécutifs ont une innovation $\varepsilon$ en commun.
+
+\vspace{0.5cm}
+
+\begin{center}
+\textbf{Graphique de $\rho(1)$ en fonction de $\theta$ :}
+
+\vspace{0.3cm}
+
+$\rho(1) \in \left[-\frac{1}{2}, \frac{1}{2}\right]$ avec maximum en $\theta = -1$ et minimum en $\theta = 1$.
+\end{center}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle MA(2)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le modèle MA(2)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc de variance $\sigma^2$. On définit le processus MA(2) $(Y_t, t \in \Z)$ par :
+\[
+Y_t = \varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+On enrichit la structure d'autocorrélation en rajoutant des retards sur les innovations $\varepsilon$.
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Remarque}
+On pourrait ajouter une constante $\mu$ ; cela n'affecterait que l'espérance, comme dans le cas du MA(1).
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Espérance et variance du MA(2)}
+\textbf{Espérance :}
+\[
+\E[Y_t] = \E[\varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2}] = 0
+\]
+
+\vspace{0.3cm}
+
+\textbf{Variance :}
+\begin{align*}
+\Var[Y_t] &= \E[(\varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2})^2] \\
+&= \E[\varepsilon_t^2 + \theta_1^2 \varepsilon_{t-1}^2 + \theta_2^2 \varepsilon_{t-2}^2 - 2\theta_1 \varepsilon_t \varepsilon_{t-1} - 2\theta_2 \varepsilon_t \varepsilon_{t-2} + 2\theta_1 \theta_2 \varepsilon_{t-1} \varepsilon_{t-2}]
+\end{align*}
+
+Les termes croisés sont nuls (bruit blanc), donc :
+\[
+\Var[Y_t] = \E[\varepsilon_t^2] + \theta_1^2 \E[\varepsilon_{t-1}^2] + \theta_2^2 \E[\varepsilon_{t-2}^2] = (1 + \theta_1^2 + \theta_2^2) \sigma^2
+\]
+\end{frame}
+
+\begin{frame}{Autocovariance d'ordre 1 du MA(2)}
+\textbf{Calcul de $\gamma(1)$ :}
+\begin{align*}
+\gamma(1) &= \E[Y_t Y_{t-1}] \\
+&= \E[(\varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2})(\varepsilon_{t-1} - \theta_1 \varepsilon_{t-2} - \theta_2 \varepsilon_{t-3})]
+\end{align*}
+
+Seuls les produits d'innovations de même date sont non nuls :
+\begin{itemize}
+\item $-\theta_1 \varepsilon_{t-1} \cdot \varepsilon_{t-1} = -\theta_1 \varepsilon_{t-1}^2$
+\item $-\theta_2 \varepsilon_{t-2} \cdot (-\theta_1 \varepsilon_{t-2}) = \theta_1 \theta_2 \varepsilon_{t-2}^2$
+\end{itemize}
+
+Donc :
+\[
+\gamma(1) = -\theta_1 \E[\varepsilon_{t-1}^2] + \theta_1 \theta_2 \E[\varepsilon_{t-2}^2] = (-\theta_1 + \theta_1 \theta_2) \sigma^2
+\]
+\end{frame}
+
+\begin{frame}{Autocovariance d'ordre 2 du MA(2)}
+\textbf{Calcul de $\gamma(2)$ :}
+\begin{align*}
+\gamma(2) &= \E[Y_t Y_{t-2}] \\
+&= \E[(\varepsilon_t - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2})(\varepsilon_{t-2} - \theta_1 \varepsilon_{t-3} - \theta_2 \varepsilon_{t-4})]
+\end{align*}
+
+Seul le produit $-\theta_2 \varepsilon_{t-2} \cdot \varepsilon_{t-2}$ est non nul :
+\[
+\gamma(2) = -\theta_2 \E[\varepsilon_{t-2}^2] = -\theta_2 \sigma^2
+\]
+
+\vspace{0.3cm}
+
+\textbf{Pour $|h| \geq 3$ :} Il n'y a plus d'innovations communes entre $Y_t$ et $Y_{t-h}$, donc :
+\[
+\gamma(h) = 0 \quad \text{pour } |h| \geq 3
+\]
+\end{frame}
+
+\begin{frame}{Résumé pour le MA(2)}
+\begin{block}{Fonction d'autocovariance}
+\[
+\gamma(h) = \begin{cases}
+(1 + \theta_1^2 + \theta_2^2) \sigma^2 & \text{si } h = 0 \\
+(-\theta_1 + \theta_1 \theta_2) \sigma^2 & \text{si } |h| = 1 \\
+-\theta_2 \sigma^2 & \text{si } |h| = 2 \\
+0 & \text{si } |h| \geq 3
+\end{cases}
+\]
+\end{block}
+
+\begin{block}{Fonction d'autocorrélation}
+\[
+\rho(1) = \frac{-\theta_1 + \theta_1 \theta_2}{1 + \theta_1^2 + \theta_2^2}, \quad \rho(2) = \frac{-\theta_2}{1 + \theta_1^2 + \theta_2^2}, \quad \rho(h) = 0 \text{ si } |h| \geq 3
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+$\Rightarrow$ La fonction d'autocovariance d'un MA(2) est nulle au-delà du rang 2.
+
+$\Rightarrow$ Le processus est stationnaire pour toute valeur de $(\theta_1, \theta_2)$.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle MA(q)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le modèle MA(q)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc de variance $\sigma^2$. On définit le processus MA($q$) $(Y_t, t \in \Z)$ par :
+\[
+Y_t = \varepsilon_t + \theta_1 \varepsilon_{t-1} + \theta_2 \varepsilon_{t-2} + \cdots + \theta_q \varepsilon_{t-q}
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Remarque sur la paramétrisation}
+On a changé le signe des coefficients par rapport au MA(1) et MA(2). Ce choix de paramétrisation affecte l'expression de la fonction d'autocovariance mais pas les propriétés fondamentales du modèle.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+On pourrait ajouter une constante $\mu$ ou un autre terme déterministe ; cela n'affecterait que l'espérance.
+\end{frame}
+
+\begin{frame}{Moments du MA(q)}
+\textbf{Espérance :}
+\[
+\E[Y_t] = 0
+\]
+
+\vspace{0.3cm}
+
+\textbf{Variance :}
+\begin{align*}
+\Var[Y_t] &= \E\left[(\varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q})^2\right] \\
+&= \E[\varepsilon_t^2] + \theta_1^2 \E[\varepsilon_{t-1}^2] + \cdots + \theta_q^2 \E[\varepsilon_{t-q}^2]
+\end{align*}
+
+Les termes croisés $\theta_i \theta_j \varepsilon_{t-i} \varepsilon_{t-j}$ pour $i \neq j$ sont nuls en espérance.
+
+\[
+\boxed{\Var[Y_t] = (1 + \theta_1^2 + \theta_2^2 + \cdots + \theta_q^2) \sigma^2}
+\]
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du MA(q) (1/2)}
+\textbf{Calcul de $\gamma(h)$ :}
+\begin{align*}
+\gamma(h) &= \E[Y_t Y_{t-h}] \\
+&= \E\left[\left(\sum_{i=0}^{q} \theta_i \varepsilon_{t-i}\right) \left(\sum_{j=0}^{q} \theta_j \varepsilon_{t-h-j}\right)\right]
+\end{align*}
+avec la convention $\theta_0 = 1$.
+
+\vspace{0.3cm}
+
+En développant :
+\[
+\gamma(h) = \sum_{i=0}^{q} \sum_{j=0}^{q} \theta_i \theta_j \E[\varepsilon_{t-i} \varepsilon_{t-h-j}]
+\]
+
+Le terme $\E[\varepsilon_{t-i} \varepsilon_{t-h-j}]$ est nul sauf si $t-i = t-h-j$, c'est-à-dire si $j = i - h$.
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du MA(q) (2/2)}
+En posant $j = i - h$ et en éliminant les termes nuls :
+\[
+\boxed{\gamma(h) = \sigma^2 \sum_{i=h}^{q} \theta_i \theta_{i-h}}
+\]
+avec la convention $\theta_0 = 1$ et $\theta_i = 0$ pour $i < 0$ ou $i > q$.
+
+\vspace{0.5cm}
+
+\begin{alertblock}{Propriété fondamentale}
+\[
+\gamma(h) = 0 \quad \text{pour } |h| > q
+\]
+La fonction d'autocovariance d'un MA($q$) est nulle au-delà du rang $q$.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+$\Rightarrow$ Le processus MA($q$) est \textbf{toujours stationnaire} pour toute valeur des paramètres $(\theta_1, \ldots, \theta_q)$.
+\end{frame}
+
+\begin{frame}{Limitation du modèle MA}
+Pour obtenir une persistance « longue » au sens où $Y_t$ et $Y_{t-h}$ sont corrélés pour de grandes valeurs de $h$, il faut rajouter de nombreux retards dans le modèle MA.
+
+\vspace{0.5cm}
+
+À l'extrême, si on souhaite que $Y_t$ soit corrélé avec tout son passé, il faut avoir un nombre \textbf{infini} de retards sur l'innovation !
+
+\vspace{0.5cm}
+
+\begin{alertblock}{Conclusion}
+Le modèle MA n'est pas très \textbf{parcimonieux} pour modéliser des processus avec une persistance longue.
+
+$\Rightarrow$ On va introduire le modèle autorégressif (AR) qui permet de capturer une persistance longue avec peu de paramètres.
+\end{alertblock}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle MA($\infty$)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le modèle MA($\infty$)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc de variance $\sigma^2$. On définit le processus MA($\infty$) $(Y_t, t \in \Z)$ par :
+\[
+Y_t = \mu + \sum_{i=0}^{\infty} \theta_i \varepsilon_{t-i}
+\]
+avec $\theta_0 = 1$ et $(\theta_i)_{i \geq 0}$ une suite \textbf{absolument sommable} :
+\[
+\sum_{i=0}^{\infty} |\theta_i| < \infty
+\]
+\end{block}
+
+L'espérance de ce processus est $\E[Y_t] = \mu$.
+\end{frame}
+
+\begin{frame}{Variance du MA($\infty$)}
+\textbf{Calcul de la variance :}
+\begin{align*}
+\Var[Y_t] &= \E\left[\left(\sum_{i=0}^{\infty} \theta_i \varepsilon_{t-i}\right)^2\right] = \E\left[\sum_{i=0}^{\infty} \theta_i^2 \varepsilon_{t-i}^2\right] \\
+&= \sum_{i=0}^{\infty} \theta_i^2 \E[\varepsilon_{t-i}^2] = \sigma^2 \sum_{i=0}^{\infty} \theta_i^2
+\end{align*}
+
+\vspace{0.3cm}
+
+La variance est finie car si les $\theta_i$ sont absolument sommables, alors la somme des carrés est aussi finie :
+\[
+\sum_{i=0}^{\infty} |\theta_i| < \infty \quad \Rightarrow \quad \sum_{i=0}^{\infty} \theta_i^2 < \infty
+\]
+
+En effet : $\sum_{i=0}^{\infty} \theta_i^2 \leq \left(\sum_{i=0}^{\infty} |\theta_i|\right)^2 < \infty$.
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du MA($\infty$)}
+\textbf{Calcul de $\gamma(h)$ :}
+\begin{align*}
+\gamma(h) &= \E\left[\left(\sum_{i=0}^{\infty} \theta_i \varepsilon_{t-i}\right) \left(\sum_{j=0}^{\infty} \theta_j \varepsilon_{t-h-j}\right)\right] \\
+&= \sum_{i=0}^{\infty} \sum_{j=0}^{\infty} \theta_i \theta_j \E[\varepsilon_{t-i} \varepsilon_{t-h-j}]
+\end{align*}
+
+Le terme $\E[\varepsilon_{t-i} \varepsilon_{t-h-j}]$ est non nul seulement si $i = h + j$, donc :
+\[
+\boxed{\gamma(h) = \sigma^2 \sum_{i=0}^{\infty} \theta_i \theta_{i+h}}
+\]
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Propriété}
+La fonction d'autocovariance (et donc d'autocorrélation) est \textbf{non nulle pour tout $h$}.
+\end{alertblock}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle Autorégressif (AR)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le modèle AR(1)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc de variance $\sigma^2$. Le processus $(Y_t, t \in \Z)$ est \textbf{autorégressif d'ordre 1} s'il est défini par la récurrence stochastique :
+\[
+Y_t = \varphi Y_{t-1} + \varepsilon_t
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+\item On suppose que $\varepsilon_t$ est \textbf{indépendant du passé} de $Y$ : c'est une innovation.
+\item On suppose $|\varphi| < 1$ (condition de stationnarité).
+\end{itemize}
+
+\vspace{0.3cm}
+
+Calculons les moments d'ordre 1 et 2 de ce processus \textbf{sous l'hypothèse de stationnarité}.
+\end{frame}
+
+\begin{frame}{Espérance du AR(1)}
+\textbf{Calcul de l'espérance :}
+\begin{align*}
+\E[Y_t] &= \E[\varphi Y_{t-1} + \varepsilon_t] \\
+&= \varphi \E[Y_{t-1}] + \E[\varepsilon_t] \\
+&= \varphi \E[Y_{t-1}]
+\end{align*}
+
+Sous l'hypothèse de stationnarité, $\E[Y_t] = \E[Y_{t-1}] = \mu$ pour tout $t$.
+
+\vspace{0.3cm}
+
+Donc :
+\[
+\mu = \varphi \mu
+\]
+
+Pour $\varphi \neq 1$, la seule solution est :
+\[
+\boxed{\E[Y_t] = 0}
+\]
+\end{frame}
+
+\begin{frame}{Variance du AR(1)}
+\textbf{Calcul de la variance :}
+\[
+\Var[Y_t] = \Var[\varphi Y_{t-1} + \varepsilon_t]
+\]
+
+Comme $\varepsilon_t$ est indépendant du passé de $Y_t$, on peut « casser » la variance :
+\[
+\Var[Y_t] = \Var[\varphi Y_{t-1}] + \Var[\varepsilon_t] = \varphi^2 \Var[Y_{t-1}] + \sigma^2
+\]
+
+Sous l'hypothèse de stationnarité, $\Var[Y_t] = \Var[Y_{t-1}] = \gamma(0)$ :
+\[
+\gamma(0) = \varphi^2 \gamma(0) + \sigma^2
+\]
+
+D'où :
+\[
+\boxed{\gamma(0) = \Var[Y_t] = \frac{\sigma^2}{1 - \varphi^2}}
+\]
+\end{frame}
+
+\begin{frame}{Remarques sur la variance du AR(1)}
+\[
+\Var[Y_t] = \frac{\sigma^2}{1 - \varphi^2}
+\]
+
+\vspace{0.3cm}
+
+La volatilité de $(Y_t, t \in \Z)$ est d'autant plus importante que :
+\begin{itemize}
+\item La variance de l'innovation $\sigma^2$ est grande
+\item Le paramètre autorégressif $\varphi$ est proche de 1 ou $-1$
+\end{itemize}
+
+\vspace{0.5cm}
+
+\begin{alertblock}{Attention}
+\begin{itemize}
+\item La variance n'est pas définie pour $|\varphi| = 1$
+\item Elle devient même \textbf{négative} pour $|\varphi| > 1$ (ce qui est absurde)
+\end{itemize}
+$\Rightarrow$ Cela justifie la condition $|\varphi| < 1$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du AR(1) (1/2)}
+\textbf{Calcul de $\gamma(h)$ :}
+
+Partons de la définition :
+\[
+Y_t Y_{t-h} = \varphi Y_{t-1} Y_{t-h} + \varepsilon_t Y_{t-h}
+\]
+
+En prenant l'espérance :
+\[
+\E[Y_t Y_{t-h}] = \varphi \E[Y_{t-1} Y_{t-h}] + \E[\varepsilon_t Y_{t-h}]
+\]
+
+Pour $h \geq 1$, on a $\E[\varepsilon_t Y_{t-h}] = 0$ car $\varepsilon_t$ est indépendant du passé de $Y$.
+
+\vspace{0.3cm}
+
+Par définition de la fonction d'autocovariance :
+\[
+\gamma(h) = \varphi \gamma(h-1)
+\]
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance du AR(1) (2/2)}
+La fonction d'autocovariance vérifie la récurrence :
+\[
+\gamma(h) = \varphi \gamma(h-1)
+\]
+
+avec $\gamma(0) = \dfrac{\sigma^2}{1 - \varphi^2}$.
+
+\vspace{0.3cm}
+
+En résolvant cette récurrence :
+\[
+\boxed{\gamma(h) = \varphi^h \cdot \frac{\sigma^2}{1 - \varphi^2} = \varphi^h \gamma(0)}
+\]
+
+\vspace{0.3cm}
+
+La fonction d'autocorrélation est donc :
+\[
+\boxed{\rho(h) = \frac{\gamma(h)}{\gamma(0)} = \varphi^h}
+\]
+\end{frame}
+
+\begin{frame}{Interprétation du paramètre autorégressif}
+\[
+\rho(h) = \varphi^h
+\]
+
+\vspace{0.3cm}
+
+\begin{block}{Remarques}
+\begin{itemize}
+\item La fonction d'autocorrélation est \textbf{non nulle à tout ordre}
+\item Elle est \textbf{décroissante} (en valeur absolue) vers 0
+\item La vitesse de décroissance dépend de $|\varphi|$
+\end{itemize}
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Interprétation}
+Le paramètre autorégressif $\varphi$ s'interprète comme un \textbf{paramètre de persistance} :
+\begin{itemize}
+\item Plus $|\varphi|$ est proche de 1, plus lentement $\rho(h)$ converge vers 0
+\item Plus $|\varphi|$ est proche de 0, plus rapidement la mémoire du processus s'estompe
+\end{itemize}
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{AR(1) avec constante}
+\begin{block}{Exercice}
+Calculer les moments d'ordre 1 et 2 du processus :
+\[
+Y_t = c + \varphi Y_{t-1} + \varepsilon_t
+\]
+avec $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$ et $|\varphi| < 1$, sous l'hypothèse de stationnarité.
+\end{block}
+
+\vspace{0.3cm}
+
+\textbf{Espérance :}
+\[
+\E[Y_t] = c + \varphi \E[Y_{t-1}] \quad \Rightarrow \quad \mu = c + \varphi \mu \quad \Rightarrow \quad \boxed{\mu = \frac{c}{1 - \varphi}}
+\]
+
+\textbf{Variance et autocovariance :} inchangées (la constante n'affecte pas les moments centrés d'ordre 2).
+\end{frame}
+
+\begin{frame}{Autocorrélogramme du AR(1)}
+On représente la fonction d'autocorrélation graphiquement à l'aide d'un \textbf{autocorrélogramme} (ou correlogram).
+
+\vspace{0.3cm}
+
+\begin{center}
+\begin{tabular}{cc}
+$\varphi > 0$ & $\varphi < 0$ \\
+Convergence monotone vers 0 & Convergence oscillatoire vers 0 \\
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+
+\textbf{Exemples :}
+\begin{itemize}
+\item $\varphi = 0.5$ : $\rho(1) = 0.5$, $\rho(2) = 0.25$, $\rho(3) = 0.125$, ...
+\item $\varphi = 0.9$ : $\rho(1) = 0.9$, $\rho(2) = 0.81$, $\rho(3) = 0.729$, ...
+\item $\varphi = 0.95$ : décroissance très lente
+\end{itemize}
+
+\vspace{0.3cm}
+
+Plus $\varphi$ se rapproche de 1, moins vite la fonction d'autocorrélation tend vers 0.
+\end{frame}
+
+\begin{frame}{Intuition sur la persistance}
+\begin{block}{Question}
+Plus $\varphi$ se rapproche de 1, plus $Y_t$ devient dépendant de son passé.
+
+\vspace{0.2cm}
+
+\textbf{Que se passe-t-il dans le cas limite $\varphi = 1$ ?}
+\end{block}
+
+\vspace{0.5cm}
+
+Pour répondre à cette question, nous allons recalculer les moments \textbf{sans recourir à l'hypothèse de stationnarité}.
+
+\vspace{0.5cm}
+
+Nous allons voir que :
+\begin{itemize}
+\item Si $|\varphi| < 1$, le processus converge vers une distribution stationnaire
+\item Si $\varphi = 1$, le processus n'admet pas de distribution stationnaire
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Analyse sans hypothèse de stationnarité}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Condition initiale et solution explicite}
+Supposons qu'il existe une \textbf{condition initiale} $Y_0$ : une variable aléatoire d'espérance $\mu_0$ et de variance $\sigma_0^2$.
+
+\vspace{0.3cm}
+
+On peut exprimer $Y_t$ en fonction de $Y_0$ et des innovations entre 0 et $t$.
+
+\vspace{0.3cm}
+
+En effet, par itération de la récurrence $Y_t = \varphi Y_{t-1} + \varepsilon_t$ :
+\begin{align*}
+Y_t &= \varphi Y_{t-1} + \varepsilon_t \\
+&= \varphi (\varphi Y_{t-2} + \varepsilon_{t-1}) + \varepsilon_t = \varphi^2 Y_{t-2} + \varphi \varepsilon_{t-1} + \varepsilon_t \\
+&= \varphi^3 Y_{t-3} + \varphi^2 \varepsilon_{t-2} + \varphi \varepsilon_{t-1} + \varepsilon_t \\
+&\vdots
+\end{align*}
+\end{frame}
+
+\begin{frame}{Solution explicite de l'AR(1)}
+En itérant jusqu'à la condition initiale $Y_0$, on obtient :
+\[
+\boxed{Y_t = \varphi^t Y_0 + \sum_{i=0}^{t-1} \varphi^i \varepsilon_{t-i}}
+\]
+
+\vspace{0.3cm}
+
+On peut vérifier que cette expression est correcte en la substituant dans l'expression récursive du processus AR(1).
+
+\vspace{0.3cm}
+
+Il s'agit de la \textbf{solution de l'équation récurrente stochastique}.
+
+\vspace{0.3cm}
+
+On peut utiliser cette expression pour calculer les moments de l'AR(1) sans supposer la stationnarité.
+\end{frame}
+
+\begin{frame}{Espérance sans hypothèse de stationnarité}
+\textbf{Calcul de l'espérance :}
+\begin{align*}
+\E[Y_t] &= \E\left[\varphi^t Y_0 + \sum_{i=0}^{t-1} \varphi^i \varepsilon_{t-i}\right] \\
+&= \varphi^t \E[Y_0] + \sum_{i=0}^{t-1} \varphi^i \underbrace{\E[\varepsilon_{t-i}]}_{= 0} \\
+&= \varphi^t \mu_0
+\end{align*}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Observation}
+L'espérance \textbf{dépend du temps} $t$, sauf si l'espérance de la condition initiale est nulle ($\mu_0 = 0$).
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Variance sans hypothèse de stationnarité}
+\textbf{Calcul de la variance :}
+\begin{align*}
+\Var[Y_t] &= \Var\left[\varphi^t Y_0 + \sum_{i=0}^{t-1} \varphi^i \varepsilon_{t-i}\right] \\
+&= \varphi^{2t} \Var[Y_0] + \sum_{i=0}^{t-1} \varphi^{2i} \Var[\varepsilon_{t-i}] \\
+&= \varphi^{2t} \sigma_0^2 + \sigma^2 \sum_{i=0}^{t-1} \varphi^{2i} \\
+&= \varphi^{2t} \sigma_0^2 + \sigma^2 \cdot \frac{1 - \varphi^{2t}}{1 - \varphi^2}
+\end{align*}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Observation}
+La variance \textbf{dépend du temps} $t$... sauf si $\sigma_0^2 = \dfrac{\sigma^2}{1 - \varphi^2}$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Condition de stationnarité}
+\begin{block}{Proposition}
+Si $|\varphi| < 1$, le processus stochastique $Y_t = \varphi Y_{t-1} + \varepsilon_t$ avec $\varepsilon_t \sim BB(0, \sigma^2)$ et condition initiale $Y_0$ est \textbf{stationnaire au second ordre} si et seulement si :
+\[
+\mu_0 = 0 \quad \text{et} \quad \sigma_0^2 = \frac{\sigma^2}{1 - \varphi^2}
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+Pour que le processus soit stationnaire au second ordre, il faut et il suffit que les moments de la condition initiale soient \textbf{identiques aux moments stationnaires} que nous avions calculés précédemment.
+\end{frame}
+
+\begin{frame}{Interprétation : dynamique d'une distribution (1/2)}
+Il faut bien comprendre la nature de l'équation :
+\[
+Y_t = \varphi Y_{t-1} + \varepsilon_t
+\]
+
+Une récurrence stochastique définit l'évolution dans le temps d'une \textbf{distribution}.
+
+\vspace{0.3cm}
+
+Pour mieux comprendre, supposons que $\varepsilon_t$ soit un bruit blanc \textbf{gaussien} et que la condition initiale soit normalement distribuée :
+\[
+\varepsilon_t \sim \mathcal{N}(0, \sigma^2), \quad Y_0 \sim \mathcal{N}(\mu_0, \sigma_0^2)
+\]
+
+Puisque le modèle est linéaire, $Y_t$ sera \textbf{normalement distribué} pour tout $t$ (une combinaison linéaire de variables normales est normale).
+\end{frame}
+
+\begin{frame}{Interprétation : dynamique d'une distribution (2/2)}
+À chaque période, la distribution de $Y_t$ évolue :
+\begin{align*}
+Y_1 &\sim \mathcal{N}(\varphi \mu_0, \varphi^2 \sigma_0^2 + \sigma^2) \\
+Y_2 &\sim \mathcal{N}(\varphi^2 \mu_0, \varphi^4 \sigma_0^2 + (1 + \varphi^2)\sigma^2) \\
+&\vdots
+\end{align*}
+
+\vspace{0.3cm}
+
+En général, à chaque période :
+\[
+\mu_t = \varphi \mu_{t-1}, \quad \sigma_t^2 = \varphi^2 \sigma_{t-1}^2 + \sigma^2
+\]
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Observation}
+L'espérance $\mu_t$ et la variance $\sigma_t^2$ changent à chaque période !
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Convergence vers la distribution stationnaire}
+Puisque $|\varphi| < 1$, on peut itérer indéfiniment. \textbf{Asymptotiquement}, $Y_t$ est normalement distribué :
+\[
+Y_t \xrightarrow[t \to \infty]{\mathcal{L}} \mathcal{N}(\mu_\infty, \sigma_\infty^2)
+\]
+avec :
+\[
+\mu_\infty = \lim_{t \to \infty} \varphi^t \mu_0 = 0, \quad \sigma_\infty^2 = \lim_{t \to \infty} \sigma_t^2 = \frac{\sigma^2}{1 - \varphi^2}
+\]
+
+\vspace{0.3cm}
+
+$Y_t$ tend vers une distribution bien définie. Les moments asymptotiques $\mu_\infty$ et $\sigma_\infty^2$ :
+\begin{itemize}
+\item Ne dépendent \textbf{pas} de la distribution de la condition initiale
+\item Correspondent précisément aux moments calculés sous l'hypothèse de stationnarité
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Distribution stationnaire comme point fixe}
+La récurrence stochastique $Y_t = \varphi Y_{t-1} + \varepsilon_t$ décrit la \textbf{dynamique d'une distribution}.
+
+\vspace{0.3cm}
+
+Pour toute condition initiale $Y_0$, la dynamique converge vers une distribution normale d'espérance nulle et de variance $\dfrac{\sigma^2}{1-\varphi^2}$.
+
+\vspace{0.5cm}
+
+\begin{block}{Point fixe}
+La loi $\mathcal{N}\left(0, \dfrac{\sigma^2}{1-\varphi^2}\right)$ est l'\textbf{attracteur} de la récurrence stochastique.
+
+\vspace{0.2cm}
+
+C'est un \textbf{point fixe} dans l'espace des distributions : si $Y_0$ a cette distribution, alors la distribution est invariante pour tout $t$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Stationnarité asymptotique}
+\begin{block}{Définition}
+Un processus stochastique est \textbf{asymptotiquement stationnaire au second ordre} s'il existe une distribution limite (quand $t \to \infty$) dont les moments d'ordre 1 et 2 sont finis et constants.
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Astuce pratique}
+Utiliser la distribution asymptotique pour définir la condition initiale !
+\end{alertblock}
+
+\vspace{0.3cm}
+
+Pour que le modèle AR(1) soit asymptotiquement stationnaire au second ordre, il faut et il suffit que $|\varphi| < 1$.
+
+\vspace{0.3cm}
+
+En effet, la dynamique de la distribution est caractérisée par le système :
+\[
+\mu_t = \varphi \mu_{t-1}, \quad \sigma_t^2 = \varphi^2 \sigma_{t-1}^2 + \sigma^2
+\]
+Ce système est \textbf{globalement stable} si et seulement si $|\varphi| < 1$.
+\end{frame}
+
+\begin{frame}{Condition de stabilité et polynôme retard}
+On dit que $|\varphi| < 1$ est une \textbf{condition de stabilité} de l'AR(1).
+
+\vspace{0.3cm}
+
+\textbf{Réécriture avec le polynôme retard :}
+\[
+Y_t - \varphi Y_{t-1} = \varepsilon_t \quad \Leftrightarrow \quad (1 - \varphi L) Y_t = \varepsilon_t
+\]
+où $\phi(L) = 1 - \varphi L$.
+
+\vspace{0.3cm}
+
+La condition de stabilité peut s'exprimer comme une restriction sur la \textbf{racine du polynôme retard} :
+\[
+\phi(z) = 0 \quad \Leftrightarrow \quad 1 - \varphi z = 0 \quad \Leftrightarrow \quad z = \frac{1}{\varphi}
+\]
+
+Le processus est stable si la racine du polynôme retard est \textbf{supérieure à 1 en module} :
+\[
+\left|\frac{1}{\varphi}\right| > 1 \quad \Leftrightarrow \quad |\varphi| < 1
+\]
+\end{frame}
+
+\begin{frame}{Représentation MA($\infty$) de l'AR(1)}
+Sous la condition $|\varphi| < 1$, on peut inverser le polynôme retard (voir chapitre précédent) et obtenir la représentation MA($\infty$) :
+\[
+Y_t = \phi(L)^{-1} \varepsilon_t = (1 - \varphi L)^{-1} \varepsilon_t = \sum_{i=0}^{\infty} \varphi^i \varepsilon_{t-i}
+\]
+
+\vspace{0.3cm}
+
+On retrouve cette expression en itérant vers le passé :
+\[
+Y_t = \varphi^s Y_{t-s} + \sum_{i=0}^{s-1} \varphi^i \varepsilon_{t-i}
+\]
+
+Quand $s \to \infty$, le terme $\varphi^s Y_{t-s} \to 0$ (car $|\varphi| < 1$) et :
+\[
+Y_t = \sum_{i=0}^{\infty} \varphi^i \varepsilon_{t-i}
+\]
+
+On obtient directement les moments de la distribution stationnaire.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le cas $\varphi = 1$ : marche aléatoire}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Propriété du modèle AR(1) si $\varphi = 1$}
+Si $\varphi = 1$ (ou $-1$), nous savons que nous ne pouvons \textbf{pas inverser} le polynôme retard.
+
+\vspace{0.3cm}
+
+En pratique, cela signifie :
+\begin{itemize}
+\item Il n'est pas possible de représenter le processus sous la forme d'un MA($\infty$)
+\item Le processus n'admet \textbf{pas de distribution stationnaire}
+\end{itemize}
+
+\vspace{0.3cm}
+
+Supposons que la condition initiale $Y_0$ soit une variable aléatoire d'espérance $\mu_0$ et de variance $\sigma_0^2$.
+
+\vspace{0.3cm}
+
+On montre facilement par récurrence arrière que :
+\[
+Y_t = Y_0 + \sum_{i=1}^{t} \varepsilon_i
+\]
+\end{frame}
+
+\begin{frame}{Moments de la marche aléatoire}
+Pour $Y_t = Y_0 + \sum_{i=1}^{t} \varepsilon_i$, calculons les moments :
+
+\vspace{0.3cm}
+
+\textbf{Espérance :}
+\[
+\E[Y_t] = \mu_0 + \sum_{i=1}^{t} \E[\varepsilon_i] = \mu_0
+\]
+
+\textbf{Variance :}
+\[
+\Var[Y_t] = \Var[Y_0] + \sum_{i=1}^{t} \Var[\varepsilon_i] = \sigma_0^2 + t \sigma^2
+\]
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Observation}
+L'espérance est constante, mais la variance \textbf{croît linéairement} avec le temps !
+
+$\Rightarrow$ Le processus stochastique est donc \textbf{non stationnaire}.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Tendance stochastique}
+Contrairement au cas $|\varphi| < 1$, la variance ne cesse jamais de croître.
+
+\vspace{0.3cm}
+
+On parle alors de \textbf{tendance stochastique}.
+
+\vspace{0.3cm}
+
+Il n'est donc pas possible de définir une distribution stationnaire, puisque la variance augmente indéfiniment.
+
+\vspace{0.5cm}
+
+\begin{block}{Définition : Marche aléatoire}
+Un processus de la forme :
+\[
+Y_t = Y_{t-1} + \varepsilon_t
+\]
+est appelé une \textbf{marche aléatoire} (random walk).
+\end{block}
+\end{frame}
+
+\begin{frame}{Processus intégré d'ordre 1}
+Notons que si la variance de $Y_t$ n'est pas définie (elle diverge), celle de $\Delta Y_t$ est bien définie :
+\[
+\Delta Y_t = Y_t - Y_{t-1} = \varepsilon_t \sim BB(0, \sigma^2)
+\]
+
+Le processus différencié est un bruit blanc, \textit{a fortiori} stationnaire au second ordre.
+
+\vspace{0.5cm}
+
+\begin{block}{Définition : Processus intégré}
+Un processus non stationnaire qui peut être rendu stationnaire en le \textbf{différenciant}, c'est-à-dire en appliquant l'opérateur différence première, est dit \textbf{intégré d'ordre 1} (on note $I(1)$).
+\end{block}
+
+\vspace{0.3cm}
+
+La marche aléatoire est le cas le plus simple de processus $I(1)$.
+\end{frame}
+
+\begin{frame}{Le cas $|\varphi| > 1$}
+\begin{alertblock}{Problème}
+Si $|\varphi| > 1$, la dynamique est \textbf{explosive} : la variance diverge exponentiellement.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+De plus, la représentation n'est pas \textbf{causale}. L'inversion du polynôme retard (qui est possible avec $|\varphi| > 1$ mais dans l'autre sens) nous dit que $Y_t$ n'est plus fonction des $\varepsilon$ passés mais des $\varepsilon$ \textbf{futurs}.
+
+\vspace{0.3cm}
+
+Voir la fin du chapitre précédent sur l'inversion des polynômes retard.
+
+\vspace{0.5cm}
+
+\begin{block}{Remarque}
+Un modèle MA est toujours causal (par construction, $Y_t$ ne dépend que des $\varepsilon$ passés et présents).
+\end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle AR(2)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Construction de l'AR(2) par composition}
+On peut considérer un modèle avec \textbf{deux retards} sur l'endogène. On peut créer un processus AR(2) en \textbf{composant deux processus AR(1)}.
+
+\vspace{0.3cm}
+
+Soit le processus $(X_t, t \in \Z)$ défini par :
+\[
+X_t = \lambda_1 X_{t-1} + \varepsilon_t
+\]
+avec $|\lambda_1| < 1$ et $\varepsilon_t \sim BB(0, \sigma^2)$.
+
+\vspace{0.3cm}
+
+On construit le processus $(Y_t, t \in \Z)$ comme :
+\[
+Y_t = \lambda_2 Y_{t-1} + X_t
+\]
+avec $|\lambda_2| < 1$.
+
+\vspace{0.3cm}
+
+Le processus $Y_t$ dépend donc de $Y_{t-1}$ et, indirectement via $X_t$, de $Y_{t-2}$.
+\end{frame}
+
+\begin{frame}{Dérivation de l'AR(2) par composition}
+En utilisant les polynômes retard :
+\[
+(1 - \lambda_1 L) X_t = \varepsilon_t \quad (*), \qquad (1 - \lambda_2 L) Y_t = X_t \quad (**)
+\]
+
+En substituant $(*)$ dans $(**)$ :
+\begin{align*}
+(1 - \lambda_2 L) Y_t &= (1 - \lambda_1 L)^{-1} \varepsilon_t \\
+\Leftrightarrow \quad (1 - \lambda_1 L)(1 - \lambda_2 L) Y_t &= \varepsilon_t \\
+\Leftrightarrow \quad (1 - (\lambda_1 + \lambda_2) L + \lambda_1 \lambda_2 L^2) Y_t &= \varepsilon_t
+\end{align*}
+
+D'où :
+\[
+Y_t = (\lambda_1 + \lambda_2) Y_{t-1} - \lambda_1 \lambda_2 Y_{t-2} + \varepsilon_t
+\]
+
+avec $\varphi_1 = \lambda_1 + \lambda_2$ et $\varphi_2 = -\lambda_1 \lambda_2$.
+\end{frame}
+
+\begin{frame}{Définition générale de l'AR(2)}
+\begin{block}{Définition}
+$(Y_t, t \in \Z)$ est un processus \textbf{AR(2)} si :
+\[
+Y_t = \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t
+\]
+avec $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$.
+\end{block}
+
+\vspace{0.3cm}
+
+Ce processus est \textbf{stable} (asymptotiquement stationnaire au second ordre et causal) si les racines du polynôme retard :
+\[
+\phi(L) = 1 - \varphi_1 L - \varphi_2 L^2
+\]
+sont \textbf{supérieures à 1 en module}.
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Remarque}
+Les racines du polynôme retard peuvent être \textbf{complexes conjuguées}, même si le processus stochastique est à valeurs réelles $\Rightarrow$ composante cyclique.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Polynôme retard vs polynôme caractéristique}
+Jusqu'ici nous avons discuté la stabilité en fonction des racines du \textbf{polynôme retard}. On peut aussi utiliser le \textbf{polynôme caractéristique} (habituel en systèmes dynamiques).
+
+\vspace{0.3cm}
+
+Pour le modèle AR(2), le polynôme caractéristique est :
+\[
+\chi(\lambda) = \lambda^2 - \varphi_1 \lambda - \varphi_2
+\]
+
+Si zéro n'est pas une racine (ce qui arriverait si $\varphi_2 = 0$, mais alors ce ne serait pas un AR(2)), il existe une relation \textbf{inverse} entre les racines :
+\[
+\chi(\lambda) = \lambda^2 \left(1 - \varphi_1 \frac{1}{\lambda} - \varphi_2 \frac{1}{\lambda^2}\right) = \lambda^2 \phi\left(\frac{1}{\lambda}\right)
+\]
+
+Ainsi $\lambda^*$ est racine de $\chi(\lambda)$ si et seulement si $\dfrac{1}{\lambda^*}$ est racine de $\phi(z)$.
+\end{frame}
+
+\begin{frame}{Condition de stabilité équivalente}
+\begin{block}{Condition de stabilité}
+La condition de stationnarité asymptotique au second ordre est équivalente à :
+
+\vspace{0.2cm}
+
+\begin{itemize}
+\item Les racines du \textbf{polynôme retard} $\phi(z) = 1 - \varphi_1 z - \varphi_2 z^2$ sont $> 1$ en module
+
+\vspace{0.2cm}
+
+\textbf{ou de façon équivalente :}
+
+\vspace{0.2cm}
+
+\item Les racines du \textbf{polynôme caractéristique} $\chi(\lambda) = \lambda^2 - \varphi_1 \lambda - \varphi_2$ sont $< 1$ en module (à l'intérieur du cercle unité)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Conditions de stabilité de l'AR(2) (1/3)}
+\begin{block}{Question}
+Quelles sont les conditions sur $\varphi_1$ et $\varphi_2$ pour que le modèle soit stable ?
+\end{block}
+
+Il faut que les racines du polynôme caractéristique $\chi(\lambda) = \lambda^2 - \varphi_1 \lambda - \varphi_2$ soient $< 1$ en module.
+
+\vspace{0.3cm}
+
+Le discriminant est $\Delta = \varphi_1^2 + 4\varphi_2$.
+
+\vspace{0.3cm}
+
+\textbf{Cas complexe :} Si $\Delta < 0$ (c'est-à-dire $\varphi_2 < -\frac{\varphi_1^2}{4}$), les racines sont complexes conjuguées :
+\[
+\lambda^* = \frac{\varphi_1}{2} \pm i \frac{\sqrt{-\Delta}}{2}
+\]
+
+Le module est $|\lambda^*| = \sqrt{\frac{\varphi_1^2}{4} + \frac{-\Delta}{4}} = \sqrt{-\varphi_2}$.
+
+Pour la stabilité : $|\lambda^*| < 1 \Leftrightarrow \boxed{\varphi_2 > -1}$.
+\end{frame}
+
+\begin{frame}{Conditions de stabilité de l'AR(2) (2/3)}
+\textbf{Cas réel :} Si $\Delta \geq 0$ (c'est-à-dire $\varphi_2 \geq -\frac{\varphi_1^2}{4}$), les racines sont réelles :
+\[
+\lambda_1 = \frac{\varphi_1 + \sqrt{\Delta}}{2}, \quad \lambda_2 = \frac{\varphi_1 - \sqrt{\Delta}}{2}
+\]
+
+\vspace{0.3cm}
+
+\textbf{Condition sur la plus grande racine $\lambda_1$ :}
+
+$\lambda_1 < 1$ $\Leftrightarrow$ $\varphi_1 + \sqrt{\Delta} < 2$ $\Leftrightarrow$ $\sqrt{\Delta} < 2 - \varphi_1$
+
+Si $\varphi_1 \geq 2$, cette condition n'est jamais satisfaite $\Rightarrow$ non stationnaire.
+
+Si $\varphi_1 < 2$, en élevant au carré : $\Delta < (2 - \varphi_1)^2$
+\[
+\varphi_1^2 + 4\varphi_2 < 4 - 4\varphi_1 + \varphi_1^2 \quad \Leftrightarrow \quad \boxed{\varphi_2 < 1 - \varphi_1}
+\]
+\end{frame}
+
+\begin{frame}{Conditions de stabilité de l'AR(2) (3/3)}
+\textbf{Condition sur la plus petite racine $\lambda_2$ :}
+
+$\lambda_2 > -1$ $\Leftrightarrow$ $\varphi_1 - \sqrt{\Delta} > -2$ $\Leftrightarrow$ $\sqrt{\Delta} < \varphi_1 + 2$
+
+Si $\varphi_1 \leq -2$, cette condition n'est jamais satisfaite $\Rightarrow$ non stationnaire.
+
+Si $\varphi_1 > -2$, en élevant au carré : $\Delta < (\varphi_1 + 2)^2$
+\[
+\varphi_1^2 + 4\varphi_2 < \varphi_1^2 + 4\varphi_1 + 4 \quad \Leftrightarrow \quad \boxed{\varphi_2 < 1 + \varphi_1}
+\]
+
+\vspace{0.5cm}
+
+\begin{block}{Résumé : Conditions de stabilité de l'AR(2)}
+\[
+\boxed{
+\begin{cases}
+\varphi_2 > -1 \\
+\varphi_2 < 1 - \varphi_1 \\
+\varphi_2 < 1 + \varphi_1
+\end{cases}
+}
+\]
+\end{block}
+\end{frame}
+
+\begin{frame}{Triangle de stationnarité}
+\begin{center}
+\textbf{Zone de stationnarité de l'AR(2) dans le plan $(\varphi_1, \varphi_2)$}
+\end{center}
+
+\vspace{0.3cm}
+
+Les trois conditions définissent un \textbf{triangle} :
+\begin{itemize}
+\item $\varphi_2 > -1$ : au-dessus de la droite horizontale $\varphi_2 = -1$
+\item $\varphi_2 < 1 - \varphi_1$ : en dessous de la droite passant par $(0, 1)$ et $(1, 0)$
+\item $\varphi_2 < 1 + \varphi_1$ : en dessous de la droite passant par $(0, 1)$ et $(-1, 0)$
+\end{itemize}
+
+\vspace{0.3cm}
+
+Les sommets du triangle sont : $(-2, -1)$, $(2, -1)$ et $(0, 1)$.
+
+\vspace{0.3cm}
+
+À l'intérieur de ce triangle : processus \textbf{stationnaire}.
+
+À l'extérieur : processus \textbf{non stationnaire} (explosif ou avec racine unitaire).
+\end{frame}
+
+\begin{frame}{Moments de l'AR(2) : Espérance}
+Calculons les moments du processus AR(2) :
+\[
+Y_t = c + \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t
+\]
+avec $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$, en supposant que $\varphi_1$ et $\varphi_2$ satisfont les conditions de stationnarité.
+
+\vspace{0.5cm}
+
+\textbf{Espérance :}
+\[
+\E[Y_t] = c + \varphi_1 \E[Y_{t-1}] + \varphi_2 \E[Y_{t-2}]
+\]
+
+Sous stationnarité, $\E[Y_t] = \E[Y_{t-1}] = \E[Y_{t-2}] = \mu$, donc :
+\[
+\mu = c + \varphi_1 \mu + \varphi_2 \mu \quad \Rightarrow \quad \boxed{\mu = \frac{c}{1 - \varphi_1 - \varphi_2}}
+\]
+\end{frame}
+
+\begin{frame}{Moments de l'AR(2) : Variance (difficulté)}
+\textbf{Calcul de la variance :} On ne peut pas suivre la même approche que pour l'AR(1).
+
+\vspace{0.3cm}
+
+Par définition :
+\[
+\Var[Y_t] = \Var[c + \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t]
+\]
+
+Comme $c$ est déterministe et $\varepsilon_t$ est une innovation :
+\[
+\Var[Y_t] = \Var[\varphi_1 Y_{t-1} + \varphi_2 Y_{t-2}] + \sigma^2
+\]
+
+\begin{alertblock}{Problème}
+$Y_{t-1}$ et $Y_{t-2}$ sont très probablement \textbf{corrélés}. On ne peut pas simplement « casser » la variance sans connaître la covariance entre $Y_{t-1}$ et $Y_{t-2}$.
+
+$\Rightarrow$ Il n'est pas possible de calculer $\gamma(0)$ indépendamment de $\gamma(1)$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Fonction d'autocovariance de l'AR(2) : processus centré}
+Notons $\tilde{Y}_t = Y_t - \mu$ le processus centré. On peut montrer que :
+\[
+\tilde{Y}_t = \varphi_1 \tilde{Y}_{t-1} + \varphi_2 \tilde{Y}_{t-2} + \varepsilon_t
+\]
+
+C'est le même processus mais sans constante.
+
+\vspace{0.3cm}
+
+\textbf{Démonstration :}
+\begin{align*}
+Y_t &= c + \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t \\
+Y_t &= \mu(1 - \varphi_1 - \varphi_2) + \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t \\
+Y_t - \mu &= \varphi_1 (Y_{t-1} - \mu) + \varphi_2 (Y_{t-2} - \mu) + \varepsilon_t
+\end{align*}
+
+La fonction d'autocovariance de $(Y_t)$ est identique à celle du processus centré $(\tilde{Y}_t)$.
+\end{frame}
+
+\begin{frame}{Équations de Yule-Walker (1/2)}
+Calculons $\gamma(h) = \E[\tilde{Y}_t \tilde{Y}_{t-h}]$.
+
+\vspace{0.3cm}
+
+\textbf{Pour $h = 0$ :}
+\begin{align*}
+\E[\tilde{Y}_t^2] &= \E[(\varphi_1 \tilde{Y}_{t-1} + \varphi_2 \tilde{Y}_{t-2} + \varepsilon_t) \tilde{Y}_t] \\
+\gamma(0) &= \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \underbrace{\E[\varepsilon_t \tilde{Y}_t]}_{\text{à calculer}}
+\end{align*}
+
+Or $\tilde{Y}_t = \varphi_1 \tilde{Y}_{t-1} + \varphi_2 \tilde{Y}_{t-2} + \varepsilon_t$, donc :
+\[
+\E[\varepsilon_t \tilde{Y}_t] = \varphi_1 \underbrace{\E[\varepsilon_t \tilde{Y}_{t-1}]}_{=0} + \varphi_2 \underbrace{\E[\varepsilon_t \tilde{Y}_{t-2}]}_{=0} + \E[\varepsilon_t^2] = \sigma^2
+\]
+
+D'où : $\boxed{\gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \sigma^2}$
+\end{frame}
+
+\begin{frame}{Équations de Yule-Walker (2/2)}
+\textbf{Pour $h = 1$ :}
+\begin{align*}
+\tilde{Y}_t \tilde{Y}_{t-1} &= \varphi_1 \tilde{Y}_{t-1}^2 + \varphi_2 \tilde{Y}_{t-2} \tilde{Y}_{t-1} + \varepsilon_t \tilde{Y}_{t-1} \\
+\gamma(1) &= \varphi_1 \gamma(0) + \varphi_2 \gamma(1) + 0 \\
+\Rightarrow \quad &\boxed{\gamma(1) = \frac{\varphi_1}{1 - \varphi_2} \gamma(0)}
+\end{align*}
+
+\textbf{Pour $h = 2$ :}
+\begin{align*}
+\gamma(2) &= \varphi_1 \gamma(1) + \varphi_2 \gamma(0)
+\end{align*}
+
+\textbf{Pour $h \geq 2$ :} La récurrence générale est :
+\[
+\boxed{\gamma(h) = \varphi_1 \gamma(h-1) + \varphi_2 \gamma(h-2)}
+\]
+\end{frame}
+
+\begin{frame}{Résolution du système de Yule-Walker}
+Nous avons un système de 3 équations à 3 inconnues :
+\[
+\begin{cases}
+\gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \sigma^2 \\
+\gamma(1) = \varphi_1 \gamma(0) + \varphi_2 \gamma(1) \\
+\gamma(2) = \varphi_1 \gamma(1) + \varphi_2 \gamma(0)
+\end{cases}
+\]
+
+De la deuxième équation : $\gamma(1) = \dfrac{\varphi_1}{1 - \varphi_2} \gamma(0)$
+
+\vspace{0.2cm}
+
+En substituant dans la troisième : $\gamma(2) = \dfrac{\varphi_1^2}{1 - \varphi_2} \gamma(0) + \varphi_2 \gamma(0) = \dfrac{\varphi_1^2 + \varphi_2 - \varphi_2^2}{1 - \varphi_2} \gamma(0)$
+
+\vspace{0.2cm}
+
+En substituant dans la première et après simplification :
+\[
+\boxed{\gamma(0) = \frac{(1 - \varphi_2) \sigma^2}{(1 + \varphi_2)[(1 - \varphi_2)^2 - \varphi_1^2]}}
+\]
+\end{frame}
+
+\begin{frame}{Vérification et formules complètes}
+On vérifie facilement que pour $\varphi_2 = 0$, cette formule redonne le résultat du modèle AR(1) :
+\[
+\gamma(0) = \frac{\sigma^2}{1 - \varphi_1^2}
+\]
+
+\vspace{0.3cm}
+
+\textbf{Formules complètes :}
+\[
+\gamma(0) = \frac{(1 - \varphi_2) \sigma^2}{(1 + \varphi_2)[(1 - \varphi_2)^2 - \varphi_1^2]}
+\]
+\[
+\gamma(1) = \frac{\varphi_1}{1 - \varphi_2} \gamma(0) = \frac{\varphi_1 \sigma^2}{(1 + \varphi_2)[(1 - \varphi_2)^2 - \varphi_1^2]}
+\]
+
+Ensuite, la fonction d'autocovariance est définie \textbf{récursivement} :
+\[
+\gamma(h) = \varphi_1 \gamma(h-1) + \varphi_2 \gamma(h-2) \quad \text{pour } h \geq 2
+\]
+\end{frame}
+
+\begin{frame}{Propriétés de l'autocovariance de l'AR(2)}
+\begin{block}{Remarque}
+Comme pour le modèle AR(1), la fonction d'autocovariance est \textbf{non nulle} à tout ordre et converge vers 0 (si $\varphi_1$ et $\varphi_2$ sont tels que le modèle est stable).
+\end{block}
+
+\vspace{0.3cm}
+
+La fonction d'autocorrélation est :
+\[
+\rho(h) = \frac{\gamma(h)}{\gamma(0)}
+\]
+
+Elle vérifie aussi la récurrence :
+\[
+\rho(h) = \varphi_1 \rho(h-1) + \varphi_2 \rho(h-2) \quad \text{pour } h \geq 1
+\]
+avec $\rho(0) = 1$ et $\rho(1) = \dfrac{\varphi_1}{1 - \varphi_2}$.
+\end{frame}
+
+\begin{frame}{Représentation MA($\infty$) de l'AR(2)}
+Si le processus AR(2) est asymptotiquement stationnaire, alors il admet une représentation MA($\infty$) :
+\[
+Y_t = \mu + \sum_{i=0}^{\infty} \psi_i \varepsilon_{t-i} = \mu + \psi(L) \varepsilon_t
+\]
+
+Pour identifier $\psi(L)$ et $\mu$, il « suffit » d'inverser le polynôme retard. L'AR(2) s'écrit :
+\[
+\phi(L) Y_t = c + \varepsilon_t \quad \Rightarrow \quad Y_t = \phi(L)^{-1} c + \phi(L)^{-1} \varepsilon_t
+\]
+
+Appliquer un opérateur retard à une constante ne change rien, donc $\phi(L)^{-1} c = \phi(1)^{-1} c$.
+
+Par identification :
+\[
+\mu = \frac{c}{1 - \varphi_1 - \varphi_2}
+\]
+(l'espérance de $Y_t$, comme attendu).
+\end{frame}
+
+\begin{frame}{Calcul des coefficients $\psi_i$ (1/2)}
+On doit avoir $\psi(L) = \phi(L)^{-1}$, c'est-à-dire $\phi(L) \psi(L) = 1$ :
+\[
+(1 - \varphi_1 L - \varphi_2 L^2) \sum_{i=0}^{\infty} \psi_i L^i = 1
+\]
+
+En développant et regroupant par puissances de $L$ :
+\[
+\sum_{i=0}^{\infty} \psi_i L^i - \varphi_1 \sum_{i=0}^{\infty} \psi_i L^{i+1} - \varphi_2 \sum_{i=0}^{\infty} \psi_i L^{i+2} = 1
+\]
+
+Soit :
+\[
+\sum_{i=0}^{\infty} (\psi_i - \varphi_1 \psi_{i-1} - \varphi_2 \psi_{i-2}) L^i = 1
+\]
+avec la convention $\psi_{-1} = \psi_{-2} = 0$.
+\end{frame}
+
+\begin{frame}{Calcul des coefficients $\psi_i$ (2/2)}
+Par identification des coefficients :
+\[
+\begin{cases}
+\psi_0 = 1 \\
+\psi_1 - \varphi_1 \psi_0 = 0 \quad \Rightarrow \quad \psi_1 = \varphi_1 \\
+\psi_2 - \varphi_1 \psi_1 - \varphi_2 \psi_0 = 0 \quad \Rightarrow \quad \psi_2 = \varphi_1^2 + \varphi_2 \\
+\vdots
+\end{cases}
+\]
+
+\textbf{Récurrence générale :}
+\[
+\boxed{\psi_i = \varphi_1 \psi_{i-1} + \varphi_2 \psi_{i-2} \quad \text{pour } i \geq 2}
+\]
+avec $\psi_0 = 1$ et $\psi_1 = \varphi_1$.
+
+\vspace{0.3cm}
+
+On peut résoudre ce système récursivement : la deuxième équation donne $\psi_1$, la troisième donne $\psi_2$, etc.
+\end{frame}
+
+\begin{frame}{Résumé AR(2)}
+\begin{itemize}
+\item L'AR(2) se définit par $Y_t = \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \varepsilon_t$
+\item \textbf{Conditions de stabilité} (triangle) :
+\[
+\varphi_2 > -1, \quad \varphi_2 < 1 - \varphi_1, \quad \varphi_2 < 1 + \varphi_1
+\]
+\item L'espérance (avec constante $c$) est $\mu = \dfrac{c}{1 - \varphi_1 - \varphi_2}$
+\item La variance et les autocovariances se calculent via les \textbf{équations de Yule-Walker}
+\item La fonction d'autocovariance vérifie $\gamma(h) = \varphi_1 \gamma(h-1) + \varphi_2 \gamma(h-2)$
+\item Sous stationnarité, l'AR(2) admet une représentation \textbf{MA($\infty$)}
+\item Les racines complexes du polynôme caractéristique engendrent des \textbf{cycles}
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle AR($p$)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Définition de l'AR($p$)}
+\begin{block}{Définition}
+Soit $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$. Le processus stochastique $(Y_t, t \in \Z)$ est un processus \textbf{autorégressif d'ordre $p$} si :
+\[
+Y_t = c + \sum_{i=1}^{p} \varphi_i Y_{t-i} + \varepsilon_t
+\]
+avec $c$ et $(\varphi_i)_{i=1}^{p}$ des paramètres réels.
+\end{block}
+
+\vspace{0.3cm}
+
+Le processus est \textbf{asymptotiquement stationnaire au second ordre} si :
+\begin{itemize}
+\item Les racines du polynôme retard $\phi(z) = 1 - \varphi_1 z - \varphi_2 z^2 - \cdots - \varphi_p z^p$ sont $> 1$ en module
+\item Ou de façon équivalente : les racines du polynôme caractéristique $\chi(\lambda) = \lambda^p - \varphi_1 \lambda^{p-1} - \cdots - \varphi_p$ sont $< 1$ en module
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Remarque sur les conditions de stabilité}
+\begin{alertblock}{Important}
+Il n'est plus possible d'obtenir de façon générale des restrictions \textbf{explicites} sur les paramètres autorégressifs pour assurer la stabilité du processus AR($p$).
+
+\vspace{0.2cm}
+
+Il faut vérifier \textbf{au cas par cas} en calculant les racines du polynôme retard (ou du polynôme caractéristique).
+\end{alertblock}
+
+\vspace{0.3cm}
+
+Pour $p = 1$ : condition simple $|\varphi_1| < 1$.
+
+Pour $p = 2$ : triangle de stationnarité (conditions explicites sur $\varphi_1$ et $\varphi_2$).
+
+Pour $p \geq 3$ : pas de formule générale simple.
+\end{frame}
+
+\begin{frame}{Espérance de l'AR($p$)}
+Sous l'hypothèse de stationnarité au second ordre, calculons l'espérance.
+
+\vspace{0.3cm}
+
+\[
+Y_t = c + \varphi_1 Y_{t-1} + \varphi_2 Y_{t-2} + \cdots + \varphi_p Y_{t-p} + \varepsilon_t
+\]
+
+En prenant l'espérance :
+\[
+\E[Y_t] = c + \varphi_1 \E[Y_{t-1}] + \varphi_2 \E[Y_{t-2}] + \cdots + \varphi_p \E[Y_{t-p}]
+\]
+
+Sous stationnarité, $\E[Y_t] = \mu$ pour tout $t$, donc :
+\[
+\mu = c + \varphi_1 \mu + \cdots + \varphi_p \mu = c + \mu \sum_{i=1}^{p} \varphi_i
+\]
+
+D'où :
+\[
+\boxed{\mu = \frac{c}{1 - \varphi_1 - \varphi_2 - \cdots - \varphi_p}}
+\]
+\end{frame}
+
+\begin{frame}{Autocovariance de l'AR($p$) : processus centré}
+Centrons le processus en définissant $\tilde{Y}_t = Y_t - \mu$. On montre que :
+\[
+\tilde{Y}_t = \varphi_1 \tilde{Y}_{t-1} + \varphi_2 \tilde{Y}_{t-2} + \cdots + \varphi_p \tilde{Y}_{t-p} + \varepsilon_t
+\]
+
+L'autocovariance d'ordre $h$ est $\gamma(h) = \E[\tilde{Y}_t \tilde{Y}_{t-h}]$.
+
+\vspace{0.3cm}
+
+Pour tout $h \geq 0$ :
+\[
+\tilde{Y}_t \tilde{Y}_{t-h} = \varphi_1 \tilde{Y}_{t-1} \tilde{Y}_{t-h} + \cdots + \varphi_p \tilde{Y}_{t-p} \tilde{Y}_{t-h} + \varepsilon_t \tilde{Y}_{t-h}
+\]
+
+En prenant l'espérance :
+\[
+\gamma(h) = \varphi_1 \gamma(h-1) + \varphi_2 \gamma(h-2) + \cdots + \varphi_p \gamma(h-p) + \E[\varepsilon_t \tilde{Y}_{t-h}]
+\]
+
+avec $\E[\varepsilon_t \tilde{Y}_{t-h}] = \sigma^2$ si $h = 0$, et $0$ sinon (innovation).
+\end{frame}
+
+\begin{frame}{Équations de Yule-Walker pour l'AR($p$)}
+On obtient la fonction d'autocovariance en résolvant le système linéaire :
+\[
+\begin{cases}
+\gamma(0) = \varphi_1 \gamma(1) + \varphi_2 \gamma(2) + \cdots + \varphi_p \gamma(p) + \sigma^2 \\
+\gamma(1) = \varphi_1 \gamma(0) + \varphi_2 \gamma(1) + \cdots + \varphi_p \gamma(p-1) \\
+\gamma(2) = \varphi_1 \gamma(1) + \varphi_2 \gamma(0) + \cdots + \varphi_p \gamma(p-2) \\
+\vdots \\
+\gamma(p) = \varphi_1 \gamma(p-1) + \varphi_2 \gamma(p-2) + \cdots + \varphi_p \gamma(0)
+\end{cases}
+\]
+
+Les termes suivants sont obtenus par \textbf{récurrence} :
+\[
+\gamma(h) = \varphi_1 \gamma(h-1) + \varphi_2 \gamma(h-2) + \cdots + \varphi_p \gamma(h-p) \quad \text{pour } h > p
+\]
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Inversibilité des processus MA}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Du MA vers l'AR : inversibilité}
+Nous avons montré qu'on peut réécrire un processus AR comme un MA($\infty$) si les racines du polynôme retard sont $> 1$ en module.
+
+\vspace{0.3cm}
+
+\begin{block}{Question}
+Est-il possible de faire le chemin inverse ? C'est-à-dire d'écrire un processus MA sous la forme d'un AR($\infty$) ?
+\end{block}
+
+\vspace{0.3cm}
+
+La réponse est \textbf{oui}, sous certaines conditions.
+\end{frame}
+
+\begin{frame}{Exemple : inversibilité du MA(1) (1/2)}
+Supposons que $(Y_t, t \in \Z)$ soit un MA(1) :
+\[
+Y_t = \varepsilon_t + \theta \varepsilon_{t-1}
+\]
+avec $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$.
+
+\vspace{0.3cm}
+
+En $t-1$ : $Y_{t-1} = \varepsilon_{t-1} + \theta \varepsilon_{t-2}$, donc $\varepsilon_{t-1} = Y_{t-1} - \theta \varepsilon_{t-2}$.
+
+En substituant dans l'équation du MA(1) :
+\[
+Y_t = \varepsilon_t + \theta Y_{t-1} - \theta^2 \varepsilon_{t-2}
+\]
+
+En $t-2$ : $\varepsilon_{t-2} = Y_{t-2} - \theta \varepsilon_{t-3}$. En substituant :
+\[
+Y_t = \varepsilon_t + \theta Y_{t-1} - \theta^2 Y_{t-2} + \theta^3 \varepsilon_{t-3}
+\]
+\end{frame}
+
+\begin{frame}{Exemple : inversibilité du MA(1) (2/2)}
+Si $|\theta| < 1$, on peut continuer ainsi indéfiniment :
+\[
+Y_t = \sum_{i=1}^{\infty} (-\theta)^i Y_{t-i} + \varepsilon_t
+\]
+
+C'est un processus \textbf{AR($\infty$)} !
+
+\vspace{0.3cm}
+
+Implicitement, nous avons inversé le polynôme retard $\theta(L) = 1 + \theta L$.
+
+\vspace{0.5cm}
+
+\begin{block}{Condition d'inversibilité}
+Pour que cela soit possible (plus généralement pour un MA($q$)), il faut que toutes les racines du polynôme $\theta(z) = 1 + \theta_1 z + \cdots + \theta_q z^q$ soient $> 1$ en module.
+\end{block}
+\end{frame}
+
+\begin{frame}{Définition de l'inversibilité}
+\begin{block}{Définition}
+Un processus MA($q$) est dit \textbf{inversible} s'il est possible de le réécrire sous la forme d'un AR($\infty$).
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Condition d'inversibilité}
+Le processus MA($q$) défini par :
+\[
+Y_t = \varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q} = \theta(L) \varepsilon_t
+\]
+est inversible si et seulement si les racines du polynôme $\theta(z) = 1 + \theta_1 z + \cdots + \theta_q z^q$ sont $> 1$ en module.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+\begin{block}{Remarque}
+Un modèle MA est \textbf{toujours causal} (par construction). Un modèle AR est \textbf{toujours inversible} (par construction).
+\end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Le modèle ARMA($p$,$q$)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Motivation : somme de deux AR(1)}
+Soient $(Y_t, t \in \Z)$ et $(X_t, t \in \Z)$ deux processus AR(1) :
+\[
+Y_t = \varphi_Y Y_{t-1} + \varepsilon_{Y,t}, \quad X_t = \varphi_X X_{t-1} + \varepsilon_{X,t}
+\]
+avec $|\varphi_Y| < 1$, $|\varphi_X| < 1$, $(\varepsilon_{Y,t})$ et $(\varepsilon_{X,t})$ des bruits blancs indépendants.
+
+\vspace{0.3cm}
+
+Définissons $Z_t = X_t + Y_t$. Est-ce que $(Z_t)$ est un processus AR ?
+
+\vspace{0.3cm}
+
+\textbf{Réponse : Non !}
+
+\vspace{0.3cm}
+
+En utilisant les polynômes retard et après calculs (voir notes), on montre que :
+\[
+Z_t - (\varphi_X + \varphi_Y) Z_{t-1} + \varphi_X \varphi_Y Z_{t-2} = S_t
+\]
+où $S_t$ est un processus MA(1).
+\end{frame}
+
+\begin{frame}{La somme de deux AR(1) est un ARMA(2,1)}
+Après calculs, on montre que $S_t = \varepsilon_{X,t} + \varepsilon_{Y,t} - \varphi_X \varepsilon_{Y,t-1} - \varphi_Y \varepsilon_{X,t-1}$ a la structure d'un MA(1).
+
+\vspace{0.3cm}
+
+En effet, on peut vérifier que :
+\begin{itemize}
+\item $\gamma_S(0) = (1 + \varphi_Y^2) \sigma_X^2 + (1 + \varphi_X^2) \sigma_Y^2$
+\item $\gamma_S(1) = -\varphi_X \sigma_Y^2 - \varphi_Y \sigma_X^2$
+\item $\gamma_S(h) = 0$ pour $|h| > 1$
+\end{itemize}
+
+C'est bien la structure d'un MA(1) : $S_t = \eta_t - \theta \eta_{t-1}$.
+
+\vspace{0.3cm}
+
+\textbf{Conclusion :} La somme des deux AR(1) s'écrit :
+\[
+Z_t = \varphi_1 Z_{t-1} + \varphi_2 Z_{t-2} + \eta_t - \theta \eta_{t-1}
+\]
+
+C'est un processus \textbf{ARMA(2,1)} : deux retards sur la partie AR, un retard sur la partie MA.
+\end{frame}
+
+\begin{frame}{Définition du processus ARMA($p$,$q$)}
+\begin{block}{Définition}
+Le processus $(Y_t, t \in \Z)$ est un processus \textbf{ARMA($p$,$q$)} s'il est défini par :
+\[
+Y_t = c + \varphi_1 Y_{t-1} + \cdots + \varphi_p Y_{t-p} + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q}
+\]
+avec $(\varepsilon_t, t \in \Z) \sim BB(0, \sigma^2)$ et $c$, $(\varphi_i)$, $(\theta_j)$ des paramètres réels.
+\end{block}
+
+\vspace{0.3cm}
+
+\textbf{Écriture avec polynômes retard :}
+\[
+\phi(L) Y_t = c + \theta(L) \varepsilon_t
+\]
+avec $\phi(L) = 1 - \varphi_1 L - \cdots - \varphi_p L^p$ et $\theta(L) = 1 + \theta_1 L + \cdots + \theta_q L^q$.
+\end{frame}
+
+\begin{frame}{Condition de représentation minimale}
+\begin{alertblock}{Hypothèse importante}
+On suppose que les racines des polynômes $\phi(z)$ et $\theta(z)$ sont \textbf{distinctes}, de façon à assurer que la représentation ARMA soit \textbf{minimale}.
+\end{alertblock}
+
+\vspace{0.3cm}
+
+\textbf{Exemple de représentation non minimale :}
+\[
+Y_t - a Y_{t-1} = \varepsilon_t - a \varepsilon_{t-1}
+\]
+
+Cela semble être un ARMA(1,1), mais en fait :
+\[
+(1 - aL) Y_t = (1 - aL) \varepsilon_t
+\]
+
+Les deux polynômes retard ont la même racine ! En simplifiant :
+\[
+Y_t = \varepsilon_t
+\]
+
+C'est simplement un \textbf{bruit blanc}.
+\end{frame}
+
+\begin{frame}{Stationnarité et inversibilité}
+\begin{block}{Stationnarité}
+Le processus ARMA($p$,$q$) est \textbf{asymptotiquement stationnaire au second ordre} si et seulement si les racines de $\phi(z)$ sont $> 1$ en module.
+
+(Condition sur la partie AR uniquement)
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{block}{Inversibilité}
+Le processus ARMA($p$,$q$) est \textbf{inversible} (on peut le réécrire sous forme AR($\infty$)) si et seulement si les racines de $\theta(z)$ sont $> 1$ en module.
+
+(Condition sur la partie MA uniquement)
+\end{block}
+
+\vspace{0.3cm}
+
+Un processus ARMA peut être stationnaire sans être inversible, et vice versa.
+\end{frame}
+
+\begin{frame}{Espérance de l'ARMA($p$,$q$)}
+Sous l'hypothèse de stationnarité, calculons l'espérance.
+
+\vspace{0.3cm}
+
+En prenant l'espérance de l'équation définissant le processus :
+\[
+\E[Y_t] = c + \varphi_1 \E[Y_{t-1}] + \cdots + \varphi_p \E[Y_{t-p}] + \E[\varepsilon_t] + \theta_1 \E[\varepsilon_{t-1}] + \cdots
+\]
+
+Sachant que $\E[\varepsilon_t] = 0$ et que l'espérance est constante :
+\[
+\mu = c + \varphi_1 \mu + \cdots + \varphi_p \mu
+\]
+
+D'où :
+\[
+\boxed{\mu = \frac{c}{1 - \varphi_1 - \cdots - \varphi_p}}
+\]
+
+L'espérance ne dépend que de la \textbf{partie AR} du modèle.
+\end{frame}
+
+\begin{frame}{Autocovariance : processus centré}
+Pour calculer la fonction d'autocovariance $\gamma(h) = \E[(Y_t - \mu)(Y_{t-h} - \mu)]$, on centre le processus.
+
+\vspace{0.3cm}
+
+On pose $\tilde{Y}_t = Y_t - \mu$. On peut montrer que :
+\[
+\tilde{Y}_t = \varphi_1 \tilde{Y}_{t-1} + \cdots + \varphi_p \tilde{Y}_{t-p} + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q}
+\]
+
+C'est le même modèle ARMA($p$,$q$) mais \textbf{sans constante}.
+
+\vspace{0.3cm}
+
+\textbf{Démonstration :} En substituant $\mu = c/(1 - \sum \varphi_i)$ dans l'équation originale et en simplifiant.
+\end{frame}
+
+\begin{frame}{Exemple détaillé : ARMA(1,1)}
+Soit le processus ARMA(1,1) :
+\[
+Y_t - \varphi Y_{t-1} = \xi + \varepsilon_t - \theta \varepsilon_{t-1}
+\]
+avec $|\varphi| < 1$, $|\theta| < 1$, $\varphi \neq \theta$.
+
+\vspace{0.3cm}
+
+\textbf{Espérance :}
+\[
+\mu = \frac{\xi}{1 - \varphi}
+\]
+
+\textbf{Processus centré :} $\tilde{Y}_t = Y_t - \mu$ vérifie :
+\[
+\tilde{Y}_t = \varphi \tilde{Y}_{t-1} + \varepsilon_t - \theta \varepsilon_{t-1}
+\]
+\end{frame}
+
+\begin{frame}{ARMA(1,1) : calcul de $\gamma(0)$ (1/2)}
+En multipliant l'équation centrée par $\tilde{Y}_t$ et en prenant l'espérance :
+\[
+\gamma(0) = \varphi \gamma(1) + \E[(\tilde{Y}_t) \varepsilon_t] - \theta \E[(\tilde{Y}_t) \varepsilon_{t-1}]
+\]
+
+\textbf{Calcul de $\E[\tilde{Y}_t \varepsilon_t]$ :}
+
+Puisque $\tilde{Y}_t = \varphi \tilde{Y}_{t-1} + \varepsilon_t - \theta \varepsilon_{t-1}$ :
+\[
+\E[\tilde{Y}_t \varepsilon_t] = \E[(\varphi \tilde{Y}_{t-1} + \varepsilon_t - \theta \varepsilon_{t-1}) \varepsilon_t] = \sigma^2
+\]
+car $\varepsilon_t$ est une innovation (orthogonale au passé de $Y$).
+\end{frame}
+
+\begin{frame}{ARMA(1,1) : calcul de $\gamma(0)$ (2/2)}
+\textbf{Calcul de $\E[\tilde{Y}_t \varepsilon_{t-1}]$ :}
+\begin{align*}
+\E[\tilde{Y}_t \varepsilon_{t-1}] &= \E[(\varphi \tilde{Y}_{t-1} + \varepsilon_t - \theta \varepsilon_{t-1}) \varepsilon_{t-1}] \\
+&= \varphi \E[\tilde{Y}_{t-1} \varepsilon_{t-1}] - \theta \sigma^2 \\
+&= \varphi \E[(\varphi \tilde{Y}_{t-2} + \varepsilon_{t-1} - \theta \varepsilon_{t-2}) \varepsilon_{t-1}] - \theta \sigma^2 \\
+&= \varphi \sigma^2 - \theta \sigma^2 = (\varphi - \theta) \sigma^2
+\end{align*}
+
+Ainsi :
+\[
+\boxed{\gamma(0) = \varphi \gamma(1) + \sigma^2 (1 + \theta^2 - \varphi \theta)}
+\]
+\end{frame}
+
+\begin{frame}{ARMA(1,1) : calcul de $\gamma(1)$}
+En multipliant l'équation centrée par $\tilde{Y}_{t-1}$ et en prenant l'espérance :
+\[
+\gamma(1) = \varphi \gamma(0) + \E[\tilde{Y}_{t-1} \varepsilon_t] - \theta \E[\tilde{Y}_{t-1} \varepsilon_{t-1}]
+\]
+
+\begin{itemize}
+\item $\E[\tilde{Y}_{t-1} \varepsilon_t] = 0$ car $\tilde{Y}_{t-1}$ ne dépend pas de $\varepsilon_t$
+\item $\E[\tilde{Y}_{t-1} \varepsilon_{t-1}] = \sigma^2$ (même calcul que précédemment)
+\end{itemize}
+
+Donc :
+\[
+\boxed{\gamma(1) = \varphi \gamma(0) - \theta \sigma^2}
+\]
+\end{frame}
+
+\begin{frame}{ARMA(1,1) : résolution du système}
+Nous avons le système :
+\[
+\begin{cases}
+\gamma(0) = \varphi \gamma(1) + \sigma^2 (1 + \theta^2 - \varphi \theta) \\
+\gamma(1) = \varphi \gamma(0) - \theta \sigma^2
+\end{cases}
+\]
+
+En substituant la deuxième équation dans la première :
+\[
+\gamma(0) = \varphi (\varphi \gamma(0) - \theta \sigma^2) + \sigma^2 (1 + \theta^2 - \varphi \theta)
+\]
+
+Soit :
+\[
+(1 - \varphi^2) \gamma(0) = \sigma^2 (1 + \theta^2 - 2\varphi \theta)
+\]
+
+D'où :
+\[
+\boxed{\gamma(0) = \sigma^2 \frac{\theta^2 - 2\varphi\theta + 1}{1 - \varphi^2}}
+\]
+\end{frame}
+
+\begin{frame}{ARMA(1,1) : fonction d'autocovariance complète}
+\begin{block}{Résultat}
+\[
+\begin{cases}
+\gamma(0) = \sigma^2 \dfrac{\theta^2 - 2\varphi\theta + 1}{1 - \varphi^2} \\[0.3cm]
+\gamma(1) = \varphi \gamma(0) - \theta \sigma^2 \\[0.3cm]
+\gamma(h) = \varphi \gamma(h-1) \quad \forall |h| > 1
+\end{cases}
+\]
+\end{block}
+
+\vspace{0.3cm}
+
+\textbf{Vérifications :}
+\begin{itemize}
+\item Si $\theta = 0$ : on retrouve la fonction d'autocovariance de l'AR(1)
+\item Si $\varphi = 0$ : on retrouve la fonction d'autocovariance du MA(1)
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{Propriété générale :} Dès que $h > q$ (l'ordre de la partie MA), le retour à zéro de $\gamma(h)$ est gouverné par la \textbf{partie AR} (dynamique géométrique).
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Résumé et comparaison}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Tableau récapitulatif}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+& \textbf{MA($q$)} & \textbf{AR($p$)} & \textbf{ARMA($p$,$q$)} \\
+\hline
+Stationnarité & Toujours & Racines $> 1$ & Racines AR $> 1$ \\
+\hline
+Inversibilité & Racines $> 1$ & Toujours & Racines MA $> 1$ \\
+\hline
+$\gamma(h) = 0$ pour & $h > q$ & Jamais & Jamais \\
+\hline
+Décroissance & Coupure & Géométrique & Géométrique \\
+de $\gamma(h)$ & nette & & (après $h > q$) \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Propriété clé}
+Pour un ARMA($p$,$q$), la dynamique de retour à zéro de l'autocovariance est gouvernée par la partie AR pour $h > q$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Résumé général}
+\begin{itemize}
+\item \textbf{MA($q$)} : autocorrélation nulle au-delà du rang $q$, toujours stationnaire
+\item \textbf{AR($p$)} : autocorrélation non nulle à tout ordre, décroissance géométrique
+\begin{itemize}
+\item Stationnaire si racines du polynôme retard $> 1$ en module
+\item Pour $p \geq 3$ : pas de condition explicite simple
+\end{itemize}
+\item \textbf{ARMA($p$,$q$)} : combine les deux structures
+\begin{itemize}
+\item Stationnarité : condition sur la partie AR
+\item Inversibilité : condition sur la partie MA
+\item Espérance : ne dépend que de la partie AR
+\item Autocovariance : système de Yule-Walker étendu
+\end{itemize}
+\item La \textbf{marche aléatoire} ($\varphi = 1$) : processus $I(1)$, non stationnaire
+\end{itemize}
+\end{frame}
+
+\end{document}
