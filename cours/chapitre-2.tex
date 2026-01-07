@@ -9,6 +9,8 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}
 \usepackage{bm}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 
 % Couleurs personnalisées
 \definecolor{darkblue}{RGB}{0,51,102}
@@ -170,6 +172,60 @@ On peut vérifier que $|\rho(1)| \leq \frac{1}{2}$ pour tout $\theta \in \R$.
 
 En effet, en étudiant la fonction $f(\theta) = \frac{-\theta}{1+\theta^2}$, on montre que son maximum est $\frac{1}{2}$ (atteint en $\theta = -1$) et son minimum est $-\frac{1}{2}$ (atteint en $\theta = 1$).
 \end{alertblock}
+\end{frame}
+
+\begin{frame}{Démonstration : $|\rho(1)| \leq \frac{1}{2}$}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+Soit $f(\theta) = \dfrac{-\theta}{1+\theta^2}$. Calculons les extrema.
+
+\vspace{0.2cm}
+
+$f'(\theta) = \dfrac{-(1+\theta^2) + \theta \cdot 2\theta}{(1+\theta^2)^2} = \dfrac{\theta^2 - 1}{(1+\theta^2)^2}$
+
+\vspace{0.2cm}
+
+\begin{itemize}
+\item $f'(\theta) = 0 \Leftrightarrow \theta = \pm 1$
+\item $f(-1) = \dfrac{1}{2}$ \quad (maximum)
+\item $f(1) = -\dfrac{1}{2}$ \quad (minimum)
+\item $\lim_{\theta \to \pm\infty} f(\theta) = 0$
+\end{itemize}
+
+\vspace{0.2cm}
+
+Donc $\boxed{-\frac{1}{2} \leq \rho(1) \leq \frac{1}{2}}$ pour tout $\theta \in \R$.
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=6.5cm,
+    height=5.5cm,
+    xlabel={$\theta$},
+    ylabel={$\rho(1)$},
+    xmin=-4, xmax=4,
+    ymin=-0.7, ymax=0.7,
+    grid=major,
+    grid style={gray!30},
+    axis lines=middle,
+    samples=100,
+    domain=-4:4,
+    thick,
+    legend pos=south east,
+    legend style={font=\small},
+]
+\addplot[blue, very thick] {-x/(1+x^2)};
+\addplot[red, dashed, thick] coordinates {(-4,0.5) (4,0.5)};
+\addplot[red, dashed, thick] coordinates {(-4,-0.5) (4,-0.5)};
+\addplot[only marks, mark=*, mark size=2pt, fill=darkblue] coordinates {(-1,0.5) (1,-0.5)};
+\node at (axis cs:-1.5,0.6) {\small $\theta=-1$};
+\node at (axis cs:1.5,-0.6) {\small $\theta=1$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}{Processus MA(1) centré}
