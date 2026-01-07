@@ -392,6 +392,80 @@ $\Rightarrow$ La fonction d'autocovariance d'un MA(2) est nulle au-delà du rang
 $\Rightarrow$ Le processus est stationnaire pour toute valeur de $(\theta_1, \theta_2)$.
 \end{frame}
 
+\begin{frame}{Autocorrélations du MA(2) : représentation graphique}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{center}
+\textbf{Autocorrélation d'ordre 1}
+
+$\rho(1) = \dfrac{-\theta_1 + \theta_1 \theta_2}{1 + \theta_1^2 + \theta_2^2}$
+
+\vspace{0.2cm}
+
+\begin{tikzpicture}
+\begin{axis}[
+    width=5.5cm,
+    height=5cm,
+    xlabel={$\theta_1$},
+    ylabel={$\theta_2$},
+    xmin=-2.2, xmax=2.2,
+    ymin=-1.2, ymax=1.2,
+    colormap/viridis,
+    colorbar,
+    colorbar style={ylabel={$\rho(1)$}, font=\small},
+    view={0}{90},
+    samples=50,
+    domain=-2:2,
+    y domain=-1:1,
+    unbounded coords=jump,
+]
+\addplot3[surf, shader=interp, point meta min=-0.5, point meta max=0.5]
+    {ifthenelse(and(and(y>-1, x+y<1), y-x<1), (-x+x*y)/(1+x^2+y^2), nan)};
+\draw[thick, dashed, black] (axis cs:-2,-1) -- (axis cs:0,1) -- (axis cs:2,-1) -- cycle;
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\textbf{Autocorrélation d'ordre 2}
+
+$\rho(2) = \dfrac{-\theta_2}{1 + \theta_1^2 + \theta_2^2}$
+
+\vspace{0.2cm}
+
+\begin{tikzpicture}
+\begin{axis}[
+    width=5.5cm,
+    height=5cm,
+    xlabel={$\theta_1$},
+    ylabel={$\theta_2$},
+    xmin=-2.2, xmax=2.2,
+    ymin=-1.2, ymax=1.2,
+    colormap/viridis,
+    colorbar,
+    colorbar style={ylabel={$\rho(2)$}, font=\small},
+    view={0}{90},
+    samples=50,
+    domain=-2:2,
+    y domain=-1:1,
+    unbounded coords=jump,
+]
+\addplot3[surf, shader=interp, point meta min=-0.5, point meta max=0.5]
+    {ifthenelse(and(and(y>-1, x+y<1), y-x<1), (-y)/(1+x^2+y^2), nan)};
+\draw[thick, dashed, black] (axis cs:-2,-1) -- (axis cs:0,1) -- (axis cs:2,-1) -- cycle;
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+
+\begin{center}
+\small Triangle d'inversibilité : $\theta_2 > -1$, $\theta_1 + \theta_2 < 1$, $\theta_2 - \theta_1 < 1$.
+\end{center}
+\end{frame}
 
 \begin{frame}{Le modèle MA(q)}
 \begin{block}{Définition}
