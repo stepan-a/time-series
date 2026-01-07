@@ -228,7 +228,7 @@ Donc $\boxed{-\frac{1}{2} \leq \rho(1) \leq \frac{1}{2}}$ pour tout $\theta \in 
 \end{columns}
 \end{frame}
 
-\begin{frame}{Processus MA(1) centré}
+\begin{frame}{Processus MA(1) non centré}
 \begin{block}{Définition}
 On peut ajouter une constante dans la définition :
 \[
@@ -236,7 +236,8 @@ Y_t = \mu + \varepsilon_t - \theta \varepsilon_{t-1}
 \]
 \end{block}
 
-Cela n'affecte que l'espérance, pas les moments d'ordre 2 :
+Cela n'affecte que l'espérance, pas les moments d'ordre 2 puisque nous ne faisons que rajouter une constante (déterministe):\newline
+
 \begin{itemize}
 \item $\E[Y_t] = \mu$
 \item $\Var[Y_t] = (1 + \theta^2) \sigma^2$ (inchangée)
@@ -281,19 +282,10 @@ La structure de dépendance du MA(1) est très limitée :
 \end{itemize}
 \end{block}
 
-\vspace{0.3cm}
+\vspace{0.7cm}
 
-La corrélation non nulle apparaît car deux $Y$ consécutifs ont une innovation $\varepsilon$ en commun.
+L'autocorrélation non nulle à l'ordre 1 apparaît car deux $Y$ consécutifs ont une innovation $\varepsilon$ en commun. Les couples de variables Y plus éloignées dans le temps ne partagent aucun $\varepsilon$.  
 
-\vspace{0.5cm}
-
-\begin{center}
-\textbf{Graphique de $\rho(1)$ en fonction de $\theta$ :}
-
-\vspace{0.3cm}
-
-$\rho(1) \in \left[-\frac{1}{2}, \frac{1}{2}\right]$ avec maximum en $\theta = -1$ et minimum en $\theta = 1$.
-\end{center}
 \end{frame}
 
 
