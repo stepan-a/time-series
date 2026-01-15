@@ -8,5 +8,6 @@
 
  - [[https://le-mans.adjemian.eu/séries-temporelles/introduction][Introduction]].
  - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-1.pdf][Chapitre 1]]. Processus stochastiques stationnaires.
+ - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-2.pdf][Chapitre 2]]. Modèle ARMA.
 
 \\
