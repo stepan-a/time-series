@@ -799,6 +799,44 @@ X_t = \sum_{i=0}^{\infty} a_i \varepsilon_{t-i}
 où $(\varepsilon_t, t \in \Z) \sim \text{BB}(0, \sigma^2)$ et $(a_i)$ est absolument sommable.
 \end{frame}
 
+\begin{frame}{Fonction d'autocovariance du processus $X$}
+\textbf{Calcul de $\gamma(h)$ :} Pour $h \geq 0$,
+\begin{align*}
+\gamma(h) &= \Cov(X_t, X_{t-h}) = \Cov\left( \sum_{i=0}^{\infty} a_i \varepsilon_{t-i}, \sum_{j=0}^{\infty} a_j \varepsilon_{t-h-j} \right) \\
+&= \sum_{i=0}^{\infty} \sum_{j=0}^{\infty} a_i a_j \Cov(\varepsilon_{t-i}, \varepsilon_{t-h-j})
+\end{align*}
+
+La covariance $\Cov(\varepsilon_{t-i}, \varepsilon_{t-h-j})$ est non nulle uniquement si $t-i = t-h-j$, i.e., $j = i - h$.
+
+\vspace{0.3cm}
+
+Donc pour $h \geq 0$ :
+\[
+\gamma(h) = \sigma^2 \sum_{i=h}^{\infty} a_i a_{i-h} = \sigma^2 \sum_{i=0}^{\infty} a_{i+h} a_i
+\]
+
+Par parité : $\gamma(-h) = \gamma(h)$.
+\end{frame}
+
+\begin{frame}{Sommabilité absolue de $\gamma(h)$}
+\begin{block}{Théorème}
+Si $(a_i)$ est absolument sommable, alors $\gamma(h)$ est absolument sommable.
+\end{block}
+
+\textbf{Démonstration :}
+\begin{align*}
+\sum_{h=-\infty}^{+\infty} |\gamma(h)| &= \sum_{h=-\infty}^{+\infty} \left| \sigma^2 \sum_{i=0}^{\infty} a_i a_{i+|h|} \right| \\
+&\leq \sigma^2 \sum_{h=-\infty}^{+\infty} \sum_{i=0}^{\infty} |a_i| |a_{i+|h|}|
+\end{align*}
+
+En échangeant les sommes et en posant $j = i + |h|$ :
+\[
+\sum_{h=-\infty}^{+\infty} |\gamma(h)| \leq \sigma^2 \sum_{i=0}^{\infty} |a_i| \sum_{j=0}^{\infty} |a_j| = \sigma^2 \left( \sum_{i=0}^{\infty} |a_i| \right)^2 < +\infty
+\]
+
+La fonction d'autocovariance doit donc converger suffisament rapidement vers zéro.
+\end{frame}
+
 \begin{frame}{Définition de la densité spectrale}
 \begin{block}{Définition}
 La \textbf{densité spectrale} du processus $(X_t, t \in \Z)$ est la fonction réelle définie par :
