@@ -1028,6 +1028,52 @@ La fonction d'autocovariance doit donc converger suffisament rapidement vers zé
 
 \end{frame}
 
+\begin{frame}{De la densité spectrale à l'autocovariance}
+
+\begin{itemize}
+
+\item On part de la définition et on intègre contre $e^{i\omega k}$ :
+  \[
+  \int_{-\pi}^{\pi} f(\omega) e^{i\omega k} \, d\omega = \frac{1}{2\pi} \int_{-\pi}^{\pi} \sum_{h=-\infty}^{+\infty} \gamma(h) e^{-i\omega h} e^{i\omega k} \, d\omega
+  \]\newline
+
+\item En intervertissant somme et intégrale :
+  \[
+  = \frac{1}{2\pi} \sum_{h=-\infty}^{+\infty} \gamma(h) \int_{-\pi}^{\pi} e^{i\omega (k-h)} \, d\omega
+  \]\newline
+
+\item Or $\int_{-\pi}^{\pi} e^{i\omega (k-h)} \, d\omega = 2\pi$ si $k = h$, et $0$ sinon (orthogonalité). Donc tous les termes s'annulent sauf celui où $h = k$ :
+  \[
+  \boxed{\gamma(k) = \int_{-\pi}^{\pi} f(\omega) e^{i\omega k} \, d\omega}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Orthogonalité des exponentielles complexes}
+
+\begin{itemize}
+
+\item Posons $n = k - h$ et calculons $\int_{-\pi}^{\pi} e^{in\omega} \, d\omega$ pour $n \neq 0$.\newline
+
+\item En utilisant $e^{in\omega} = \cos(n\omega) + i\sin(n\omega)$ :
+  \[
+  \int_{-\pi}^{\pi} \cos(n\omega) \, d\omega = \left[ \frac{\sin(n\omega)}{n} \right]_{-\pi}^{\pi} = \frac{\sin(n\pi) - \sin(-n\pi)}{n} = 0
+  \]
+  car $\sin(n\pi) = 0$ pour tout $n \in \Z^*$.\newline
+
+\item De même :
+  \[
+  \int_{-\pi}^{\pi} \sin(n\omega) \, d\omega = \left[ -\frac{\cos(n\omega)}{n} \right]_{-\pi}^{\pi} = -\frac{\cos(n\pi) - \cos(-n\pi)}{n} = 0
+  \]\newline
+
+\item Si $n = 0$ : $\int_{-\pi}^{\pi} e^{i \cdot 0 \cdot \omega} \, d\omega = \int_{-\pi}^{\pi} 1 \, d\omega = 2\pi$.
+
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}{Exemple : Densité spectrale d'un bruit blanc}
 
 \begin{itemize}
