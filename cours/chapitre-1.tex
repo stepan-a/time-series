@@ -1,25 +1,34 @@
-\documentclass[10pt,aspectratio=169]{beamer}
+\synctex=1
+\documentclass[11pt,aspectratio=169]{beamer}
 
-\usetheme{Madrid}
-\usecolortheme{default}
-
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[french]{babel}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage[french,provide=*]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{mathtools}
 \usepackage{bm}
 
-% Couleurs personnalisées
-\definecolor{darkblue}{RGB}{0,51,102}
-\definecolor{lightblue}{RGB}{230,240,250}
-\setbeamercolor{structure}{fg=darkblue}
-\setbeamercolor{block title}{bg=darkblue,fg=white}
-\setbeamercolor{block body}{bg=lightblue,fg=black}
+% Police serif pour les mathématiques
+\usefonttheme[onlymath]{serif}
+
+% Git hash
+\usepackage{xstring}
+\usepackage{catchfile}
+\immediate\write18{git rev-parse HEAD > git.hash}
+\CatchFileDef{\HEAD}{git.hash}{\endlinechar=-1}
+\newcommand{\gitrevision}{\StrLeft{\HEAD}{7}}
+
+\usepackage{ccicons}
+
+% Pied de page personnalisé
+\setbeamertemplate{footline}{
+  \hfill\vspace*{1pt}\href{https://creativecommons.org/publicdomain/zero/1.0/deed.fr}{\cczero}\enspace\href{https://github.com/stepan-a/time-series}{\gitrevision}\enspace--\enspace\insertframenumber/\inserttotalframenumber\enspace--\enspace\today\enspace}
+
+% Supprimer la barre de navigation
+\setbeamertemplate{navigation symbols}{}
 
 % Commandes personnalisées
 \newcommand{\E}{\mathbb{E}}
-\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Var}{\mathbb{V}}
 \newcommand{\Cov}{\mathrm{Cov}}
 \newcommand{\Corr}{\mathrm{Corr}}
 \newcommand{\R}{\mathbb{R}}
@@ -30,6 +39,15 @@
 \subtitle{Séries Temporelles}
 \author{}
 \date{}
+\institute{}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Plan}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
 
 \begin{document}
 
@@ -41,762 +59,849 @@
 \tableofcontents
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Introduction aux processus stochastiques}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Définition d'un processus stochastique}
-\begin{block}{Définition}
-Un \textbf{processus stochastique} est une suite de variables aléatoires réelles $\{X_t\}_{t \in \Z}$.
-\end{block}
 
-\vspace{0.5cm}
+\begin{itemize}
 
-Une \textbf{série temporelle} est une réalisation d'un processus stochastique.
+\item Un \textbf{processus stochastique} est une suite de variables aléatoires réelles $\{X_t\}_{t \in \Z}$.\newline
 
-\vspace{0.5cm}
+\item Une \textbf{série temporelle} est une réalisation d'un processus stochastique.\newline
 
-Pour caractériser complètement un processus stochastique, il faut spécifier la distribution jointe de $(X_{t_1}, X_{t_2}, \ldots, X_{t_n})$ pour tout $(t_1, t_2, \ldots, t_n) \in \Z^n$ et pour tout $n \in \N$, avec $t_i \neq t_j$ pour tout $i \neq j$.
+\item Pour caractériser complètement un processus stochastique, il faut spécifier la distribution jointe de $(X_{t_1}, X_{t_2}, \ldots, X_{t_n})$ pour tout $(t_1, t_2, \ldots, t_n) \in \Z^n$ et pour tout $n \in \N$, avec $t_i \neq t_j$ pour tout $i \neq j$.\newline
 
-\vspace{0.5cm}
+\item Il faut énormément d'information pour définir complètement un processus stochastique.
 
-\textbf{Constat :} Il faut énormément d'information pour définir complètement un processus stochastique !
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Processus linéaires}
-\textbf{Problème de l'inférence :} Comment estimer les paramètres du processus stochastique à partir d'une seule réalisation (série temporelle) ?
 
-\vspace{0.5cm}
+\begin{itemize}
 
-Pour traiter ce problème, on se restreint aux \textbf{processus linéaires} : processus dont les distributions jointes sont caractérisées par les moments d'ordre 1 et 2 :
+\item \textbf{Problème de l'inférence :} Comment estimer les paramètres du processus stochastique à partir d'une seule réalisation (série temporelle) ?\newline
 
-\begin{align*}
-\mu_t &= \E[X_t] \\[0.3cm]
-\gamma(t,s) &= \Cov(X_t, X_s) = \E\left[(X_t - \mu_t)(X_s - \mu_s)\right]
-\end{align*}
+\item Pour traiter ce problème, on se restreint aux \textbf{processus linéaires} : processus dont les distributions jointes sont caractérisées par les moments d'ordre 1 et 2 :
+  \[
+  \mu_t = \E[X_t]
+  \]
+  \[
+  \gamma(t,s) = \Cov(X_t, X_s) = \E\left[(X_t - \mu_t)(X_s - \mu_s)\right]
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Propriété de la fonction d'autocovariance}
-\begin{block}{Exercice}
-Montrer que $\gamma(t,s) = \E[X_t X_s] - \mu_t \mu_s$
-\end{block}
 
-\textbf{Démonstration :}
-\begin{align*}
-\gamma(t,s) &= \E\left[(X_t - \mu_t)(X_s - \mu_s)\right] \\
-&= \E\left[X_t X_s - X_t \mu_s - \mu_t X_s + \mu_t \mu_s\right] \\
-&= \E[X_t X_s] - \E[X_t]\mu_s - \mu_t \E[X_s] + \mu_t \mu_s \\
-&= \E[X_t X_s] - \mu_t \mu_s - \mu_t \mu_s + \mu_t \mu_s \\
-&= \E[X_t X_s] - \mu_t \mu_s \quad \square
-\end{align*}
+\begin{itemize}
+
+\item \textbf{Exercice :} Montrer que $\gamma(t,s) = \E[X_t X_s] - \mu_t \mu_s$.\newline
+
+\item Démonstration :
+  \begin{align*}
+  \gamma(t,s) &= \E\left[(X_t - \mu_t)(X_s - \mu_s)\right] \\
+  &= \E\left[X_t X_s - X_t \mu_s - \mu_t X_s + \mu_t \mu_s\right] \\
+  &= \E[X_t X_s] - \E[X_t]\mu_s - \mu_t \E[X_s] + \mu_t \mu_s \\
+  &= \E[X_t X_s] - \mu_t \mu_s - \mu_t \mu_s + \mu_t \mu_s \\
+  &= \E[X_t X_s] - \mu_t \mu_s \quad \square
+  \end{align*}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Le problème de l'estimation avec une seule réalisation}
-\textbf{Exemple industriel :} Supposons qu'un processus stochastique décrit le diamètre d'un câble sortant d'une machine à intervalles réguliers (chaque mètre).
 
-\vspace{0.3cm}
+\begin{itemize}
 
-Une série temporelle = mesures sur un câble de 1 km (1000 observations).
+\item \textbf{Exemple industriel :} Supposons qu'un processus stochastique décrit le diamètre d'un câble sortant d'une machine à intervalles réguliers (chaque mètre).\newline
 
-\vspace{0.3cm}
+\item Une série temporelle = mesures sur un câble de 1 km (1000 observations).\newline
 
-Si l'on fabrique $K$ câbles avec la même machine, on peut estimer $\mu_t$ :
-\[
-\hat{\mu}_t = \frac{1}{K} \sum_{j=1}^{K} X_t^{(j)}
-\]
-où $X_t^{(j)}$ est le diamètre du câble $j$ au $t$-ème mètre.
+\item Si l'on fabrique $K$ câbles avec la même machine, on peut estimer $\mu_t$ :
+  \[
+  \hat{\mu}_t = \frac{1}{K} \sum_{j=1}^{K} X_t^{(j)}
+  \]
+  où $X_t^{(j)}$ est le diamètre du câble $j$ au $t$-ème mètre.\newline
 
-\vspace{0.3cm}
+\item \textbf{Problème pour l'économiste :} On n'observe qu'une seule série temporelle pour le PIB... On ne peut pas « remonter le temps » pour obtenir une nouvelle réalisation.
 
-\textbf{Problème pour l'économiste :} On n'observe qu'une seule série temporelle pour le PIB... On ne peut pas « remonter le temps » pour obtenir une nouvelle réalisation !
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Stationnarité}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Définition de la stationnarité (au sens strict)}
-\begin{block}{Définition}
-Le processus stochastique $(X_t, t \in \Z)$ est \textbf{stationnaire} si et seulement si la distribution jointe de $(X_{t_1}, X_{t_2}, \ldots, X_{t_n})$ est identique à la distribution jointe de $(X_{t_1+h}, X_{t_2+h}, \ldots, X_{t_n+h})$ pour tout $(t_1, t_2, \ldots, t_n) \in \Z^n$, pour tout $n \in \N$, pour tout $h \in \Z$, avec $t_i \neq t_j$ pour $i \neq j$.
-\end{block}
 
-\vspace{0.5cm}
+\begin{itemize}
 
-$\Rightarrow$ La distribution jointe est \textbf{invariante dans le temps}.
+\item Le processus stochastique $(X_t, t \in \Z)$ est \textbf{stationnaire} si et seulement si la distribution jointe de $(X_{t_1}, X_{t_2}, \ldots, X_{t_n})$ est identique à la distribution jointe de $(X_{t_1+h}, X_{t_2+h}, \ldots, X_{t_n+h})$ pour tout $(t_1, t_2, \ldots, t_n) \in \Z^n$, pour tout $n \in \N$, pour tout $h \in \Z$, avec $t_i \neq t_j$ pour $i \neq j$.\newline
 
-\vspace{0.5cm}
+\item La distribution jointe est \textbf{invariante dans le temps}.\newline
 
-Pour les processus linéaires, nous n'avons pas besoin d'une définition si générale.
+\item Pour les processus linéaires, nous n'avons pas besoin d'une définition si générale.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Stationnarité au second ordre}
-\begin{block}{Définition}
-Le processus stochastique $(X_t, t \in \Z)$ est dit \textbf{stationnaire au second ordre} si et seulement si ses moments d'ordre 1 et 2 sont invariants :
-\begin{align*}
-\E[X_t] &= \mu \quad \forall t \\
-\Var[X_t] &= \gamma_0 \quad \forall t \\
-\Cov(X_t, X_s) &= \gamma(t-s)
-\end{align*}
-\end{block}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\begin{alertblock}{Remarque importante}
-Un processus stochastique $(X_t, t \in \Z)$ stationnaire au second ordre appartient à l'espace des variables aléatoires de carré intégrable $(L_2)$. La norme dans cet espace est définie par :
-\[
-\|X\| = \sqrt{\E[X^2]}
-\]
-\end{alertblock}
+\item Le processus stochastique $(X_t, t \in \Z)$ est dit \textbf{stationnaire au second ordre} si et seulement si ses moments d'ordre 1 et 2 sont invariants :
+  \[
+  \E[X_t] = \mu \quad \forall t
+  \]
+  \[
+  \Var[X_t] = \gamma_0 \quad \forall t
+  \]
+  \[
+  \Cov(X_t, X_s) = \gamma(t-s)
+  \]\newline
+
+\item Un processus stochastique $(X_t, t \in \Z)$ stationnaire au second ordre appartient à l'espace des variables aléatoires de carré intégrable $(L_2)$. La norme dans cet espace est définie par :
+  \[
+  \|X\| = \sqrt{\E[X^2]}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Conséquences de la stationnarité au second ordre}
-\begin{block}{Remarque}
-Si le processus est stationnaire au second ordre, alors :
-\[
-\Cov(X_t, X_{t-h}) = \gamma(h) \quad \forall t
-\]
-La covariance ne dépend pas du temps mais seulement de la \textbf{distance} $h$ entre $X_t$ et $X_s$.
-\end{block}
 
-\vspace{0.5cm}
+\begin{itemize}
 
-En nous restreignant aux processus stochastiques stationnaires, nous avons considérablement diminué le nombre de paramètres à estimer !
+\item Si le processus est stationnaire au second ordre, alors :
+  \[
+  \Cov(X_t, X_{t-h}) = \gamma(h) \quad \forall t
+  \]
+  La covariance ne dépend pas du temps mais seulement de la \textbf{distance} $h$ entre $X_t$ et $X_s$.\newline
 
-\vspace{0.5cm}
+\item En nous restreignant aux processus stochastiques stationnaires, nous avons considérablement diminué le nombre de paramètres à estimer.\newline
 
-Mais pour pouvoir effectivement estimer les paramètres (par exemple l'espérance), il faut aussi que le processus soit \textbf{ergodique}.
+\item Mais pour pouvoir effectivement estimer les paramètres (par exemple l'espérance), il faut aussi que le processus soit \textbf{ergodique}.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Ergodicité : intuition}
-Le concept d'ergodicité est techniquement difficile, mais l'idée intuitive est que des variables aléatoires doivent être d'autant moins corrélées qu'elles sont éloignées dans le temps.
 
-\vspace{0.5cm}
+\begin{itemize}
 
-Si on utilise une moyenne empirique pour estimer l'espérance :
-\[
-\bar{X}_n = \frac{1}{n} \sum_{t=1}^{n} X_t
-\]
+\item Le concept d'ergodicité est techniquement difficile, mais l'idée intuitive est que des variables aléatoires doivent être d'autant moins corrélées qu'elles sont éloignées dans le temps.\newline
 
-alors $\E[\bar{X}_n] = \mu$ (sans biais) et surtout $\Var[\bar{X}_n] \xrightarrow[n \to \infty]{} 0$, assurant la convergence de $\bar{X}_n$ vers $\mu$.
+\item Si on utilise une moyenne empirique pour estimer l'espérance :
+  \[
+  \bar{X}_n = \frac{1}{n} \sum_{t=1}^{n} X_t
+  \]
+  alors $\E[\bar{X}_n] = \mu$ (sans biais) et surtout $\Var[\bar{X}_n] \xrightarrow[n \to \infty]{} 0$, assurant la convergence de $\bar{X}_n$ vers $\mu$.\newline
 
-\vspace{0.5cm}
+\item \textbf{Question clé :} Sous quelles conditions sur $\gamma(h)$ a-t-on $\Var[\bar{X}_n] \to 0$ ?
 
-\textbf{Question clé :} Sous quelles conditions sur $\gamma(h)$ a-t-on $\Var[\bar{X}_n] \to 0$ ?
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Variance de la moyenne empirique (1/4)}
-Calculons la variance de $\bar{X}_n = \frac{1}{n} \sum_{t=1}^{n} X_t$ :
-\begin{align*}
-\Var[\bar{X}_n] &= \Var\left[\frac{1}{n} \sum_{t=1}^{n} X_t\right] = \frac{1}{n^2} \Var\left[\sum_{t=1}^{n} X_t\right]
-\end{align*}
 
-En développant la variance de la somme :
-\begin{align*}
-\Var\left[\sum_{t=1}^{n} X_t\right] &= \E\left[\left(\sum_{t=1}^{n} (X_t - \mu)\right)^2\right] = \E\left[\sum_{t=1}^{n} \sum_{s=1}^{n} (X_t - \mu)(X_s - \mu)\right] \\
-&= \sum_{t=1}^{n} \sum_{s=1}^{n} \E[(X_t - \mu)(X_s - \mu)] = \sum_{t=1}^{n} \sum_{s=1}^{n} \Cov(X_t, X_s)
-\end{align*}
+\begin{itemize}
 
-Par stationnarité, $\Cov(X_t, X_s) = \gamma(t-s)$, donc :
-\[
-\Var\left[\sum_{t=1}^{n} X_t\right] = \sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s)
-\]
+\item Calculons la variance de $\bar{X}_n = \frac{1}{n} \sum_{t=1}^{n} X_t$ :
+  \[
+  \Var[\bar{X}_n] = \Var\left[\frac{1}{n} \sum_{t=1}^{n} X_t\right] = \frac{1}{n^2} \Var\left[\sum_{t=1}^{n} X_t\right]
+  \]\newline
+
+\item En développant la variance de la somme :
+  \begin{align*}
+  \Var\left[\sum_{t=1}^{n} X_t\right] &= \E\left[\left(\sum_{t=1}^{n} (X_t - \mu)\right)^2\right] = \sum_{t=1}^{n} \sum_{s=1}^{n} \Cov(X_t, X_s)
+  \end{align*}\newline
+
+\item Par stationnarité, $\Cov(X_t, X_s) = \gamma(t-s)$, donc :
+  \[
+  \Var\left[\sum_{t=1}^{n} X_t\right] = \sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s)
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Variance de la moyenne empirique (2/4)}
-On a $\displaystyle\Var\left[\sum_{t=1}^{n} X_t\right] = \sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s)$.
 
-\vspace{0.2cm}
-
-Posons $h = t - s$. Pour chaque valeur de $h \in \{-(n-1), \ldots, n-1\}$, comptons le nombre de couples $(t,s)$ tels que $t - s = h$ :
 \begin{itemize}
-\item Si $h = 0$ : les couples $(1,1), (2,2), \ldots, (n,n)$ $\Rightarrow$ $n$ termes
-\item Si $h = 1$ : les couples $(2,1), (3,2), \ldots, (n,n-1)$ $\Rightarrow$ $n-1$ termes
-\item Si $h = -1$ : les couples $(1,2), (2,3), \ldots, (n-1,n)$ $\Rightarrow$ $n-1$ termes
-\item Plus généralement, pour $h \in \{-(n-1), \ldots, n-1\}$ : $n - |h|$ termes
+
+\item On a $\displaystyle\Var\left[\sum_{t=1}^{n} X_t\right] = \sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s)$.\newline
+
+\item Posons $h = t - s$. Pour chaque valeur de $h \in \{-(n-1), \ldots, n-1\}$, comptons le nombre de couples $(t,s)$ tels que $t - s = h$ :
+  \begin{itemize}
+    \item Si $h = 0$ : les couples $(1,1), (2,2), \ldots, (n,n)$ $\Rightarrow$ $n$ termes\newline
+    \item Si $h = 1$ : les couples $(2,1), (3,2), \ldots, (n,n-1)$ $\Rightarrow$ $n-1$ termes\newline
+    \item Plus généralement, pour $h \in \{-(n-1), \ldots, n-1\}$ : $n - |h|$ termes
+  \end{itemize}
+
+\item Donc :
+  \[
+  \sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s) = \sum_{h=-(n-1)}^{n-1} (n - |h|) \gamma(h)
+  \]
+
 \end{itemize}
 
-Donc :
-\[
-\sum_{t=1}^{n} \sum_{s=1}^{n} \gamma(t-s) = \sum_{h=-(n-1)}^{n-1} (n - |h|) \gamma(h)
-\]
 \end{frame}
 
 \begin{frame}{Variance de la moyenne empirique (3/4)}
-Nous avons donc :
-\[
-\Var[\bar{X}_n] = \frac{1}{n^2} \sum_{h=-(n-1)}^{n-1} (n - |h|) \gamma(h)
-\]
 
-En utilisant la parité $\gamma(h) = \gamma(-h)$, séparons le terme $h=0$ :
-\begin{align*}
-\Var[\bar{X}_n] &= \frac{1}{n^2} \left[ n\gamma(0) + \sum_{h=1}^{n-1} (n-h) \gamma(h) + \sum_{h=-(n-1)}^{-1} (n-|h|) \gamma(h) \right] \\
-&= \frac{1}{n^2} \left[ n\gamma(0) + \sum_{h=1}^{n-1} (n-h) \gamma(h) + \sum_{h=1}^{n-1} (n-h) \gamma(-h) \right] \\
-&= \frac{1}{n^2} \left[ n\gamma(0) + 2\sum_{h=1}^{n-1} (n-h) \gamma(h) \right]
-\end{align*}
+\begin{itemize}
 
-\[
-\boxed{\Var[\bar{X}_n] = \frac{\gamma(0)}{n} + \frac{2}{n} \sum_{h=1}^{n-1} \left(1 - \frac{h}{n}\right) \gamma(h)}
-\]
+\item Nous avons donc :
+  \[
+  \Var[\bar{X}_n] = \frac{1}{n^2} \sum_{h=-(n-1)}^{n-1} (n - |h|) \gamma(h)
+  \]\newline
+
+\item En utilisant la parité $\gamma(h) = \gamma(-h)$ :
+  \begin{align*}
+  \Var[\bar{X}_n] &= \frac{1}{n^2} \left[ n\gamma(0) + 2\sum_{h=1}^{n-1} (n-h) \gamma(h) \right]
+  \end{align*}\newline
+
+\item Résultat :
+  \[
+  \boxed{\Var[\bar{X}_n] = \frac{\gamma(0)}{n} + \frac{2}{n} \sum_{h=1}^{n-1} \left(1 - \frac{h}{n}\right) \gamma(h)}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Variance de la moyenne empirique (4/4)}
-\[
-\Var[\bar{X}_n] = \frac{\gamma(0)}{n} + \frac{2}{n} \sum_{h=1}^{n-1} \left(1 - \frac{h}{n}\right) \gamma(h)
-\]
 
-\textbf{Cas 1 (bruit blanc) :} Si $\gamma(h) = 0$ pour $h \neq 0$ :
-\[
-\Var[\bar{X}_n] = \frac{\gamma(0)}{n} = \frac{\sigma^2}{n} \xrightarrow[n \to \infty]{} 0 \quad \checkmark
-\]
+\begin{itemize}
 
-\textbf{Cas 2 (autocovariance constante) :} Si $\gamma(h) = c > 0$ pour tout $h$ :
-\begin{align*}
-\Var[\bar{X}_n] &= \frac{c}{n} + \frac{2}{n} \sum_{h=1}^{n-1} \left(1 - \frac{h}{n}\right) c = \frac{c}{n} + \frac{2c}{n} \left[ (n-1) - \frac{1}{n}\frac{(n-1)n}{2} \right] \\
-&= \frac{c}{n} + \frac{2c}{n} \left[ n - 1 - \frac{n-1}{2} \right] = \frac{c}{n} + \frac{2c}{n} \cdot \frac{n-1}{2} \xrightarrow[n \to \infty]{} c \neq 0 \quad \times
-\end{align*}
+\item \textbf{Cas 1 (bruit blanc) :} Si $\gamma(h) = 0$ pour $h \neq 0$ :
+  \[
+  \Var[\bar{X}_n] = \frac{\gamma(0)}{n} = \frac{\sigma^2}{n} \xrightarrow[n \to \infty]{} 0 \quad \checkmark
+  \]\newline
 
-$\Rightarrow$ La variance ne converge pas vers 0 : l'estimation est impossible !
+\item \textbf{Cas 2 (autocovariance constante) :} Si $\gamma(h) = c > 0$ pour tout $h$ :
+  \begin{align*}
+  \Var[\bar{X}_n] &= \frac{c}{n} + \frac{2c}{n} \left[ n - 1 - \frac{n-1}{2} \right] \xrightarrow[n \to \infty]{} c \neq 0 \quad \times
+  \end{align*}\newline
+
+\item La variance ne converge pas vers 0 : l'estimation est impossible.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Condition suffisante de convergence}
-\begin{block}{Théorème}
-Si la fonction d'autocovariance est \textbf{absolument sommable} :
-\[
-\sum_{h=-\infty}^{+\infty} |\gamma(h)| < +\infty
-\]
-alors $\Var[\bar{X}_n] \to 0$ quand $n \to \infty$.
-\end{block}
 
-\textbf{Démonstration :} Si $\sum_{h} |\gamma(h)| < \infty$, alors :
-\[
-\Var[\bar{X}_n] \leq \frac{1}{n} \sum_{h=-(n-1)}^{n-1} |\gamma(h)| \leq \frac{1}{n} \sum_{h=-\infty}^{+\infty} |\gamma(h)| \xrightarrow[n \to \infty]{} 0
-\]
+\begin{itemize}
 
-\vspace{0.3cm}
+\item Si la fonction d'autocovariance est \textbf{absolument sommable} :
+  \[
+  \sum_{h=-\infty}^{+\infty} |\gamma(h)| < +\infty
+  \]
+  alors $\Var[\bar{X}_n] \to 0$ quand $n \to \infty$.\newline
 
-\textbf{Remarque :} Cette condition implique que $\gamma(h) \to 0$ suffisamment vite quand $|h| \to \infty$. Elle est satisfaite par la plupart des modèles ARMA.
+\item Démonstration : Si $\sum_{h} |\gamma(h)| < \infty$, alors :
+  \[
+  \Var[\bar{X}_n] \leq \frac{1}{n} \sum_{h=-(n-1)}^{n-1} |\gamma(h)| \leq \frac{1}{n} \sum_{h=-\infty}^{+\infty} |\gamma(h)| \xrightarrow[n \to \infty]{} 0
+  \]\newline
+
+\item Cette condition implique que $\gamma(h) \to 0$ suffisamment vite quand $|h| \to \infty$. Elle est satisfaite par la plupart des modèles ARMA.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Comportement asymptotique de la variance}
-Quand $n \to \infty$, on peut montrer que :
-\[
-n \cdot \Var[\bar{X}_n] \xrightarrow[n \to \infty]{} \sum_{h=-\infty}^{+\infty} \gamma(h) = 2\pi f(0)
-\]
 
-où $f(\omega)$ est la densité spectrale du processus.
-
-\vspace{0.5cm}
-
-\begin{alertblock}{Interprétation}
 \begin{itemize}
-\item La quantité $\sum_{h} \gamma(h) = 2\pi f(0)$ est appelée \textbf{variance de long terme}.
-\item Si $\sum_{h} \gamma(h) > \gamma(0)$ : la dépendance positive augmente la variance de $\bar{X}_n$.
-\item Si $\sum_{h} \gamma(h) < \gamma(0)$ : la dépendance négative diminue la variance de $\bar{X}_n$.
+
+\item Quand $n \to \infty$, on peut montrer que :
+  \[
+  n \cdot \Var[\bar{X}_n] \xrightarrow[n \to \infty]{} \sum_{h=-\infty}^{+\infty} \gamma(h) = 2\pi f(0)
+  \]
+  où $f(\omega)$ est la densité spectrale du processus.\newline
+
+\item La quantité $\sum_{h} \gamma(h) = 2\pi f(0)$ est appelée \textbf{variance de long terme}.\newline
+
+\item Interprétation :
+  \begin{itemize}
+    \item Si $\sum_{h} \gamma(h) > \gamma(0)$ : la dépendance positive augmente la variance de $\bar{X}_n$.\newline
+    \item Si $\sum_{h} \gamma(h) < \gamma(0)$ : la dépendance négative diminue la variance de $\bar{X}_n$.
+  \end{itemize}
+
 \end{itemize}
-\end{alertblock}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Moments d'un processus stationnaire}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Fonction d'autocovariance}
-On note $\gamma : \Z \to \R$, $h \mapsto \gamma(h)$ la \textbf{fonction d'autocovariance} d'un processus stochastique stationnaire au second ordre.
 
-\vspace{0.5cm}
+\begin{itemize}
 
-\begin{block}{Propriétés}
-\begin{enumerate}
-\item $\gamma(0) = \Var[X_t] \geq 0$
-\item $\gamma(h) = \gamma(-h)$ \quad (parité)
-\item $|\gamma(h)| \leq \gamma(0)$ \quad pour tout $h$
-\item $\gamma$ est une fonction \textbf{positive} (au sens de la positivité définie)
-\end{enumerate}
-\end{block}
+\item On note $\gamma : \Z \to \R$, $h \mapsto \gamma(h)$ la \textbf{fonction d'autocovariance} d'un processus stochastique stationnaire au second ordre.\newline
+
+\item Propriétés :
+  \begin{enumerate}
+    \item $\gamma(0) = \Var[X_t] \geq 0$\newline
+    \item $\gamma(h) = \gamma(-h)$ \quad (parité)\newline
+    \item $|\gamma(h)| \leq \gamma(0)$ \quad pour tout $h$\newline
+    \item $\gamma$ est une fonction \textbf{positive} (au sens de la positivité définie)
+  \end{enumerate}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Démonstration de la parité}
-\textbf{Propriété :} $\gamma(h) = \gamma(-h)$
 
-\vspace{0.5cm}
+\begin{itemize}
 
-\textbf{Démonstration :} Il suffit de remarquer que
-\begin{align*}
-\gamma(-h) &= \Cov(X_t, X_{t+h}) \\
-&= \E\left[(X_t - \mu)(X_{t+h} - \mu)\right] \\
-&= \E\left[(X_{t+h} - \mu)(X_t - \mu)\right] \\
-&= \gamma(h) \quad \square
-\end{align*}
+\item \textbf{Propriété :} $\gamma(h) = \gamma(-h)$.\newline
+
+\item Démonstration : Il suffit de remarquer que
+  \begin{align*}
+  \gamma(-h) &= \Cov(X_t, X_{t+h}) \\
+  &= \E\left[(X_t - \mu)(X_{t+h} - \mu)\right] \\
+  &= \E\left[(X_{t+h} - \mu)(X_t - \mu)\right] \\
+  &= \gamma(h) \quad \square
+  \end{align*}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Inégalité de Cauchy-Schwarz pour la covariance (1/2)}
-\begin{block}{Proposition}
-Pour deux variables aléatoires $U$ et $V$ de carré intégrable :
-\[
-|\Cov(U, V)| \leq \sqrt{\Var(U)} \cdot \sqrt{\Var(V)}
-\]
-\end{block}
 
-\textbf{Démonstration :} Sans perte de généralité, supposons $\E[U] = \E[V] = 0$ (sinon on centre les variables). Alors $\Cov(U,V) = \E[UV]$ et $\Var(U) = \E[U^2]$.
+\begin{itemize}
 
-\vspace{0.3cm}
+\item Pour deux variables aléatoires $U$ et $V$ de carré intégrable :
+  \[
+  |\Cov(U, V)| \leq \sqrt{\Var(U)} \cdot \sqrt{\Var(V)}
+  \]\newline
 
-Pour tout $\lambda \in \R$, la variable aléatoire $(U + \lambda V)^2$ est positive, donc :
-\[
-\E\left[(U + \lambda V)^2\right] \geq 0 \quad \forall \lambda \in \R
-\]
+\item Démonstration : Sans perte de généralité, supposons $\E[U] = \E[V] = 0$. Alors $\Cov(U,V) = \E[UV]$ et $\Var(U) = \E[U^2]$.\newline
 
-En développant :
-\[
-\E[U^2] + 2\lambda \E[UV] + \lambda^2 \E[V^2] \geq 0
-\]
+\item Pour tout $\lambda \in \R$, la variable aléatoire $(U + \lambda V)^2$ est positive, donc :
+  \[
+  \E\left[(U + \lambda V)^2\right] \geq 0 \quad \forall \lambda \in \R
+  \]\newline
+
+\item En développant :
+  \[
+  \E[U^2] + 2\lambda \E[UV] + \lambda^2 \E[V^2] \geq 0
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Inégalité de Cauchy-Schwarz pour la covariance (2/2)}
-Nous avons un trinôme en $\lambda$ :
-\[
-P(\lambda) = \E[V^2] \lambda^2 + 2\E[UV] \lambda + \E[U^2] \geq 0 \quad \forall \lambda \in \R
-\]
 
-Pour qu'un trinôme $a\lambda^2 + b\lambda + c$ soit toujours $\geq 0$, son discriminant doit être $\leq 0$ :
-\[
-\Delta = 4\E[UV]^2 - 4\E[U^2]\E[V^2] \leq 0
-\]
+\begin{itemize}
 
-Donc :
-\[
-\E[UV]^2 \leq \E[U^2] \cdot \E[V^2]
-\]
+\item Nous avons un trinôme en $\lambda$ :
+  \[
+  P(\lambda) = \E[V^2] \lambda^2 + 2\E[UV] \lambda + \E[U^2] \geq 0 \quad \forall \lambda \in \R
+  \]\newline
 
-En prenant la racine carrée et en revenant aux variables non centrées :
-\[
-\boxed{|\Cov(U, V)| \leq \sqrt{\Var(U)} \cdot \sqrt{\Var(V)}} \quad \square
-\]
+\item Pour qu'un trinôme $a\lambda^2 + b\lambda + c$ soit toujours $\geq 0$, son discriminant doit être $\leq 0$ :
+  \[
+  \Delta = 4\E[UV]^2 - 4\E[U^2]\E[V^2] \leq 0
+  \]\newline
+
+\item En prenant la racine carrée et en revenant aux variables non centrées :
+  \[
+  \boxed{|\Cov(U, V)| \leq \sqrt{\Var(U)} \cdot \sqrt{\Var(V)}} \quad \square
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Démonstration de $|\gamma(h)| \leq \gamma(0)$}
-\textbf{Propriété :} $|\gamma(h)| \leq \gamma(0)$ pour tout $h$.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\textbf{Démonstration :} Cette propriété découle de l'inégalité de Cauchy-Schwarz.
+\item \textbf{Propriété :} $|\gamma(h)| \leq \gamma(0)$ pour tout $h$.\newline
 
-\vspace{0.3cm}
+\item Cette propriété découle de l'inégalité de Cauchy-Schwarz.\newline
 
-Pour deux variables aléatoires $U$ et $V$ de carré intégrable :
-\[
-|\Cov(U, V)| \leq \sqrt{\Var(U)} \cdot \sqrt{\Var(V)}
-\]
+\item En appliquant cette inégalité à $U = X_t$ et $V = X_{t-h}$ :
+  \[
+  |\gamma(h)| = |\Cov(X_t, X_{t-h})| \leq \sqrt{\Var(X_t)} \cdot \sqrt{\Var(X_{t-h})}
+  \]\newline
 
-En appliquant cette inégalité à $U = X_t$ et $V = X_{t-h}$ :
-\[
-|\gamma(h)| = |\Cov(X_t, X_{t-h})| \leq \sqrt{\Var(X_t)} \cdot \sqrt{\Var(X_{t-h})}
-\]
+\item Par stationnarité, $\Var(X_t) = \Var(X_{t-h}) = \gamma(0)$, donc :
+  \[
+  |\gamma(h)| \leq \sqrt{\gamma(0)} \cdot \sqrt{\gamma(0)} = \gamma(0) \quad \square
+  \]
 
-Par stationnarité, $\Var(X_t) = \Var(X_{t-h}) = \gamma(0)$, donc :
-\[
-|\gamma(h)| \leq \sqrt{\gamma(0)} \cdot \sqrt{\gamma(0)} = \gamma(0) \quad \square
-\]
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Interprétation et conséquences}
-\begin{block}{Interprétation}
-L'inégalité $|\gamma(h)| \leq \gamma(0)$ signifie que la covariance entre $X_t$ et $X_{t-h}$ ne peut jamais dépasser (en valeur absolue) la variance du processus.
-\end{block}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\textbf{Cas d'égalité :} $|\gamma(h)| = \gamma(0)$ si et seulement si $X_t$ et $X_{t-h}$ sont parfaitement corrélés (positivement ou négativement), c'est-à-dire $X_{t-h} = aX_t + b$ avec $a = \pm 1$.
+\item L'inégalité $|\gamma(h)| \leq \gamma(0)$ signifie que la covariance entre $X_t$ et $X_{t-h}$ ne peut jamais dépasser (en valeur absolue) la variance du processus.\newline
 
-\vspace{0.3cm}
+\item \textbf{Cas d'égalité :} $|\gamma(h)| = \gamma(0)$ si et seulement si $X_t$ et $X_{t-h}$ sont parfaitement corrélés.\newline
 
-\textbf{Conséquence :} En divisant par $\gamma(0) > 0$, on obtient :
-\[
-\left|\frac{\gamma(h)}{\gamma(0)}\right| \leq 1 \quad \forall h
-\]
+\item En divisant par $\gamma(0) > 0$, on obtient :
+  \[
+  \left|\frac{\gamma(h)}{\gamma(0)}\right| \leq 1 \quad \forall h
+  \]\newline
 
-Le ratio $\gamma(h)/\gamma(0)$ est toujours compris entre $-1$ et $1$. On verra plus loin que ce ratio définit la \textbf{fonction d'autocorrélation} $\rho(h)$, qui s'interprète comme un coefficient de corrélation.
+\item Le ratio $\gamma(h)/\gamma(0)$ est toujours compris entre $-1$ et $1$. Ce ratio définit la \textbf{fonction d'autocorrélation} $\rho(h)$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Positivité de la fonction d'autocovariance}
-Dire que la fonction d'autocovariance est \textbf{positive} ne veut pas dire que $\gamma(h) \geq 0$ pour tout $h$. Cette propriété découle de la positivité de la variance.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-On sait que $\Var\left[\sum_{i=1}^n a_i X_{t_i}\right] \geq 0$ pour tout vecteur $(a_1, \ldots, a_n)$.
+\item Dire que la fonction d'autocovariance est \textbf{positive} ne veut pas dire que $\gamma(h) \geq 0$ pour tout $h$. Cette propriété découle de la positivité de la variance.\newline
 
-\vspace{0.3cm}
+\item On sait que $\Var\left[\sum_{i=1}^n a_i X_{t_i}\right] \geq 0$ pour tout vecteur $(a_1, \ldots, a_n)$.\newline
 
-Supposons sans perte de généralité que $\E[X_{t_i}] = 0$ pour tout $i$. Alors :
-\begin{align*}
-\Var\left[\sum_{i=1}^n a_i X_{t_i}\right] &= \E\left[\left(\sum_{i=1}^n a_i X_{t_i}\right)^2\right] = \E\left[\sum_{i=1}^n \sum_{j=1}^n a_i a_j X_{t_i} X_{t_j}\right] \\
-&= \sum_{i=1}^n \sum_{j=1}^n a_i a_j \E[X_{t_i} X_{t_j}] = \sum_{i=1}^n \sum_{j=1}^n a_i a_j \gamma(t_i - t_j)
-\end{align*}
+\item Supposons $\E[X_{t_i}] = 0$ pour tout $i$. Alors :
+  \begin{align*}
+  \Var\left[\sum_{i=1}^n a_i X_{t_i}\right] &= \sum_{i=1}^n \sum_{j=1}^n a_i a_j \gamma(t_i - t_j)
+  \end{align*}\newline
 
-Cette double somme doit être $\geq 0$ pour tout vecteur $\mathbf{a} \neq \mathbf{0}$.
+\item Cette double somme doit être $\geq 0$ pour tout vecteur $\mathbf{a} \neq \mathbf{0}$.
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Construction de processus stationnaires}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Théorème de construction}
-\begin{block}{Théorème}
-Si $(X_t, t \in \Z)$ est un processus stochastique stationnaire et si $(a_i)_{i \geq 0}$ est une suite de nombres réels \textbf{absolument sommable} :
-\[
-\sum_{i=0}^{\infty} |a_i| < +\infty
-\]
-alors
-\[
-Y_t = \sum_{i=0}^{\infty} a_i X_{t-i}
-\]
-définit un nouveau processus stochastique stationnaire.
-\end{block}
+
+\begin{itemize}
+
+\item Si $(X_t, t \in \Z)$ est un processus stochastique stationnaire et si $(a_i)_{i \geq 0}$ est une suite de nombres réels \textbf{absolument sommable} :
+  \[
+  \sum_{i=0}^{\infty} |a_i| < +\infty
+  \]
+  alors
+  \[
+  Y_t = \sum_{i=0}^{\infty} a_i X_{t-i}
+  \]
+  définit un nouveau processus stochastique stationnaire.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Éléments de preuve (1/2)}
-Si $(X_t, t \in \Z)$ est de carré intégrable, alors il en va de même pour $(Y_t, t \in \Z)$.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-En effet :
-\[
-\|Y_t\| = \left\|\sum_{i=0}^{\infty} a_i X_{t-i}\right\| \leq \sum_{i=0}^{\infty} |a_i| \cdot \|X_{t-i}\| = \|X\| \sum_{i=0}^{\infty} |a_i| < +\infty
-\]
+\item Si $(X_t, t \in \Z)$ est de carré intégrable, alors il en va de même pour $(Y_t, t \in \Z)$.\newline
 
-\vspace{0.5cm}
+\item En effet :
+  \[
+  \|Y_t\| = \left\|\sum_{i=0}^{\infty} a_i X_{t-i}\right\| \leq \sum_{i=0}^{\infty} |a_i| \cdot \|X_{t-i}\| = \|X\| \sum_{i=0}^{\infty} |a_i| < +\infty
+  \]\newline
 
-L'espérance de $(Y_t, t \in \Z)$ est :
-\[
-\E[Y_t] = \E\left[\sum_{i=0}^{\infty} a_i X_{t-i}\right] = \sum_{i=0}^{\infty} a_i \E[X_{t-i}] = \mu \sum_{i=0}^{\infty} a_i = \mu_Y
-\]
+\item L'espérance de $(Y_t, t \in \Z)$ est :
+  \[
+  \E[Y_t] = \E\left[\sum_{i=0}^{\infty} a_i X_{t-i}\right] = \sum_{i=0}^{\infty} a_i \E[X_{t-i}] = \mu \sum_{i=0}^{\infty} a_i = \mu_Y
+  \]\newline
 
-L'espérance est constante et ne dépend pas de $t$.
+\item L'espérance est constante et ne dépend pas de $t$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Éléments de preuve (2/2)}
-La fonction d'autocovariance de $(Y_t, t \in \Z)$ est :
-\begin{align*}
-\gamma_Y(h) &= \Cov(Y_t, Y_{t-h}) \\
-&= \Cov\left(\sum_{i=0}^{\infty} a_i X_{t-i}, \sum_{j=0}^{\infty} a_j X_{t-h-j}\right) \\
-&= \sum_{i=0}^{\infty} \sum_{j=0}^{\infty} a_i a_j \Cov(X_{t-i}, X_{t-h-j}) \\
-&= \sum_{i=0}^{\infty} \sum_{j=0}^{\infty} a_i a_j \gamma_X(h+i-j)
-\end{align*}
 
-Les moments d'ordre 1 et 2 sont bien indépendants du temps. \hfill $\square$
+\begin{itemize}
+
+\item La fonction d'autocovariance de $(Y_t, t \in \Z)$ est :
+  \begin{align*}
+  \gamma_Y(h) &= \Cov(Y_t, Y_{t-h}) \\
+  &= \Cov\left(\sum_{i=0}^{\infty} a_i X_{t-i}, \sum_{j=0}^{\infty} a_j X_{t-h-j}\right) \\
+  &= \sum_{i=0}^{\infty} \sum_{j=0}^{\infty} a_i a_j \gamma_X(h+i-j)
+  \end{align*}\newline
+
+\item Les moments d'ordre 1 et 2 sont bien indépendants du temps. \hfill $\square$
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Exemple : Processus MA(1)}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Bruit blanc}
-\begin{block}{Définition}
-Soit $(X_t, t \in \Z)$ une suite de variables aléatoires \textbf{indépendamment et identiquement distribuées} (bruit blanc) avec :
-\begin{align*}
-\E[X_t] &= 0 \quad \forall t \\
-\Var[X_t] &= \sigma^2 \quad \forall t \\
-\gamma(h) &= 0 \quad \forall h \neq 0
-\end{align*}
-\end{block}
 
-Ce processus stochastique est stationnaire.
+\begin{itemize}
 
-\vspace{0.3cm}
+\item Soit $(X_t, t \in \Z)$ une suite de variables aléatoires \textbf{indépendamment et identiquement distribuées} (bruit blanc) avec :
+  \[
+  \E[X_t] = 0 \quad \forall t
+  \]
+  \[
+  \Var[X_t] = \sigma^2 \quad \forall t
+  \]
+  \[
+  \gamma(h) = 0 \quad \forall h \neq 0
+  \]\newline
 
-On note souvent : $X_t \sim \text{BB}(0, \sigma^2)$ ou $\varepsilon_t \sim \text{BB}(0, \sigma^2)$.
+\item Ce processus stochastique est stationnaire.\newline
+
+\item On note souvent : $X_t \sim \text{BB}(0, \sigma^2)$ ou $\varepsilon_t \sim \text{BB}(0, \sigma^2)$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Définition du processus MA(1)}
-Définissons un nouveau processus stochastique $(Y_t, t \in \Z)$ :
-\[
-Y_t = \lambda X_t + \rho X_{t-1}
-\]
 
-En termes du théorème précédent : $a_0 = \lambda$, $a_1 = \rho$, $a_i = 0$ pour $i \notin \{0, 1\}$.
+\begin{itemize}
 
-\vspace{0.5cm}
+\item Définissons un nouveau processus stochastique $(Y_t, t \in \Z)$ :
+  \[
+  Y_t = \lambda X_t + \rho X_{t-1}
+  \]\newline
 
-On montre facilement qu'il s'agit d'un processus stochastique stationnaire au second ordre.
+\item En termes du théorème précédent : $a_0 = \lambda$, $a_1 = \rho$, $a_i = 0$ pour $i \notin \{0, 1\}$.\newline
+
+\item On montre facilement qu'il s'agit d'un processus stochastique stationnaire au second ordre.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Espérance du processus MA(1)}
-L'espérance est nulle pour tout $t$ :
-\begin{align*}
-\E[Y_t] &= \E[\lambda X_t + \rho X_{t-1}] \\
-&= \lambda \E[X_t] + \rho \E[X_{t-1}] \\
-&= \lambda \cdot 0 + \rho \cdot 0 \\
-&= 0
-\end{align*}
+
+\begin{itemize}
+
+\item L'espérance est nulle pour tout $t$ :
+  \begin{align*}
+  \E[Y_t] &= \E[\lambda X_t + \rho X_{t-1}] \\
+  &= \lambda \E[X_t] + \rho \E[X_{t-1}] \\
+  &= \lambda \cdot 0 + \rho \cdot 0 \\
+  &= 0
+  \end{align*}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Variance du processus MA(1)}
-La variance est finie et constante :
-\begin{align*}
-\Var[Y_t] &= \Var[\lambda X_t + \rho X_{t-1}] \\
-&= \E\left[(\lambda X_t + \rho X_{t-1})^2\right] \quad \text{(car } \E[Y_t] = 0\text{)} \\
-&= \E\left[\lambda^2 X_t^2 + 2\lambda\rho X_t X_{t-1} + \rho^2 X_{t-1}^2\right] \\
-&= \lambda^2 \E[X_t^2] + 2\lambda\rho \underbrace{\E[X_t X_{t-1}]}_{= 0 \text{ (indép.)}} + \rho^2 \E[X_{t-1}^2] \\
-&= (\lambda^2 + \rho^2) \sigma^2
-\end{align*}
+
+\begin{itemize}
+
+\item La variance est finie et constante :
+  \begin{align*}
+  \Var[Y_t] &= \Var[\lambda X_t + \rho X_{t-1}] \\
+  &= \E\left[(\lambda X_t + \rho X_{t-1})^2\right] \quad \text{(car } \E[Y_t] = 0\text{)} \\
+  &= \E\left[\lambda^2 X_t^2 + 2\lambda\rho X_t X_{t-1} + \rho^2 X_{t-1}^2\right] \\
+  &= \lambda^2 \E[X_t^2] + 2\lambda\rho \underbrace{\E[X_t X_{t-1}]}_{= 0 \text{ (indép.)}} + \rho^2 \E[X_{t-1}^2] \\
+  &= (\lambda^2 + \rho^2) \sigma^2
+  \end{align*}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Fonction d'autocovariance du MA(1)}
-Calculons la fonction d'autocovariance $\gamma(h) = \Cov(Y_t, Y_{t-h})$ :
-\begin{align*}
-\gamma(h) &= \Cov(\lambda X_t + \rho X_{t-1}, \lambda X_{t-h} + \rho X_{t-h-1}) \\
-&= \lambda^2 \Cov(X_t, X_{t-h}) + \lambda\rho \Cov(X_t, X_{t-h-1}) \\
-&\quad + \rho\lambda \Cov(X_{t-1}, X_{t-h}) + \rho^2 \Cov(X_{t-1}, X_{t-h-1})
-\end{align*}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-Au total :
-\[
-\gamma(h) = \begin{cases}
-(\lambda^2 + \rho^2)\sigma^2 & \text{si } h = 0 \\
-\lambda\rho\sigma^2 & \text{si } h = \pm 1 \\
-0 & \text{sinon}
-\end{cases}
-\]
+\item Calculons la fonction d'autocovariance $\gamma(h) = \Cov(Y_t, Y_{t-h})$ :
+  \begin{align*}
+  \gamma(h) &= \Cov(\lambda X_t + \rho X_{t-1}, \lambda X_{t-h} + \rho X_{t-h-1}) \\
+  &= \lambda^2 \Cov(X_t, X_{t-h}) + \lambda\rho \Cov(X_t, X_{t-h-1}) \\
+  &\quad + \rho\lambda \Cov(X_{t-1}, X_{t-h}) + \rho^2 \Cov(X_{t-1}, X_{t-h-1})
+  \end{align*}\newline
 
-$(Y_t, t \in \Z)$ est bien un processus stationnaire au second ordre.
+\item Au total :
+  \[
+  \gamma(h) = \begin{cases}
+  (\lambda^2 + \rho^2)\sigma^2 & \text{si } h = 0 \\
+  \lambda\rho\sigma^2 & \text{si } h = \pm 1 \\
+  0 & \text{sinon}
+  \end{cases}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Interprétation}
-Contrairement au processus d'origine $(X_t, t \in \Z)$ (bruit blanc), le processus $(Y_t, t \in \Z)$ admet de la \textbf{dépendance} (relativement limitée) :
 
-\vspace{0.5cm}
+\begin{itemize}
 
-La covariance entre $Y_t$ et $Y_{t-1}$ est non nulle : $\gamma(1) = \lambda\rho\sigma^2$.
+\item Contrairement au processus d'origine $(X_t, t \in \Z)$ (bruit blanc), le processus $(Y_t, t \in \Z)$ admet de la \textbf{dépendance} (relativement limitée).\newline
 
-\vspace{0.5cm}
+\item La covariance entre $Y_t$ et $Y_{t-1}$ est non nulle : $\gamma(1) = \lambda\rho\sigma^2$.\newline
 
-Mais cette dépendance est de \textbf{courte mémoire} : $\gamma(h) = 0$ pour $|h| > 1$.
+\item Mais cette dépendance est de \textbf{courte mémoire} : $\gamma(h) = 0$ pour $|h| > 1$.\newline
 
-\vspace{0.5cm}
+\item Ce processus est appelé \textbf{MA(1)} (moyenne mobile d'ordre 1).
 
-Ce processus est appelé \textbf{MA(1)} (moyenne mobile d'ordre 1).
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Fonction d'autocorrélation}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Innovation d'un processus}
-\begin{block}{Définition}
-Si $(X_t, t \in \Z)$ est un processus stochastique stationnaire au second ordre, on définit son \textbf{innovation} par :
-\[
-\varepsilon_t = X_t - X_t^*
-\]
-où $X_t^*$ est la régression linéaire de $X_t$ sur son passé $(X_s, s < t)$.
-\end{block}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-$X_t^*$ est la meilleure prévision (linéaire) de $X_t$ basée sur l'ensemble d'information $I_t = \{X_{t-1}, X_{t-2}, \ldots\}$.
+\item Si $(X_t, t \in \Z)$ est un processus stochastique stationnaire au second ordre, on définit son \textbf{innovation} par :
+  \[
+  \varepsilon_t = X_t - X_t^*
+  \]
+  où $X_t^*$ est la régression linéaire de $X_t$ sur son passé $(X_s, s < t)$.\newline
 
-\vspace{0.3cm}
+\item $X_t^*$ est la meilleure prévision (linéaire) de $X_t$ basée sur l'ensemble d'information $I_t = \{X_{t-1}, X_{t-2}, \ldots\}$.\newline
 
-Par construction, l'innovation $\varepsilon_t$ est non corrélée avec le passé de $X$ : elle peut être interprétée comme une \textbf{erreur de prévision}.
+\item Par construction, l'innovation $\varepsilon_t$ est non corrélée avec le passé de $X$ : elle peut être interprétée comme une \textbf{erreur de prévision}.\newline
 
-\vspace{0.3cm}
+\item On peut montrer que si $(X_t, t \in \Z)$ est stationnaire au second ordre, alors son innovation est un \textbf{bruit blanc}.
 
-On peut montrer que si $(X_t, t \in \Z)$ est stationnaire au second ordre, alors son innovation est un \textbf{bruit blanc}.
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Fonction d'autocorrélation}
-\begin{block}{Définition}
-La \textbf{fonction d'autocorrélation} est définie par :
-\[
-\rho(h) = \frac{\gamma(h)}{\gamma(0)}
-\]
-\end{block}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\begin{alertblock}{Remarque}
-$\rho(h)$ mesure la corrélation entre $X_t$ et $X_{t+h}$ (ou $X_{t-h}$) :
-\[
-\rho(h) = \Corr(X_t, X_{t+h})
-\]
-\end{alertblock}
+\item La \textbf{fonction d'autocorrélation} est définie par :
+  \[
+  \rho(h) = \frac{\gamma(h)}{\gamma(0)}
+  \]\newline
 
-\vspace{0.3cm}
+\item $\rho(h)$ mesure la corrélation entre $X_t$ et $X_{t+h}$ (ou $X_{t-h}$) :
+  \[
+  \rho(h) = \Corr(X_t, X_{t+h})
+  \]\newline
 
-La fonction d'autocorrélation est une normalisation de la fonction d'autocovariance. Elle hérite de ses propriétés : parité et positivité.
+\item La fonction d'autocorrélation est une normalisation de la fonction d'autocovariance. Elle hérite de ses propriétés : parité et positivité.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Exemple}
-Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc. On définit le processus $(X_t, t \in \Z)$ :
-\[
-X_t = \varepsilon_t - \varepsilon_{t-12}
-\]
 
-La fonction d'autocovariance est :
-\[
-\gamma(h) = \begin{cases}
-2\sigma^2 & \text{si } h = 0 \\
--\sigma^2 & \text{si } h = \pm 12 \\
-0 & \text{sinon}
-\end{cases}
-\]
+\begin{itemize}
 
-La fonction d'autocorrélation est :
-\[
-\rho(h) = \begin{cases}
-1 & \text{si } h = 0 \\
--\frac{1}{2} & \text{si } h = \pm 12 \\
-0 & \text{sinon}
-\end{cases}
-\]
+\item Soit $(\varepsilon_t, t \in \Z)$ un bruit blanc. On définit le processus $(X_t, t \in \Z)$ :
+  \[
+  X_t = \varepsilon_t - \varepsilon_{t-12}
+  \]\newline
+
+\item La fonction d'autocovariance est :
+  \[
+  \gamma(h) = \begin{cases}
+  2\sigma^2 & \text{si } h = 0 \\
+  -\sigma^2 & \text{si } h = \pm 12 \\
+  0 & \text{sinon}
+  \end{cases}
+  \]\newline
+
+\item La fonction d'autocorrélation est :
+  \[
+  \rho(h) = \begin{cases}
+  1 & \text{si } h = 0 \\
+  -\frac{1}{2} & \text{si } h = \pm 12 \\
+  0 & \text{sinon}
+  \end{cases}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Matrice d'autocorrélation et contraintes}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Matrice d'autocorrélation}
-\begin{block}{Définition}
-La \textbf{matrice d'autocorrélation} d'ordre $m$ contient les corrélations entre $m$ $X$ successifs : $X_t, X_{t+1}, \ldots, X_{t+m-1}$.
-\[
-R(m) = \begin{pmatrix}
-1 & \rho(1) & \rho(2) & \cdots & \rho(m-1) \\
-\rho(1) & 1 & \rho(1) & \cdots & \rho(m-2) \\
-\rho(2) & \rho(1) & 1 & \cdots & \rho(m-3) \\
-\vdots & \vdots & \vdots & \ddots & \vdots \\
-\rho(m-1) & \rho(m-2) & \rho(m-3) & \cdots & 1
-\end{pmatrix}
-\]
-\end{block}
 
-La positivité de la fonction $\rho(h)$ implique que $R(m)$ est une \textbf{matrice définie positive} :
-\[
-\mathbf{a}' R(m) \mathbf{a} > 0 \quad \forall \mathbf{a} \in \R^m, \mathbf{a} \neq \mathbf{0}
-\]
+\begin{itemize}
+
+\item La \textbf{matrice d'autocorrélation} d'ordre $m$ contient les corrélations entre $m$ $X$ successifs : $X_t, X_{t+1}, \ldots, X_{t+m-1}$.
+  \[
+  R(m) = \begin{pmatrix}
+  1 & \rho(1) & \rho(2) & \cdots & \rho(m-1) \\
+  \rho(1) & 1 & \rho(1) & \cdots & \rho(m-2) \\
+  \rho(2) & \rho(1) & 1 & \cdots & \rho(m-3) \\
+  \vdots & \vdots & \vdots & \ddots & \vdots \\
+  \rho(m-1) & \rho(m-2) & \rho(m-3) & \cdots & 1
+  \end{pmatrix}
+  \]\newline
+
+\item La positivité de la fonction $\rho(h)$ implique que $R(m)$ est une \textbf{matrice définie positive} :
+  \[
+  \mathbf{a}' R(m) \mathbf{a} > 0 \quad \forall \mathbf{a} \in \R^m, \mathbf{a} \neq \mathbf{0}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Contraintes sur l'autocorrélation d'ordre 1}
-\begin{block}{Théorème}
-$|R(m)| > 0$ pour tout $m \in \N^*$.
-\end{block}
 
-\textbf{Application pour $m = 2$ :}
-\[
-|R(2)| > 0 \Leftrightarrow \begin{vmatrix} 1 & \rho(1) \\ \rho(1) & 1 \end{vmatrix} > 0 \Leftrightarrow 1 - \rho(1)^2 > 0
-\]
+\begin{itemize}
 
-\begin{alertblock}{Résultat}
-L'autocorrélation d'ordre 1 doit être strictement inférieure à 1 en valeur absolue :
-\[
-|\rho(1)| < 1
-\]
-\end{alertblock}
+\item $|R(m)| > 0$ pour tout $m \in \N^*$.\newline
+
+\item Application pour $m = 2$ :
+  \[
+  |R(2)| > 0 \Leftrightarrow \begin{vmatrix} 1 & \rho(1) \\ \rho(1) & 1 \end{vmatrix} > 0 \Leftrightarrow 1 - \rho(1)^2 > 0
+  \]\newline
+
+\item L'autocorrélation d'ordre 1 doit être strictement inférieure à 1 en valeur absolue :
+  \[
+  |\rho(1)| < 1
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Contraintes sur l'autocorrélation d'ordre 2}
-\textbf{Application pour $m = 3$ :}
-\[
-|R(3)| > 0 \Leftrightarrow \begin{vmatrix} 1 & \rho(1) & \rho(2) \\ \rho(1) & 1 & \rho(1) \\ \rho(2) & \rho(1) & 1 \end{vmatrix} > 0
-\]
 
-Après calcul du déterminant :
-\[
-(1 + 2\rho(1)^2)(1 - \rho(2)) - 2\rho(1)^2(1 - \rho(2)) > 0
-\]
+\begin{itemize}
 
-Ce qui donne la contrainte :
-\[
-(1 - \rho(1))(1 + \rho(1)) - 2\rho(1)^2 > 0
-\]
+\item Application pour $m = 3$ :
+  \[
+  |R(3)| > 0 \Leftrightarrow \begin{vmatrix} 1 & \rho(1) & \rho(2) \\ \rho(1) & 1 & \rho(1) \\ \rho(2) & \rho(1) & 1 \end{vmatrix} > 0
+  \]\newline
 
-\begin{alertblock}{Résultat}
-Les valeurs possibles de $\rho(2)$ sont contraintes par $\rho(1)$ :
-\[
-\rho(2) \in \left[2\rho(1)^2 - 1, 1\right)
-\]
-\end{alertblock}
+\item Après calcul du déterminant, on obtient la contrainte :\newline
+
+\item Les valeurs possibles de $\rho(2)$ sont contraintes par $\rho(1)$ :
+  \[
+  \rho(2) \in \left[2\rho(1)^2 - 1, 1\right)
+  \]
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Autocorrélation partielle}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Prévision linéaire}
-Soit $(X_t, t \in \Z)$ un processus stochastique stationnaire au second ordre.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-On s'intéresse à la meilleure prévision linéaire de $X_t$ étant données les $K$ valeurs précédentes : $X_{t-1}, X_{t-2}, \ldots, X_{t-K}$.
+\item Soit $(X_t, t \in \Z)$ un processus stochastique stationnaire au second ordre.\newline
 
-\vspace{0.3cm}
+\item On s'intéresse à la meilleure prévision linéaire de $X_t$ étant données les $K$ valeurs précédentes : $X_{t-1}, X_{t-2}, \ldots, X_{t-K}$.\newline
 
-En supposant $\E[X_t] = 0$ :
-\[
-\E[X_t | X_{t-1}, \ldots, X_{t-K}] = a_1^{(K)} X_{t-1} + a_2^{(K)} X_{t-2} + \cdots + a_K^{(K)} X_{t-K}
-\]
+\item En supposant $\E[X_t] = 0$ :
+  \[
+  \E[X_t | X_{t-1}, \ldots, X_{t-K}] = a_1^{(K)} X_{t-1} + a_2^{(K)} X_{t-2} + \cdots + a_K^{(K)} X_{t-K}
+  \]\newline
 
-Le vecteur $\mathbf{a}^{(K)} = (a_1^{(K)}, a_2^{(K)}, \ldots, a_K^{(K)})'$ est donné par :
-\[
-\mathbf{a}^{(K)} = R(K)^{-1} \begin{pmatrix} \rho(1) \\ \rho(2) \\ \vdots \\ \rho(K) \end{pmatrix}
-\]
+\item Le vecteur $\mathbf{a}^{(K)} = (a_1^{(K)}, a_2^{(K)}, \ldots, a_K^{(K)})'$ est donné par :
+  \[
+  \mathbf{a}^{(K)} = R(K)^{-1} \begin{pmatrix} \rho(1) \\ \rho(2) \\ \vdots \\ \rho(K) \end{pmatrix}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Coefficient de corrélation partielle}
-\begin{block}{Définition}
-Le \textbf{coefficient de corrélation partielle} est :
-\[
-r(K) = a_K^{(K)}
-\]
-Il mesure le lien entre $X_t$ et $X_{t-K}$ une fois que l'on a purgé l'effet de $X_{t-1}, X_{t-2}, \ldots, X_{t-K+1}$.
-\end{block}
 
-\vspace{0.5cm}
-
-\begin{alertblock}{Remarque}
-Les fonctions d'autocorrélation et d'autocorrélation partielle sont \textbf{équivalentes} :
 \begin{itemize}
-\item $r(K)$ est une fonction de $(\rho(1), \ldots, \rho(K))$
-\item Inversement, on peut déduire $\rho(K)$ de $(r(1), r(2), \ldots, r(K))$
+
+\item Le \textbf{coefficient de corrélation partielle} est :
+  \[
+  r(K) = a_K^{(K)}
+  \]
+  Il mesure le lien entre $X_t$ et $X_{t-K}$ une fois que l'on a purgé l'effet de $X_{t-1}, X_{t-2}, \ldots, X_{t-K+1}$.\newline
+
+\item Les fonctions d'autocorrélation et d'autocorrélation partielle sont \textbf{équivalentes} :
+  \begin{itemize}
+    \item $r(K)$ est une fonction de $(\rho(1), \ldots, \rho(K))$\newline
+    \item Inversement, on peut déduire $\rho(K)$ de $(r(1), r(2), \ldots, r(K))$
+  \end{itemize}
+
+\item Pour $K = 1$ : $a_1^{(1)} = r(1) = \rho(1)$.
+
 \end{itemize}
-Pour $K = 1$ : $a_1^{(1)} = r(1) = \rho(1)$.
-\end{alertblock}
+
 \end{frame}
 
 \begin{frame}{Expression explicite de l'autocorrélation partielle}
-En utilisant la structure par blocs de la matrice, on peut montrer :
-\[
-r(1) = \rho(1)
-\]
-\[
-r(2) = \frac{\rho(2) - \rho(1)^2}{1 - \rho(1)^2}
-\]
 
-Plus généralement, on peut obtenir une expression explicite de $r(K)$ en exploitant la structure de la matrice d'autocorrélation.
+\begin{itemize}
+
+\item En utilisant la structure par blocs de la matrice, on peut montrer :
+  \[
+  r(1) = \rho(1)
+  \]
+  \[
+  r(2) = \frac{\rho(2) - \rho(1)^2}{1 - \rho(1)^2}
+  \]\newline
+
+\item Plus généralement, on peut obtenir une expression explicite de $r(K)$ en exploitant la structure de la matrice d'autocorrélation.
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Densité spectrale}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Introduction à l'approche fréquentielle}
-Une façon alternative de caractériser un processus stochastique est d'étudier la \textbf{densité spectrale}.
 
-\vspace{0.5cm}
+\begin{itemize}
 
-Cette approche est équivalente à la fonction d'autocovariance.
+\item Une façon alternative de caractériser un processus stochastique est d'étudier la \textbf{densité spectrale}.\newline
 
-\vspace{0.5cm}
+\item Cette approche est équivalente à la fonction d'autocovariance.\newline
 
-\textbf{Idée :} Plutôt que d'aborder un processus stochastique dans le \textbf{domaine temporel}, on s'intéresse au \textbf{domaine des fréquences}.
+\item Plutôt que d'aborder un processus stochastique dans le \textbf{domaine temporel}, on s'intéresse au \textbf{domaine des fréquences}.\newline
 
-\vspace{0.5cm}
+\item On considère un processus de la forme :
+  \[
+  X_t = \sum_{i=0}^{\infty} a_i \varepsilon_{t-i}
+  \]
+  où $(\varepsilon_t, t \in \Z) \sim \text{BB}(0, \sigma^2)$ et $(a_i)$ est absolument sommable.
 
-On considère un processus de la forme :
-\[
-X_t = \sum_{i=0}^{\infty} a_i \varepsilon_{t-i}
-\]
-où $(\varepsilon_t, t \in \Z) \sim \text{BB}(0, \sigma^2)$ et $(a_i)$ est absolument sommable.
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Fonction d'autocovariance du processus $X$}
@@ -838,464 +943,590 @@ La fonction d'autocovariance doit donc converger suffisament rapidement vers zé
 \end{frame}
 
 \begin{frame}{Définition de la densité spectrale}
-\begin{block}{Définition}
-La \textbf{densité spectrale} du processus $(X_t, t \in \Z)$ est la fonction réelle définie par :
-\[
-f(\omega) = \frac{1}{2\pi} \sum_{h=-\infty}^{+\infty} \gamma(h) e^{-i\omega h}
-\]
-pour tout $\omega \in \R$.
-\end{block}
 
-Cette fonction existe car $\gamma(h)$ est absolument sommable.
+\begin{itemize}
 
-\vspace{0.3cm}
+\item La \textbf{densité spectrale} du processus $(X_t, t \in \Z)$ est la fonction réelle définie par :
+  \[
+  f(\omega) = \frac{1}{2\pi} \sum_{h=-\infty}^{+\infty} \gamma(h) e^{-i\omega h}
+  \]
+  pour tout $\omega \in \R$.\newline
 
-On peut montrer que :
-\[
-f(\omega) = \frac{\gamma(0)}{2\pi} + \frac{1}{\pi} \sum_{h=1}^{\infty} \gamma(h) \cos(\omega h)
-\]
+\item Cette fonction existe car $\gamma(h)$ est absolument sommable.\newline
 
-La densité spectrale est une fonction continue, périodique et symétrique.
+\item On peut montrer que :
+  \[
+  f(\omega) = \frac{\gamma(0)}{2\pi} + \frac{1}{\pi} \sum_{h=1}^{\infty} \gamma(h) \cos(\omega h)
+  \]\newline
+
+\item La densité spectrale est une fonction continue, périodique et symétrique.
+
+\end{itemize}
+
 \end{frame}
 
+\begin{frame}{La densité spectrale est à valeurs réelles}
+
+\begin{itemize}
+
+\item La définition $f(\omega) = \frac{1}{2\pi} \sum_{h=-\infty}^{+\infty} \gamma(h) e^{-i\omega h}$ fait intervenir des exponentielles complexes. Montrons que $f(\omega) \in \R$.\newline
+
+\item On regroupe les termes symétriques et on utilise $\gamma(-h) = \gamma(h)$ :
+  \[
+  f(\omega) = \frac{1}{2\pi} \left[ \gamma(0) + \sum_{h=1}^{\infty} \gamma(h) \left( e^{-i\omega h} + e^{i\omega h} \right) \right]
+  \]\newline
+
+\item Or $e^{-i\omega h} + e^{i\omega h} = 2\cos(\omega h)$, d'où :
+  \[
+  \boxed{f(\omega) = \frac{\gamma(0)}{2\pi} + \frac{1}{\pi} \sum_{h=1}^{\infty} \gamma(h) \cos(\omega h) \in \R}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Symétrie de la densité spectrale}
+
+\begin{itemize}
+
+\item La représentation en cosinus montre immédiatement que $f$ est une fonction \textbf{paire} :
+  \[
+  f(-\omega) = \frac{\gamma(0)}{2\pi} + \frac{1}{\pi} \sum_{h=1}^{\infty} \gamma(h) \cos(-\omega h) = f(\omega)
+  \]
+  car $\cos(-x) = \cos(x)$.\newline
+
+\item De plus, $f$ est \textbf{$2\pi$-périodique} car $\cos(\omega h)$ est $2\pi$-périodique en $\omega$.\newline
+
+\item En combinant parité et périodicité, il suffit de connaître $f$ sur $[0, \pi]$ pour la connaître partout.\newline
+
+\item C'est pourquoi on représente généralement la densité spectrale sur l'intervalle $[0, \pi]$.
+
+\end{itemize}
+
+\end{frame}
+
+
 \begin{frame}{Équivalence avec la fonction d'autocovariance}
-\begin{block}{Théorème}
-La densité spectrale et la fonction d'autocovariance sont \textbf{équivalentes}.
-\end{block}
 
-\textbf{De l'autocovariance à la densité spectrale :} définition de $f(\omega)$.
+\begin{itemize}
 
-\vspace{0.3cm}
+\item La densité spectrale et la fonction d'autocovariance sont \textbf{équivalentes}.\newline
 
-\textbf{De la densité spectrale à l'autocovariance :}
-\[
-\gamma(h) = \int_{-\pi}^{\pi} f(\omega) \cos(\omega h) \, d\omega
-\]
+\item De l'autocovariance à la densité spectrale : définition de $f(\omega)$.\newline
 
-En particulier, la variance s'exprime comme une intégrale de la densité spectrale :
-\[
-\gamma(0) = \int_{-\pi}^{\pi} f(\omega) \, d\omega
-\]
+\item De la densité spectrale à l'autocovariance :
+  \[
+  \gamma(h) = \int_{-\pi}^{\pi} f(\omega) \cos(\omega h) \, d\omega
+  \]\newline
+
+\item En particulier, la variance s'exprime comme une intégrale de la densité spectrale :
+  \[
+  \gamma(0) = \int_{-\pi}^{\pi} f(\omega) \, d\omega
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Exemple : Densité spectrale d'un bruit blanc}
-Soit $(X_t, t \in \Z)$ une suite de variables aléatoires i.i.d. d'espérance nulle et de variance $\sigma^2$ (bruit blanc).
 
-\vspace{0.3cm}
+\begin{itemize}
 
-La fonction d'autocovariance est :
-\[
-\gamma(h) = \begin{cases}
-\sigma^2 & \text{si } h = 0 \\
-0 & \text{sinon}
-\end{cases}
-\]
+\item Soit $(X_t, t \in \Z)$ une suite de variables aléatoires i.i.d. d'espérance nulle et de variance $\sigma^2$ (bruit blanc).\newline
 
-La densité spectrale est donc :
-\[
-f(\omega) = \frac{\sigma^2}{2\pi}
-\]
+\item La fonction d'autocovariance est :
+  \[
+  \gamma(h) = \begin{cases}
+  \sigma^2 & \text{si } h = 0 \\
+  0 & \text{sinon}
+  \end{cases}
+  \]\newline
 
-La densité spectrale est \textbf{constante} : toutes les fréquences contribuent également à la variance du processus.
+\item La densité spectrale est donc :
+  \[
+  f(\omega) = \frac{\sigma^2}{2\pi}
+  \]\newline
 
-\vspace{0.3cm}
+\item La densité spectrale est \textbf{constante} : toutes les fréquences contribuent également à la variance du processus. C'est pourquoi on parle de \textbf{bruit blanc}.
 
-C'est pourquoi on parle de \textbf{bruit blanc} (analogie avec la lumière blanche).
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Réciproque}
-\begin{block}{Proposition}
-Si la densité spectrale est plate (constante), alors le processus associé est un bruit blanc.
-\end{block}
 
-\textbf{Démonstration :} Supposons que $f(\omega) = \kappa > 0$ pour tout $\omega$.
+\begin{itemize}
 
-Alors :
-\[
-\gamma(h) = \int_{-\pi}^{\pi} \kappa \cos(\omega h) \, d\omega = \kappa \int_{-\pi}^{\pi} \cos(\omega h) \, d\omega = \begin{cases}
-\kappa \cdot 2\pi & \text{si } h = 0 \\
-0 & \text{sinon}
-\end{cases}
-\]
+\item Si la densité spectrale est plate (constante), alors le processus associé est un bruit blanc.\newline
 
-$(X_t, t \in \Z)$ est bien un bruit blanc de variance $2\pi\kappa$. \hfill $\square$
+\item Démonstration : Supposons que $f(\omega) = \kappa > 0$ pour tout $\omega$. Alors :
+  \[
+  \gamma(h) = \int_{-\pi}^{\pi} \kappa \cos(\omega h) \, d\omega = \begin{cases}
+  \kappa \cdot 2\pi & \text{si } h = 0 \\
+  0 & \text{sinon}
+  \end{cases}
+  \]\newline
+
+\item $(X_t, t \in \Z)$ est bien un bruit blanc de variance $2\pi\kappa$. \hfill $\square$
+
+\end{itemize}
+
 \end{frame}
+
+\begin{frame}{Interprétation de la densité spectrale}
+
+\begin{itemize}
+
+\item La densité spectrale $f(\omega)$ mesure la \textbf{contribution de la fréquence $\omega$} à la variance totale du processus :
+  \[
+  \gamma(0) = \int_{-\pi}^{\pi} f(\omega) \, d\omega = 2 \int_{0}^{\pi} f(\omega) \, d\omega
+  \]\newline
+
+\item Un \textbf{pic} dans $f(\omega)$ à la fréquence $\omega_0$ indique une composante cyclique dominante de période :
+  \[
+  T = \frac{2\pi}{\omega_0}\quad\text{(en nombre de périodes d'échantillonnage)}
+  \]
+
+\item Exemples :
+  \begin{itemize}
+    \item $\omega_0 = \pi$ $\Rightarrow$ $T = 2$ : oscillation à la fréquence maximale (alternance)\newline
+    \item $\omega_0 = \pi/6$ $\Rightarrow$ $T = 12$ : cycle annuel pour des données mensuelles\newline
+    \item $\omega_0 \approx 0$ $\Rightarrow$ $T \to \infty$ : composante de très basse fréquence (tendance)
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Identification des cycles}
+
+\begin{itemize}
+
+\item En pratique, on estime $f(\omega)$ à partir des données (périodogramme) et on recherche les pics.\newline
+
+\item Les \textbf{hautes fréquences} ($\omega$ proche de $\pi$) correspondent aux fluctuations rapides, de courte période.\newline
+
+\item Les \textbf{basses fréquences} ($\omega$ proche de $0$) correspondent aux mouvements lents, de longue période.\newline
+
+\item Un processus avec $f(\omega)$ concentré près de $\omega = 0$ est \textbf{persistant} : les chocs ont des effets durables.\newline
+
+\item Un processus avec $f(\omega)$ concentré près de $\omega = \pi$ est \textbf{antipersistant} : tendance au retour à la moyenne rapide.
+
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}{Densité spectrale d'une transformation linéaire}
-\begin{block}{Théorème}
-Soit $(X_t, t \in \Z)$ un processus stationnaire de densité spectrale $f_X(\omega)$. Soit $(a_i)_{i \geq 0}$ une suite absolument sommable. Alors le processus $(Y_t, t \in \Z)$ défini par :
-\[
-Y_t = \sum_{i=0}^{\infty} a_i X_{t-i}
-\]
-a pour densité spectrale :
-\[
-f_Y(\omega) = \left|\sum_{i=0}^{\infty} a_i e^{-i\omega i}\right|^2 f_X(\omega)
-\]
-\end{block}
+
+\begin{itemize}
+
+\item Soit $(X_t, t \in \Z)$ un processus stationnaire de densité spectrale $f_X(\omega)$. Soit $(a_i)_{i \geq 0}$ une suite absolument sommable. Alors le processus $(Y_t, t \in \Z)$ défini par :
+  \[
+  Y_t = \sum_{i=0}^{\infty} a_i X_{t-i}
+  \]
+  a pour densité spectrale :
+  \[
+  f_Y(\omega) = \left|\sum_{i=0}^{\infty} a_i e^{-i\omega i}\right|^2 f_X(\omega)
+  \]
+
+\end{itemize}
+
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 \section{Opérateur retard}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%==============================================================================
 
 \begin{frame}{Définition de l'opérateur retard}
-\begin{block}{Définition}
-L'\textbf{opérateur retard} $L$ transforme un processus $(X_t, t \in \Z)$ en un processus $(Y_t, t \in \Z)$ tel que :
-\[
-Y_t = LX_t = X_{t-1}
-\]
-\end{block}
 
-Cet opérateur est linéaire et inversible.
+\begin{itemize}
 
-\vspace{0.3cm}
+\item L'\textbf{opérateur retard} $L$ transforme un processus $(X_t, t \in \Z)$ en un processus $(Y_t, t \in \Z)$ tel que :
+  \[
+  Y_t = LX_t = X_{t-1}
+  \]\newline
 
-Son inverse est l'\textbf{opérateur avance} $F$ :
-\[
-Z_t = FX_t = X_{t+1}
-\]
+\item Cet opérateur est linéaire et inversible.\newline
 
-Par construction : $L \cdot F = F \cdot L = 1$.
+\item Son inverse est l'\textbf{opérateur avance} $F$ :
+  \[
+  Z_t = FX_t = X_{t+1}
+  \]\newline
 
-\vspace{0.3cm}
+\item Par construction : $L \cdot F = F \cdot L = 1$.\newline
 
-En appliquant plusieurs fois l'opérateur retard :
-\[
-L^k X_t = X_{t-k}
-\]
+\item En appliquant plusieurs fois l'opérateur retard :
+  \[
+  L^k X_t = X_{t-k}
+  \]
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Polynômes en $L$}
-On peut définir des \textbf{polynômes en $L$} :
-\[
-\left(\sum_{i=0}^{p} a_i L^i\right) X_t = \sum_{i=0}^{p} a_i X_{t-i}
-\]
 
-On peut aussi définir des \textbf{séries en $L$} (ou $F$). On doit bien sûr se restreindre à des processus stationnaires pour que cela ait un sens.
+\begin{itemize}
 
-\vspace{0.5cm}
+\item On peut définir des \textbf{polynômes en $L$} :
+  \[
+  \left(\sum_{i=0}^{p} a_i L^i\right) X_t = \sum_{i=0}^{p} a_i X_{t-i}
+  \]\newline
 
-Si $(X_t, t \in \Z)$ est stationnaire au second ordre et $(a_i)_{i \geq 0}$ absolument sommable, alors :
-\[
-Y_t = \sum_{i=0}^{\infty} a_i X_{t-i}
-\]
-est aussi stationnaire et on peut écrire :
-\[
-Y_t = \left(\sum_{i=0}^{\infty} a_i L^i\right) X_t
-\]
+\item On peut aussi définir des \textbf{séries en $L$} (ou $F$). On doit bien sûr se restreindre à des processus stationnaires pour que cela ait un sens.\newline
+
+\item Si $(X_t, t \in \Z)$ est stationnaire au second ordre et $(a_i)_{i \geq 0}$ absolument sommable, alors :
+  \[
+  Y_t = \sum_{i=0}^{\infty} a_i X_{t-i} = \left(\sum_{i=0}^{\infty} a_i L^i\right) X_t
+  \]
+  est aussi stationnaire.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Propriétés des séries en $L$}
-\begin{block}{Propriété 1 : Addition}
-\[
-\left(\sum_{i=0}^{\infty} a_i L^i + \sum_{i=0}^{\infty} b_i L^i\right) X_t = \sum_{i=0}^{\infty} (a_i + b_i) L^i X_t
-\]
-où la suite $(a_i + b_i)$ est absolument sommable.
-\end{block}
 
-\begin{block}{Propriété 2 : Multiplication}
-\[
-\left(\sum_{i=0}^{\infty} a_i L^i\right) \left(\sum_{j=0}^{\infty} b_j L^j\right) X_t = \sum_{k=0}^{\infty} c_k L^k X_t
-\]
-où $c_k = \sum_{i=0}^{k} a_i b_{k-i}$ et la suite $(c_k)$ est absolument sommable.
-\end{block}
+\begin{itemize}
+
+\item \textbf{Addition :}
+  \[
+  \left(\sum_{i=0}^{\infty} a_i L^i + \sum_{i=0}^{\infty} b_i L^i\right) X_t = \sum_{i=0}^{\infty} (a_i + b_i) L^i X_t
+  \]
+  où la suite $(a_i + b_i)$ est absolument sommable.\newline
+
+\item \textbf{Multiplication :}
+  \[
+  \left(\sum_{i=0}^{\infty} a_i L^i\right) \left(\sum_{j=0}^{\infty} b_j L^j\right) X_t = \sum_{k=0}^{\infty} c_k L^k X_t
+  \]
+  où $c_k = \sum_{i=0}^{k} a_i b_{k-i}$ et la suite $(c_k)$ est absolument sommable.
+
+\end{itemize}
+
 \end{frame}
 
-\begin{frame}{Démonstration de la propriété 2 (1/2)}
-Notons $A(L) = \sum_{i=0}^{\infty} a_i L^i$ et $B(L) = \sum_{j=0}^{\infty} b_j L^j$.
+\begin{frame}{Démonstration de la multiplication (1/2)}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-Calculons $A(L) B(L) X_t$ :
-\begin{align*}
-A(L) B(L) X_t &= A(L) \left( \sum_{j=0}^{\infty} b_j X_{t-j} \right) = \sum_{i=0}^{\infty} a_i L^i \left( \sum_{j=0}^{\infty} b_j X_{t-j} \right) \\
-&= \sum_{i=0}^{\infty} a_i \sum_{j=0}^{\infty} b_j X_{t-j-i}
-\end{align*}
+\item Notons $A(L) = \sum_{i=0}^{\infty} a_i L^i$ et $B(L) = \sum_{j=0}^{\infty} b_j L^j$.\newline
 
-En posant $k = i + j$ (donc $j = k - i$) et en réorganisant :
-\begin{align*}
-A(L) B(L) X_t &= \sum_{k=0}^{\infty} \left( \sum_{i=0}^{k} a_i b_{k-i} \right) X_{t-k} = \sum_{k=0}^{\infty} c_k X_{t-k}
-\end{align*}
+\item Calculons $A(L) B(L) X_t$ :
+  \begin{align*}
+  A(L) B(L) X_t &= A(L) \left( \sum_{j=0}^{\infty} b_j X_{t-j} \right) = \sum_{i=0}^{\infty} a_i \sum_{j=0}^{\infty} b_j X_{t-j-i}
+  \end{align*}\newline
 
-où $c_k = \sum_{i=0}^{k} a_i b_{k-i}$ est le \textbf{produit de convolution} des suites $(a_i)$ et $(b_j)$.
+\item En posant $k = i + j$ et en réorganisant :
+  \[
+  A(L) B(L) X_t = \sum_{k=0}^{\infty} \left( \sum_{i=0}^{k} a_i b_{k-i} \right) X_{t-k} = \sum_{k=0}^{\infty} c_k X_{t-k}
+  \]
+  où $c_k = \sum_{i=0}^{k} a_i b_{k-i}$ est le \textbf{produit de convolution}.
+
+\end{itemize}
+
 \end{frame}
 
-\begin{frame}{Démonstration de la propriété 2 (2/2)}
-Il reste à montrer que la suite $(c_k)$ est absolument sommable.
+\begin{frame}{Démonstration de la multiplication (2/2)}
 
-\vspace{0.3cm}
+\begin{itemize}
 
-On a :
-\begin{align*}
-\sum_{k=0}^{\infty} |c_k| &= \sum_{k=0}^{\infty} \left| \sum_{i=0}^{k} a_i b_{k-i} \right| \leq \sum_{k=0}^{\infty} \sum_{i=0}^{k} |a_i| |b_{k-i}|
-\end{align*}
+\item Il reste à montrer que la suite $(c_k)$ est absolument sommable.\newline
 
-En changeant l'ordre de sommation :
-\begin{align*}
-\sum_{k=0}^{\infty} |c_k| &\leq \sum_{i=0}^{\infty} |a_i| \sum_{j=0}^{\infty} |b_j| = \left( \sum_{i=0}^{\infty} |a_i| \right) \left( \sum_{j=0}^{\infty} |b_j| \right) < +\infty
-\end{align*}
+\item On a :
+  \begin{align*}
+  \sum_{k=0}^{\infty} |c_k| &= \sum_{k=0}^{\infty} \left| \sum_{i=0}^{k} a_i b_{k-i} \right| \leq \sum_{k=0}^{\infty} \sum_{i=0}^{k} |a_i| |b_{k-i}|
+  \end{align*}\newline
 
-car $(a_i)$ et $(b_j)$ sont absolument sommables par hypothèse. \hfill $\square$
+\item En changeant l'ordre de sommation :
+  \[
+  \sum_{k=0}^{\infty} |c_k| \leq \left( \sum_{i=0}^{\infty} |a_i| \right) \left( \sum_{j=0}^{\infty} |b_j| \right) < +\infty
+  \]
+  car $(a_i)$ et $(b_j)$ sont absolument sommables. \hfill $\square$\newline
 
-\vspace{0.3cm}
+\item Le produit de deux séries absolument sommables est absolument sommable : l'ensemble des séries en $L$ forme une \textbf{algèbre}.
 
-\begin{alertblock}{Remarque}
-Le produit de deux séries absolument sommables est absolument sommable : l'ensemble des séries en $L$ forme une \textbf{algèbre}.
-\end{alertblock}
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Inversibilité du polynôme $(1 - \lambda L)$}
-\begin{block}{Proposition}
-Le polynôme retard $\phi(L) = 1 - \lambda L$ est inversible dès lors que $|\lambda| < 1$.
-\end{block}
 
-\textbf{Démonstration :} Posons $a_i = \lambda^i$ pour $i \geq 0$.
+\begin{itemize}
 
-La suite $(a_i)$ est absolument sommable (série géométrique convergente car $|\lambda| < 1$).
+\item Le polynôme retard $\phi(L) = 1 - \lambda L$ est inversible dès lors que $|\lambda| < 1$.\newline
 
-La série $\sum_{i=0}^{\infty} \lambda^i L^i$ est donc définie.
+\item Démonstration : Posons $a_i = \lambda^i$ pour $i \geq 0$. La suite $(a_i)$ est absolument sommable (série géométrique convergente car $|\lambda| < 1$).\newline
 
-\vspace{0.3cm}
+\item En multipliant par $\phi(L) = 1 - \lambda L$ :
+  \begin{align*}
+  (1 - \lambda L) \sum_{i=0}^{\infty} \lambda^i L^i &= \sum_{i=0}^{\infty} \lambda^i L^i - \sum_{i=0}^{\infty} \lambda^{i+1} L^{i+1} \\
+  &= 1 + \sum_{i=1}^{\infty} \lambda^i L^i - \sum_{i=1}^{\infty} \lambda^i L^i = 1
+  \end{align*}\newline
 
-En multipliant par $\phi(L) = 1 - \lambda L$ :
-\begin{align*}
-(1 - \lambda L) \sum_{i=0}^{\infty} \lambda^i L^i &= \sum_{i=0}^{\infty} \lambda^i L^i - \sum_{i=0}^{\infty} \lambda^{i+1} L^{i+1} \\
-&= 1 + \sum_{i=1}^{\infty} \lambda^i L^i - \sum_{i=1}^{\infty} \lambda^i L^i = 1
-\end{align*}
-Ainsi $(1 - \lambda L)^{-1} = \sum_{i=0}^{\infty} \lambda^i L^i$. \hfill $\square$
+\item Ainsi $(1 - \lambda L)^{-1} = \sum_{i=0}^{\infty} \lambda^i L^i$. \hfill $\square$
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Interprétation}
-Soit $(X_t, t \in \Z)$ un processus stationnaire au second ordre.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-Alors le processus $(Y_t, t \in \Z)$ défini par :
-\[
-Y_t = \sum_{i=0}^{\infty} \lambda^i X_{t-i}
-\]
-est l'unique processus stationnaire au second ordre solution de l'équation :
-\[
-Z_t - \lambda Z_{t-1} = X_t \quad \Leftrightarrow \quad (1 - \lambda L) Z_t = X_t
-\]
+\item Soit $(X_t, t \in \Z)$ un processus stationnaire au second ordre.\newline
 
-Il existe d'autres solutions (une infinité), mais elles ne sont pas stationnaires au second ordre.
+\item Alors le processus $(Y_t, t \in \Z)$ défini par :
+  \[
+  Y_t = \sum_{i=0}^{\infty} \lambda^i X_{t-i}
+  \]
+  est l'unique processus stationnaire au second ordre solution de l'équation :
+  \[
+  Z_t - \lambda Z_{t-1} = X_t \quad \Leftrightarrow \quad (1 - \lambda L) Z_t = X_t
+  \]\newline
 
-\vspace{0.3cm}
+\item Il existe d'autres solutions (une infinité), mais elles ne sont pas stationnaires au second ordre.\newline
 
-\textbf{Analogie avec les suites déterministes :} $u_n = \lambda u_{n-1} + b$ a une unique solution constante (stationnaire) : $u^* = \frac{b}{1-\lambda}$.
+\item \textbf{Analogie :} $u_n = \lambda u_{n-1} + b$ a une unique solution constante : $u^* = \frac{b}{1-\lambda}$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Inversion d'un polynôme général}
-\begin{block}{Proposition}
-Soit la fonction polynomiale :
-\[
-\phi(z) = 1 + \phi_1 z + \phi_2 z^2 + \cdots + \phi_p z^p
-\]
-dont les racines $z_j = \frac{1}{\lambda_j}$ sont plus grandes que 1 en module.
 
-Il existe une série $\psi(z) = \sum_{i=0}^{\infty} \psi_i z^i$ telle que $\phi(z) \cdot \psi(z) = 1$.
-\end{block}
+\begin{itemize}
 
-Le polynôme retard $\phi(L) = 1 + \phi_1 L + \phi_2 L^2 + \cdots + \phi_p L^p$ est inversible et admet pour inverse $\psi(L)$.
+\item Soit la fonction polynomiale :
+  \[
+  \phi(z) = 1 + \phi_1 z + \phi_2 z^2 + \cdots + \phi_p z^p
+  \]
+  dont les racines $z_j = \frac{1}{\lambda_j}$ sont plus grandes que 1 en module.\newline
+
+\item Il existe une série $\psi(z) = \sum_{i=0}^{\infty} \psi_i z^i$ telle que $\phi(z) \cdot \psi(z) = 1$.\newline
+
+\item Le polynôme retard $\phi(L) = 1 + \phi_1 L + \phi_2 L^2 + \cdots + \phi_p L^p$ est inversible et admet pour inverse $\psi(L)$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Méthode d'inversion par identification (1/2)}
-On cherche $\psi(z) = \sum_{i=0}^{\infty} \psi_i z^i$ tel que $\phi(z) \cdot \psi(z) = 1$.
 
-\vspace{0.2cm}
+\begin{itemize}
 
-Développons le produit :
-\[
-(1 + \phi_1 z + \phi_2 z^2 + \cdots + \phi_p z^p)(\psi_0 + \psi_1 z + \psi_2 z^2 + \cdots) = 1
-\]
+\item On cherche $\psi(z) = \sum_{i=0}^{\infty} \psi_i z^i$ tel que $\phi(z) \cdot \psi(z) = 1$.\newline
 
-En regroupant par puissances de $z$ :
-\begin{align*}
-z^0 &: \quad \psi_0 = 1 \\
-z^1 &: \quad \psi_1 + \phi_1 \psi_0 = 0 \quad \Rightarrow \quad \psi_1 = -\phi_1 \\
-z^2 &: \quad \psi_2 + \phi_1 \psi_1 + \phi_2 \psi_0 = 0 \quad \Rightarrow \quad \psi_2 = -\phi_1 \psi_1 - \phi_2 \\
-z^3 &: \quad \psi_3 + \phi_1 \psi_2 + \phi_2 \psi_1 + \phi_3 \psi_0 = 0 \quad \Rightarrow \quad \psi_3 = -\phi_1 \psi_2 - \phi_2 \psi_1 - \phi_3
-\end{align*}
+\item Développons le produit :
+  \[
+  (1 + \phi_1 z + \phi_2 z^2 + \cdots + \phi_p z^p)(\psi_0 + \psi_1 z + \psi_2 z^2 + \cdots) = 1
+  \]\newline
+
+\item En regroupant par puissances de $z$ :
+  \begin{align*}
+  z^0 &: \quad \psi_0 = 1 \\
+  z^1 &: \quad \psi_1 + \phi_1 \psi_0 = 0 \quad \Rightarrow \quad \psi_1 = -\phi_1 \\
+  z^2 &: \quad \psi_2 + \phi_1 \psi_1 + \phi_2 \psi_0 = 0 \quad \Rightarrow \quad \psi_2 = -\phi_1 \psi_1 - \phi_2
+  \end{align*}
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Méthode d'inversion par identification (2/2)}
-\textbf{Formule de récurrence générale :} Pour $k \geq 1$ :
-\[
-\boxed{\psi_k = -\sum_{j=1}^{\min(k,p)} \phi_j \psi_{k-j}}
-\]
-avec la convention $\psi_0 = 1$ et $\phi_j = 0$ pour $j > p$.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\textbf{Exemple :} Pour $\phi(L) = 1 - 0.8L$ (AR(1) avec $\phi_1 = -0.8$) :
-\begin{align*}
-\psi_0 &= 1 \\
-\psi_1 &= -(-0.8) \cdot 1 = 0.8 \\
-\psi_2 &= -(-0.8) \cdot 0.8 = 0.64 = 0.8^2 \\
-\psi_k &= 0.8^k
-\end{align*}
+\item \textbf{Formule de récurrence générale :} Pour $k \geq 1$ :
+  \[
+  \boxed{\psi_k = -\sum_{j=1}^{\min(k,p)} \phi_j \psi_{k-j}}
+  \]
+  avec la convention $\psi_0 = 1$ et $\phi_j = 0$ pour $j > p$.\newline
 
-On retrouve $(1 - 0.8L)^{-1} = \sum_{k=0}^{\infty} 0.8^k L^k$, cohérent avec la formule directe.
+\item \textbf{Exemple :} Pour $\phi(L) = 1 - 0.8L$ (AR(1) avec $\phi_1 = -0.8$) :
+  \begin{align*}
+  \psi_0 &= 1 \\
+  \psi_1 &= -(-0.8) \cdot 1 = 0.8 \\
+  \psi_2 &= -(-0.8) \cdot 0.8 = 0.64 = 0.8^2 \\
+  \psi_k &= 0.8^k
+  \end{align*}\newline
+
+\item On retrouve $(1 - 0.8L)^{-1} = \sum_{k=0}^{\infty} 0.8^k L^k$.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Cas des racines unitaires : le problème}
-\textbf{Question :} Que se passe-t-il si le polynôme $\phi(z)$ admet une ou plusieurs racines de module 1 (racines unitaires) ?
 
-\vspace{0.5cm}
+\begin{itemize}
 
-\begin{alertblock}{Problème fondamental}
-Si $\phi(z)$ admet une racine $z_0$ avec $|z_0| = 1$, alors le polynôme retard $\phi(L)$ n'est \textbf{pas inversible} au sens usuel : il n'existe pas de série $\psi(L) = \sum_{i=0}^{\infty} \psi_i L^i$ avec $(\psi_i)$ absolument sommable telle que $\phi(L) \psi(L) = 1$.
-\end{alertblock}
+\item Que se passe-t-il si le polynôme $\phi(z)$ admet une ou plusieurs racines de module 1 (racines unitaires) ?\newline
 
-\vspace{0.3cm}
+\item Si $\phi(z)$ admet une racine $z_0$ avec $|z_0| = 1$, alors le polynôme retard $\phi(L)$ n'est \textbf{pas inversible} au sens usuel : il n'existe pas de série $\psi(L) = \sum_{i=0}^{\infty} \psi_i L^i$ avec $(\psi_i)$ absolument sommable telle que $\phi(L) \psi(L) = 1$.\newline
 
-\textbf{Exemple :} Le polynôme $\phi(L) = 1 - L$ a pour racine $z = 1$ (racine unitaire).
+\item \textbf{Exemple :} Le polynôme $\phi(L) = 1 - L$ a pour racine $z = 1$ (racine unitaire).\newline
 
-L'inverse formel serait $\sum_{i=0}^{\infty} L^i$, mais la suite $(1, 1, 1, \ldots)$ n'est pas absolument sommable !
+\item L'inverse formel serait $\sum_{i=0}^{\infty} L^i$, mais la suite $(1, 1, 1, \ldots)$ n'est pas absolument sommable.
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Factorisation avec racines unitaires}
-Supposons que $\phi(z)$ admette $k$ racines unitaires (égales à 1 pour simplifier). On peut factoriser :
-\[
-\phi(z) = (1-z)^k \tilde{\phi}(z)
-\]
-où $\tilde{\phi}(z)$ est un polynôme dont toutes les racines sont de module $> 1$.
 
-\vspace{0.3cm}
-
-En termes d'opérateur retard :
-\[
-\phi(L) = (1-L)^k \tilde{\phi}(L)
-\]
-
-\begin{block}{Remarque clé}
 \begin{itemize}
-\item $(1-L)$ est l'\textbf{opérateur de différenciation} : $(1-L)X_t = X_t - X_{t-1} = \Delta X_t$
-\item $(1-L)^k$ correspond à la différenciation d'ordre $k$ : $\Delta^k X_t$
-\item $\tilde{\phi}(L)$ est inversible car ses racines sont de module $> 1$
+
+\item Supposons que $\phi(z)$ admette $k$ racines unitaires. On peut factoriser :
+  \[
+  \phi(z) = (1-z)^k \tilde{\phi}(z)
+  \]
+  où $\tilde{\phi}(z)$ est un polynôme dont toutes les racines sont de module $> 1$.\newline
+
+\item En termes d'opérateur retard :
+  \[
+  \phi(L) = (1-L)^k \tilde{\phi}(L)
+  \]\newline
+
+\item Remarques :
+  \begin{itemize}
+    \item $(1-L)$ est l'\textbf{opérateur de différenciation} : $(1-L)X_t = X_t - X_{t-1} = \Delta X_t$\newline
+    \item $(1-L)^k$ correspond à la différenciation d'ordre $k$ : $\Delta^k X_t$\newline
+    \item $\tilde{\phi}(L)$ est inversible car ses racines sont de module $> 1$
+  \end{itemize}
+
 \end{itemize}
-\end{block}
+
 \end{frame}
 
 \begin{frame}{Inversion partielle}
-Bien que $\phi(L)$ ne soit pas globalement inversible, on peut écrire :
-\[
-\phi(L) = (1-L)^k \tilde{\phi}(L)
-\]
 
-et inverser la partie $\tilde{\phi}(L)$ :
-\[
-\tilde{\phi}(L)^{-1} = \tilde{\psi}(L) = \sum_{i=0}^{\infty} \tilde{\psi}_i L^i
-\]
+\begin{itemize}
 
-avec $(\tilde{\psi}_i)$ absolument sommable.
+\item Bien que $\phi(L)$ ne soit pas globalement inversible, on peut écrire :
+  \[
+  \phi(L) = (1-L)^k \tilde{\phi}(L)
+  \]
+  et inverser la partie $\tilde{\phi}(L)$ :
+  \[
+  \tilde{\phi}(L)^{-1} = \tilde{\psi}(L) = \sum_{i=0}^{\infty} \tilde{\psi}_i L^i
+  \]
+  avec $(\tilde{\psi}_i)$ absolument sommable.\newline
 
-\vspace{0.3cm}
+\item Si $\phi(L) Y_t = X_t$, alors :
+  \[
+  (1-L)^k \tilde{\phi}(L) Y_t = X_t \quad \Rightarrow \quad (1-L)^k Y_t = \tilde{\psi}(L) X_t
+  \]\newline
 
-\textbf{Conséquence :} Si $\phi(L) Y_t = X_t$, alors :
-\[
-(1-L)^k \tilde{\phi}(L) Y_t = X_t \quad \Rightarrow \quad (1-L)^k Y_t = \tilde{\psi}(L) X_t
-\]
+\item On peut exprimer $\Delta^k Y_t$ en fonction de $X_t$, mais pas $Y_t$ directement.
 
-On peut exprimer $\Delta^k Y_t$ en fonction de $X_t$, mais pas $Y_t$ directement.
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Processus intégrés}
-\begin{block}{Définition}
-Un processus $(Y_t)$ est dit \textbf{intégré d'ordre $k$}, noté $Y_t \sim I(k)$, si :
+
 \begin{itemize}
-\item $Y_t$ n'est pas stationnaire
-\item $\Delta^k Y_t = (1-L)^k Y_t$ est stationnaire
+
+\item Un processus $(Y_t)$ est dit \textbf{intégré d'ordre $k$}, noté $Y_t \sim I(k)$, si :
+  \begin{itemize}
+    \item $Y_t$ n'est pas stationnaire\newline
+    \item $\Delta^k Y_t = (1-L)^k Y_t$ est stationnaire
+  \end{itemize}
+
+\item \textbf{Exemple :} La marche aléatoire $Y_t = Y_{t-1} + \varepsilon_t$ où $\varepsilon_t \sim BB(0,\sigma^2)$.\newline
+
+\item On a $(1-L)Y_t = \varepsilon_t$, donc $\Delta Y_t = \varepsilon_t$ est stationnaire. Ainsi $Y_t \sim I(1)$.\newline
+
+\item De nombreuses séries économiques (PIB, prix, indices boursiers) sont $I(1)$ : leur niveau n'est pas stationnaire, mais leur taux de croissance l'est.
+
 \end{itemize}
-\end{block}
 
-\vspace{0.3cm}
-
-\textbf{Exemple :} La marche aléatoire $Y_t = Y_{t-1} + \varepsilon_t$ où $\varepsilon_t \sim BB(0,\sigma^2)$.
-
-On a $(1-L)Y_t = \varepsilon_t$, donc $\Delta Y_t = \varepsilon_t$ est stationnaire.
-
-$\Rightarrow$ $Y_t \sim I(1)$ (intégré d'ordre 1).
-
-\vspace{0.3cm}
-
-\begin{alertblock}{Interprétation économique}
-De nombreuses séries économiques (PIB, prix, indices boursiers) sont $I(1)$ : leur niveau n'est pas stationnaire, mais leur taux de croissance (différence première) l'est.
-\end{alertblock}
 \end{frame}
 
 \begin{frame}{Résolution avec racines unitaires}
-\textbf{Stratégie générale :} Si $\phi(L)$ a $k$ racines unitaires, on ne peut pas inverser $\phi(L)$ directement, mais on peut :
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\textbf{1. Différencier} le processus $k$ fois pour éliminer les racines unitaires :
-\[
-\phi(L) Y_t = X_t \quad \Rightarrow \quad \tilde{\phi}(L) \Delta^k Y_t = X_t
-\]
+\item Si $\phi(L)$ a $k$ racines unitaires, on ne peut pas inverser $\phi(L)$ directement, mais on peut :\newline
 
-\textbf{2. Inverser} $\tilde{\phi}(L)$ (qui n'a plus de racines unitaires) :
-\[
-\Delta^k Y_t = \tilde{\psi}(L) X_t = \sum_{i=0}^{\infty} \tilde{\psi}_i X_{t-i}
-\]
+\item \textbf{1. Différencier} le processus $k$ fois pour éliminer les racines unitaires :
+  \[
+  \phi(L) Y_t = X_t \quad \Rightarrow \quad \tilde{\phi}(L) \Delta^k Y_t = X_t
+  \]\newline
 
-\textbf{3. Intégrer} $k$ fois pour retrouver $Y_t$ (avec $k$ constantes d'intégration).
+\item \textbf{2. Inverser} $\tilde{\phi}(L)$ (qui n'a plus de racines unitaires) :
+  \[
+  \Delta^k Y_t = \tilde{\psi}(L) X_t = \sum_{i=0}^{\infty} \tilde{\psi}_i X_{t-i}
+  \]\newline
+
+\item \textbf{3. Intégrer} $k$ fois pour retrouver $Y_t$ (avec $k$ constantes d'intégration).
+
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Interprétation des constantes d'intégration}
-L'intégration introduit $k$ \textbf{constantes d'intégration} qui correspondent aux \textbf{conditions initiales}.% du processus.
 
-\vspace{0.3cm}
+\begin{itemize}
 
-\textbf{Exemple pour $k=1$ :} Si $\Delta Y_t = Z_t$ où $Z_t$ est connu, alors :
-\[
-Y_t = Y_0 + \sum_{s=1}^{t} Z_s
-\]
-La constante $Y_0$ est la \textbf{condition initiale} (valeur du processus en $t=0$).
+\item L'intégration introduit $k$ \textbf{constantes d'intégration} qui correspondent aux \textbf{conditions initiales}.\newline
 
-\vspace{0.3cm}
+\item \textbf{Exemple pour $k=1$ :} Si $\Delta Y_t = Z_t$ où $Z_t$ est connu, alors :
+  \[
+  Y_t = Y_0 + \sum_{s=1}^{t} Z_s
+  \]
+  La constante $Y_0$ est la \textbf{condition initiale}.\newline
 
-\textbf{Exemple pour $k=2$ :} Si $\Delta^2 Y_t = Z_t$, alors :
-\[
-Y_t = Y_0 + t \cdot \Delta Y_0 + \sum_{s=1}^{t} (t-s+1) Z_s
-\]
-Les constantes $Y_0$ et $\Delta Y_0$ sont les conditions initiales sur le niveau et la pente.
+\item \textbf{Exemple pour $k=2$ :} Si $\Delta^2 Y_t = Z_t$, alors :
+  \[
+  Y_t = Y_0 + t \cdot \Delta Y_0 + \sum_{s=1}^{t} (t-s+1) Z_s
+  \]\newline
 
-\vspace{0.3cm}
+\item Ces conditions initiales déterminent le \textbf{niveau} du processus mais n'affectent pas sa dynamique.
 
-\begin{alertblock}{En pratique}
-Ces conditions initiales déterminent le \textbf{niveau} du processus mais n'affectent pas sa dynamique.% stationnaire (après différenciation).
-\end{alertblock}
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Conclusion sur les racines unitaires}
 
-\begin{block}{Résumé}
-Les racines unitaires empêchent l'inversion directe mais permettent une représentation du processus différencié. C'est la base de l'analyse des séries non stationnaires (tests de racine unitaire, cointégration).
-\end{block}
-
-\vspace{0.3cm}
-
-\textbf{Points clés :}
 \begin{itemize}
-\item Un polynôme avec $k$ racines unitaires ne peut pas être inversé en une série absolument sommable
-\item On factorise : $\phi(L) = (1-L)^k \tilde{\phi}(L)$ où $\tilde{\phi}(L)$ est inversible
-\item Le processus différencié $\Delta^k Y_t$ admet une représentation stationnaire
-\item Les $k$ conditions initiales déterminent le niveau mais pas la dynamique
+
+\item Les racines unitaires empêchent l'inversion directe mais permettent une représentation du processus différencié. C'est la base de l'analyse des séries non stationnaires.\newline
+
+\item Points clés :
+  \begin{itemize}
+    \item Un polynôme avec $k$ racines unitaires ne peut pas être inversé en une série absolument sommable\newline
+    \item On factorise : $\phi(L) = (1-L)^k \tilde{\phi}(L)$ où $\tilde{\phi}(L)$ est inversible\newline
+    \item Le processus différencié $\Delta^k Y_t$ admet une représentation stationnaire\newline
+    \item Les $k$ conditions initiales déterminent le niveau mais pas la dynamique
+  \end{itemize}
+
 \end{itemize}
+
 \end{frame}
 
 \begin{frame}{Résumé}
+
 \begin{itemize}
-\item Un \textbf{processus stochastique} est une suite de variables aléatoires.
-\item La \textbf{stationnarité} (au second ordre) simplifie considérablement l'inférence.
-\item La \textbf{fonction d'autocovariance} $\gamma(h)$ caractérise les dépendances.
-\item La \textbf{fonction d'autocorrélation} $\rho(h) = \gamma(h)/\gamma(0)$ normalise les dépendances.
-\item L'\textbf{autocorrélation partielle} $r(K)$ mesure le lien direct entre $X_t$ et $X_{t-K}$.
-\item La \textbf{densité spectrale} $f(\omega)$ donne une vision fréquentielle équivalente.
+
+\item Un \textbf{processus stochastique} est une suite de variables aléatoires.\newline
+
+\item La \textbf{stationnarité} (au second ordre) simplifie considérablement l'inférence.\newline
+
+\item La \textbf{fonction d'autocovariance} $\gamma(h)$ caractérise les dépendances.\newline
+
+\item La \textbf{fonction d'autocorrélation} $\rho(h) = \gamma(h)/\gamma(0)$ normalise les dépendances.\newline
+
+\item L'\textbf{autocorrélation partielle} $r(K)$ mesure le lien direct entre $X_t$ et $X_{t-K}$.\newline
+
+\item La \textbf{densité spectrale} $f(\omega)$ donne une vision fréquentielle équivalente.\newline
+
 \item L'\textbf{opérateur retard} $L$ permet une écriture compacte des modèles.
+
 \end{itemize}
+
 \end{frame}
 
 \end{document}
