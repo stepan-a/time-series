@@ -1,0 +1,1485 @@
+\synctex=1
+\documentclass[11pt,aspectratio=169]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[french,provide=*]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{bm}
+
+% Police serif pour les mathématiques
+\usefonttheme[onlymath]{serif}
+
+% Git hash
+\usepackage{xstring}
+\usepackage{catchfile}
+\immediate\write18{git rev-parse HEAD > git.hash}
+\CatchFileDef{\HEAD}{git.hash}{\endlinechar=-1}
+\newcommand{\gitrevision}{\StrLeft{\HEAD}{7}}
+
+\usepackage{ccicons}
+
+% Pied de page personnalisé
+\setbeamertemplate{footline}{
+  \hfill\vspace*{1pt}\href{https://creativecommons.org/publicdomain/zero/1.0/deed.fr}{\cczero}\enspace\href{https://github.com/stepan-a/time-series}{\gitrevision}\enspace--\enspace\insertframenumber/\inserttotalframenumber\enspace--\enspace\today\enspace}
+
+% Supprimer la barre de navigation
+\setbeamertemplate{navigation symbols}{}
+
+% Commandes personnalisées
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathbb{V}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Corr}{\mathrm{Corr}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{Estimation des modèles ARMA}
+\author{}
+\date{}
+\institute{}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Plan}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Plan}
+\tableofcontents
+\end{frame}
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+\begin{frame}{Le problème de l'estimation}
+
+\begin{itemize}
+
+\item Soit un modèle ARMA($p$, $q$) :
+  \[
+  Y_t = c + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q}
+  \]
+  avec $\varepsilon_t$ un bruit blanc.\newline
+
+\item Les chapitres précédents ont montré comment calculer les moments du processus (autocovariances, autocorrélations, prévisions linéaires) en fonction des paramètres.\newline
+
+\item \textbf{Problème :} Comment estimer les paramètres $(c, \phi_1, \ldots, \phi_p, \theta_1, \ldots, \theta_q, \sigma^2)$ à partir d'un échantillon d'observations $(y_1, y_2, \ldots, y_T)$ ?
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Principe du maximum de vraisemblance}
+
+\begin{itemize}
+
+\item On note $\bm{\theta} = (c, \phi_1, \ldots, \phi_p, \theta_1, \ldots, \theta_q, \sigma^2)'$ le vecteur des paramètres.\newline
+
+\item On suppose que $\varepsilon_t \sim \text{i.i.d.} \; N(0, \sigma^2)$.\newline
+
+\item On calcule la densité jointe de l'échantillon observé :
+  \[
+  f_{Y_T, Y_{T-1}, \ldots, Y_1}(y_T, y_{T-1}, \ldots, y_1; \bm{\theta})
+  \]
+  vue comme une fonction de $\bm{\theta}$ pour les données observées.\newline
+
+\item L'\textbf{estimateur du maximum de vraisemblance} (EMV) est la valeur $\hat{\bm{\theta}}$ qui maximise cette fonction, c'est-à-dire la valeur des paramètres pour laquelle l'échantillon observé est le plus probable.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Hypothèse de normalité}
+
+\begin{itemize}
+
+\item L'hypothèse de normalité sur $\varepsilon_t$ est forte, mais l'estimation résultante reste pertinente même si elle est violée.\newline
+
+\item Si le vrai processus est non gaussien, les estimateurs obtenus en maximisant la vraisemblance gaussienne restent \textbf{convergents}. On parle alors d'estimateur de \textbf{quasi-maximum de vraisemblance}.\newline
+
+\item En revanche, les erreurs standard calculées sous l'hypothèse de normalité peuvent ne pas être correctes si les données sont non gaussiennes.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Décomposition en erreurs de prévision}
+
+\begin{itemize}
+
+\item La densité jointe peut être factorisée en utilisant la règle de Bayes :
+  \[
+  f_{Y_T, \ldots, Y_1}(y_T, \ldots, y_1; \bm{\theta}) = f_{Y_1}(y_1; \bm{\theta}) \cdot \prod_{t=2}^{T} f_{Y_t | Y_{t-1}}(y_t | y_{t-1}; \bm{\theta})
+  \]\newline
+
+\item La \textbf{log-vraisemblance} est donc :
+  \[
+  \mathcal{L}(\bm{\theta}) = \log f_{Y_1}(y_1; \bm{\theta}) + \sum_{t=2}^{T} \log f_{Y_t | Y_{t-1}}(y_t | y_{t-1}; \bm{\theta})
+  \]\newline
+
+\item Cette décomposition est connue sous le nom de \textbf{décomposition en erreurs de prévision} (\emph{prediction-error decomposition}).
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Vraisemblance d'un processus AR(1) gaussien}
+%==============================================================================
+
+\begin{frame}{Le modèle AR(1) gaussien}
+
+\begin{itemize}
+
+\item On considère le processus AR(1) gaussien :
+  \[
+  Y_t = c + \phi Y_{t-1} + \varepsilon_t
+  \]
+  avec $\varepsilon_t \sim \text{i.i.d.} \; N(0, \sigma^2)$ et $|\phi| < 1$.\newline
+
+\item Le vecteur de paramètres est $\bm{\theta} = (c, \phi, \sigma^2)'$.\newline
+
+\item L'espérance du processus stationnaire est $\mu = c/(1 - \phi)$.\newline
+
+\item La variance du processus stationnaire est $\sigma^2/(1 - \phi^2)$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Densité de la première observation}
+
+\begin{itemize}
+
+\item Puisque $\varepsilon_t$ est gaussien, $Y_1$ est également gaussien avec :
+  \[
+  \E[Y_1] = \mu = \frac{c}{1 - \phi}, \quad \Var[Y_1] = \frac{\sigma^2}{1 - \phi^2}
+  \]\newline
+
+\item La densité de $Y_1$ est donc :
+  \[
+  f_{Y_1}(y_1; \bm{\theta}) = \frac{1}{\sqrt{2\pi \sigma^2 / (1 - \phi^2)}} \exp\left[ \frac{-\{y_1 - c/(1 - \phi)\}^2}{2\sigma^2/(1 - \phi^2)} \right]
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Densités conditionnelles}
+
+\begin{itemize}
+
+\item Conditionnellement à $Y_{t-1} = y_{t-1}$, on a :
+  \[
+  Y_t = c + \phi Y_{t-1} + \varepsilon_t \sim N(c + \phi y_{t-1}, \sigma^2)
+  \]\newline
+
+\item La densité conditionnelle est :
+  \[
+  f_{Y_t | Y_{t-1}}(y_t | y_{t-1}; \bm{\theta}) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left[ \frac{-(y_t - c - \phi y_{t-1})^2}{2\sigma^2} \right]
+  \]\newline
+
+\item Cette expression est valable pour $t = 2, 3, \ldots, T$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Log-vraisemblance exacte}
+
+\begin{itemize}
+
+\item La log-vraisemblance exacte de l'AR(1) gaussien est :
+  \begin{align*}
+  \mathcal{L}(\bm{\theta}) &= -\frac{1}{2}\log(2\pi) - \frac{1}{2}\log\!\left(\frac{\sigma^2}{1 - \phi^2}\right) - \frac{\{y_1 - c/(1 - \phi)\}^2}{2\sigma^2/(1 - \phi^2)} \\
+  &\quad - \frac{T-1}{2}\log(2\pi) - \frac{T-1}{2}\log(\sigma^2) \\
+  &\quad - \sum_{t=2}^{T} \frac{(y_t - c - \phi y_{t-1})^2}{2\sigma^2}
+  \end{align*}
+
+\item On regroupe les termes pour obtenir :
+  \begin{align*}
+  \mathcal{L}(\bm{\theta}) &= -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) + \frac{1}{2}\log(1 - \phi^2) \\
+  &\quad - \frac{(1 - \phi^2)}{2\sigma^2}\left(y_1 - \frac{c}{1 - \phi}\right)^2 - \sum_{t=2}^{T} \frac{(y_t - c - \phi y_{t-1})^2}{2\sigma^2}
+  \end{align*}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Log-vraisemblance conditionnelle}
+
+\begin{itemize}
+
+\item Une alternative consiste à conditionner sur la première observation $y_1$ et à maximiser :
+  \[
+  \mathcal{L}_c(\bm{\theta}) = -\frac{T-1}{2}\log(2\pi) - \frac{T-1}{2}\log(\sigma^2) - \sum_{t=2}^{T} \frac{(y_t - c - \phi y_{t-1})^2}{2\sigma^2}
+  \]\newline
+
+\item La maximisation par rapport à $c$ et $\phi$ revient à minimiser :
+  \[
+  \sum_{t=2}^{T} (y_t - c - \phi y_{t-1})^2
+  \]\newline
+
+\item C'est un problème de \textbf{moindres carrés ordinaires} (MCO) : régression de $y_t$ sur une constante et $y_{t-1}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimateurs conditionnels du maximum de vraisemblance}
+
+\begin{itemize}
+
+\item Les estimateurs conditionnels de $c$ et $\phi$ sont donnés par la formule des MCO :
+  \[
+  \begin{bmatrix} \hat{c} \\ \hat{\phi} \end{bmatrix} = \begin{bmatrix} T-1 & \sum y_{t-1} \\ \sum y_{t-1} & \sum y_{t-1}^2 \end{bmatrix}^{-1} \begin{bmatrix} \sum y_t \\ \sum y_{t-1} y_t \end{bmatrix}
+  \]
+  où les sommes portent sur $t = 2, 3, \ldots, T$.\newline
+
+\item L'estimateur conditionnel de $\sigma^2$ est la variance résiduelle de la régression :
+  \[
+  \hat{\sigma}^2 = \frac{1}{T-1} \sum_{t=2}^{T} (y_t - \hat{c} - \hat{\phi} y_{t-1})^2
+  \]\newline
+
+\item Pour $T$ grand, les estimateurs exact et conditionnel convergent vers la même distribution asymptotique (si $|\phi| < 1$).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte et conditionnelle : comparaison}
+
+\begin{itemize}
+
+\item La vraisemblance exacte nécessite le terme supplémentaire $\frac{1}{2}\log(1 - \phi^2) - \frac{(1-\phi^2)}{2\sigma^2}(y_1 - \mu)^2$ lié à la première observation.\newline
+
+\item La vraisemblance conditionnelle ignore ce terme et traite $y_1$ comme déterministe.\newline
+
+\item Si $T$ est grand, la contribution de la première observation est négligeable.\newline
+
+\item Si $|\phi| < 1$, les deux approches donnent des estimateurs \textbf{convergents}. Si $|\phi| > 1$, la vraisemblance conditionnelle ne fournit pas d'estimateurs convergents car la densité de $Y_1$ n'est pas correctement spécifiée.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (1/6)}
+
+\begin{itemize}
+
+\item On peut dériver la vraisemblance d'une manière alternative en considérant le vecteur des $T$ observations :
+  \[
+  \mathbf{y} = (y_1, y_2, \ldots, y_T)'
+  \]\newline
+
+\item Ce vecteur peut être vu comme une unique réalisation d'un vecteur gaussien de dimension $T$ :
+  \[
+  \mathbf{y} \sim N(\bm{\mu}, \bm{\Omega})
+  \]\newline
+
+\item Le vecteur d'espérances est $\bm{\mu} = (\mu, \mu, \ldots, \mu)'$ avec $\mu = c/(1 - \phi)$.\newline
+
+\item La matrice de variance-covariance $\bm{\Omega}$ est une matrice $(T \times T)$ dont l'élément $(i, j)$ est l'autocovariance $\gamma(|i-j|)$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (2/6)}
+
+\begin{itemize}
+
+\item Pour l'AR(1), l'autocovariance est $\gamma(h) = \sigma^2 \phi^{|h|}/(1-\phi^2)$, donc :
+  \[
+  \bm{\Omega} = \sigma^2 \mathbf{V}
+  \]
+  où
+  \[
+  \mathbf{V} = \frac{1}{1-\phi^2} \begin{bmatrix} 1 & \phi & \phi^2 & \cdots & \phi^{T-1} \\ \phi & 1 & \phi & \cdots & \phi^{T-2} \\ \phi^2 & \phi & 1 & \cdots & \phi^{T-3} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ \phi^{T-1} & \phi^{T-2} & \phi^{T-3} & \cdots & 1 \end{bmatrix}
+  \]\newline
+
+\item $\mathbf{V}$ est une matrice de Toeplitz symétrique définie positive.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (3/6)}
+
+\begin{itemize}
+
+\item La densité du vecteur gaussien $\mathbf{y}$ s'écrit :
+  \[
+  f_{\mathbf{Y}}(\mathbf{y}; \bm{\theta}) = (2\pi)^{-T/2} |\bm{\Omega}|^{-1/2} \exp\!\left[-\tfrac{1}{2}(\mathbf{y} - \bm{\mu})'\bm{\Omega}^{-1}(\mathbf{y} - \bm{\mu})\right]
+  \]\newline
+
+\item La log-vraisemblance est donc :
+  \[
+  \boxed{\mathcal{L}(\bm{\theta}) = -\frac{T}{2}\log(2\pi) + \frac{1}{2}\log|\bm{\Omega}^{-1}| - \frac{1}{2}(\mathbf{y} - \bm{\mu})'\bm{\Omega}^{-1}(\mathbf{y} - \bm{\mu})}
+  \]\newline
+
+\item Cette expression fait intervenir l'inverse et le déterminant de la matrice $\bm{\Omega}$ de taille $(T \times T)$. En apparence, le calcul est coûteux, mais la structure de $\bm{\Omega}$ permet de le simplifier.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (4/6)}
+
+\begin{itemize}
+
+\item On introduit la matrice triangulaire inférieure $\mathbf{L}$ de taille $(T \times T)$ :
+  \[
+  \mathbf{L} = \begin{bmatrix} \sqrt{1-\phi^2} & 0 & 0 & \cdots & 0 & 0 \\ -\phi & 1 & 0 & \cdots & 0 & 0 \\ 0 & -\phi & 1 & \cdots & 0 & 0 \\ \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\ 0 & 0 & 0 & \cdots & -\phi & 1 \end{bmatrix}
+  \]\newline
+
+\item On peut montrer que :
+  \[
+  \mathbf{L}'\mathbf{L} = \mathbf{V}^{-1}
+  \]
+  et donc $\bm{\Omega}^{-1} = \sigma^{-2}\mathbf{V}^{-1} = \sigma^{-2}\mathbf{L}'\mathbf{L}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (5/6)}
+
+\begin{itemize}
+
+\item Puisque $\mathbf{L}$ est triangulaire, son déterminant est le produit des éléments diagonaux :
+  \[
+  |\mathbf{L}| = \sqrt{1-\phi^2} \cdot \underbrace{1 \cdot 1 \cdots 1}_{T-1} = \sqrt{1-\phi^2}
+  \]\newline
+
+\item Donc $|\mathbf{L}'\mathbf{L}| = |\mathbf{V}^{-1}| = 1 - \phi^2$, et :
+  \[
+  \frac{1}{2}\log|\bm{\Omega}^{-1}| = \frac{1}{2}\log(\sigma^{-2T} \cdot |\mathbf{V}^{-1}|) = -\frac{T}{2}\log(\sigma^2) + \frac{1}{2}\log(1 - \phi^2)
+  \]\newline
+
+\item On définit le vecteur transformé $\tilde{\mathbf{y}} = \mathbf{L}(\mathbf{y} - \bm{\mu})$, de sorte que :
+  \[
+  (\mathbf{y} - \bm{\mu})'\bm{\Omega}^{-1}(\mathbf{y} - \bm{\mu}) = \frac{1}{\sigma^2}\tilde{\mathbf{y}}'\tilde{\mathbf{y}}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Expression vectorielle de la vraisemblance (6/6)}
+
+\begin{itemize}
+
+\item Les composantes de $\tilde{\mathbf{y}} = \mathbf{L}(\mathbf{y} - \bm{\mu})$ sont :
+  \[
+  \tilde{y}_1 = \sqrt{1-\phi^2}\,(y_1 - \mu), \quad \tilde{y}_t = (y_t - \mu) - \phi(y_{t-1} - \mu) \;\; \text{pour } t \geq 2
+  \]\newline
+
+\item En substituant $\mu = c/(1-\phi)$ :
+  \[
+  \tilde{y}_t = y_t - c - \phi y_{t-1} \quad \text{pour } t \geq 2
+  \]
+  Ce sont les \textbf{erreurs de prévision} !\newline
+
+\item La log-vraisemblance s'écrit alors :
+  \[
+  \boxed{\mathcal{L}(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) + \frac{1}{2}\log(1-\phi^2) - \frac{1}{2\sigma^2}\sum_{t=1}^{T} \tilde{y}_t^2}
+  \]\newline
+
+\item On retrouve exactement l'expression de la log-vraisemblance exacte obtenue par la décomposition en erreurs de prévision.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Vraisemblance d'un processus AR($p$) gaussien}
+%==============================================================================
+
+\begin{frame}{Le modèle AR($p$) gaussien}
+
+\begin{itemize}
+
+\item On considère le processus AR($p$) gaussien :
+  \[
+  Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \varepsilon_t
+  \]
+  avec $\varepsilon_t \sim \text{i.i.d.}\; N(0, \sigma^2)$.\newline
+
+\item Le vecteur de paramètres est $\bm{\theta} = (c, \phi_1, \phi_2, \ldots, \phi_p, \sigma^2)'$.\newline
+
+\item L'espérance du processus stationnaire est :
+  \[
+  \mu = \frac{c}{1 - \phi_1 - \phi_2 - \cdots - \phi_p}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Construction de la vraisemblance}
+
+\begin{itemize}
+
+\item Les $p$ premières observations $(y_1, \ldots, y_p)$ suivent une loi gaussienne multivariée $N(\bm{\mu}_p, \sigma^2 \mathbf{V}_p)$.\newline
+
+\item Pour $t > p$, conditionnellement aux $p$ observations précédentes :
+  \[
+  Y_t | Y_{t-1}, \ldots, Y_{t-p} \sim N(c + \phi_1 y_{t-1} + \cdots + \phi_p y_{t-p}, \; \sigma^2)
+  \]\newline
+
+\item La log-vraisemblance exacte est :
+  \begin{align*}
+  \mathcal{L}(\bm{\theta}) &= -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) + \frac{1}{2}\log|\mathbf{V}_p^{-1}| \\
+  &\quad - \frac{1}{2\sigma^2}(\mathbf{y}_p - \bm{\mu}_p)'\mathbf{V}_p^{-1}(\mathbf{y}_p - \bm{\mu}_p) \\
+  &\quad - \sum_{t=p+1}^{T} \frac{(y_t - c - \phi_1 y_{t-1} - \cdots - \phi_p y_{t-p})^2}{2\sigma^2}
+  \end{align*}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimateurs conditionnels pour l'AR($p$)}
+
+\begin{itemize}
+
+\item La log-vraisemblance conditionnelle (sur les $p$ premières observations) est :
+  \begin{align*}
+  \mathcal{L}_c(\bm{\theta}) &= -\frac{T-p}{2}\log(2\pi) - \frac{T-p}{2}\log(\sigma^2) \\
+  &\quad - \sum_{t=p+1}^{T} \frac{(y_t - c - \phi_1 y_{t-1} - \cdots - \phi_p y_{t-p})^2}{2\sigma^2}
+  \end{align*}\newline
+
+\item La maximisation revient à minimiser :
+  \[
+  \sum_{t=p+1}^{T} (y_t - c - \phi_1 y_{t-1} - \cdots - \phi_p y_{t-p})^2
+  \]\newline
+
+\item C'est la somme des carrés des résidus d'une régression MCO de $y_t$ sur une constante et ses $p$ valeurs retardées.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimateur de la variance des innovations}
+
+\begin{itemize}
+
+\item L'estimateur conditionnel de $\sigma^2$ est le résidu quadratique moyen :
+  \[
+  \hat{\sigma}^2 = \frac{1}{T-p} \sum_{t=p+1}^{T} (y_t - \hat{c} - \hat{\phi}_1 y_{t-1} - \hat{\phi}_2 y_{t-2} - \cdots - \hat{\phi}_p y_{t-p})^2
+  \]\newline
+
+\item Les estimateurs exact et conditionnel ont la même distribution asymptotique.\newline
+
+\item \textbf{Résultat important :} Pour un processus AR($p$), les estimateurs conditionnels du maximum de vraisemblance sont identiques aux estimateurs des MCO. L'estimation d'un AR($p$) est donc particulièrement simple.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Estimation par quasi-maximum de vraisemblance}
+%==============================================================================
+
+\begin{frame}{Processus non gaussiens}
+
+\begin{itemize}
+
+\item Que se passe-t-il si le processus n'est pas gaussien ?\newline
+
+\item La régression MCO de $y_t$ sur une constante et ses $p$ retards fournit une estimation convergente de la \textbf{projection linéaire} :
+  \[
+  \hat{\E}(Y_t | Y_{t-1}, Y_{t-2}, \ldots, Y_{t-p})
+  \]
+  pourvu que le processus soit ergodique pour les moments d'ordre 2.\newline
+
+\item Cette régression MCO maximise aussi la \textbf{log-vraisemblance gaussienne conditionnelle}. Même si le processus n'est pas gaussien, maximiser cette fonction fournit des estimateurs convergents.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimateur de quasi-maximum de vraisemblance}
+
+\begin{itemize}
+
+\item Un estimateur obtenu en maximisant une vraisemblance mal spécifiée (par exemple, gaussienne alors que les données ne le sont pas) est appelé estimateur de \textbf{quasi-maximum de vraisemblance} (QMLE).\newline
+
+\item \textbf{Propriété :} Le QMLE fournit des estimateurs \textbf{convergents} des paramètres $(\phi_1, \ldots, \phi_p)$.\newline
+
+\item Cependant, les erreurs standard calculées sous l'hypothèse gaussienne peuvent ne pas être correctes. Il faut utiliser un estimateur robuste de la matrice de variance-covariance.\newline
+
+\item En pratique, si les données sont non gaussiennes, une transformation préalable (par exemple, le logarithme) peut rapprocher la distribution de la normalité.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Transformations Box-Cox}
+
+\begin{itemize}
+
+\item Pour une variable positive $Y_t$, Box et Cox (1964) proposent la famille de transformations :
+  \[
+  Y_t^{(\lambda)} = \begin{cases} \dfrac{Y_t^{\lambda} - 1}{\lambda} & \text{si } \lambda \neq 0 \\[0.3cm] \log Y_t & \text{si } \lambda = 0 \end{cases}
+  \]\newline
+
+\item On choisit $\lambda$ de sorte que $Y_t^{(\lambda)}$ soit bien approximé par un processus ARMA gaussien.\newline
+
+\item En pratique, pour les séries économiques qui croissent dans le temps (PIB, prix), on utilise souvent :
+  \[
+  y_t = \log X_t - \log X_{t-1}
+  \]
+  c'est-à-dire le taux de croissance en log.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Vraisemblance d'un processus MA(1) gaussien}
+%==============================================================================
+
+\begin{frame}{Le modèle MA(1) gaussien}
+
+\begin{itemize}
+
+\item On considère le processus MA(1) gaussien :
+  \[
+  Y_t = \mu + \varepsilon_t + \theta \varepsilon_{t-1}
+  \]
+  avec $\varepsilon_t \sim \text{i.i.d.}\; N(0, \sigma^2)$.\newline
+
+\item Le vecteur de paramètres est $\bm{\theta} = (\mu, \theta, \sigma^2)'$.\newline
+
+\item Contrairement à l'AR, la vraisemblance du MA ne se réduit \textbf{pas} à un problème de moindres carrés.\newline
+
+\item Deux approches : la vraisemblance \textbf{conditionnelle} (plus simple) et la vraisemblance \textbf{exacte} (plus précise en petit échantillon).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance conditionnelle du MA(1) (1/2)}
+
+\begin{itemize}
+
+\item On conditionne sur la valeur initiale $\varepsilon_0 = 0$. Sachant $\varepsilon_{t-1}$, la densité de $Y_t$ est :
+  \[
+  f_{Y_t | \varepsilon_{t-1}}(y_t | \varepsilon_{t-1}; \bm{\theta}) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left[\frac{-(y_t - \mu - \theta \varepsilon_{t-1})^2}{2\sigma^2}\right]
+  \]\newline
+
+\item Sachant $\varepsilon_0 = 0$, on déduit $\varepsilon_1$ de l'observation $y_1$ :
+  \[
+  \varepsilon_1 = y_1 - \mu
+  \]\newline
+
+\item Plus généralement, les innovations sont calculées récursivement :
+  \[
+  \varepsilon_t = y_t - \mu - \theta \varepsilon_{t-1}
+  \]
+  pour $t = 1, 2, \ldots, T$, en partant de $\varepsilon_0 = 0$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance conditionnelle du MA(1) (2/2)}
+
+\begin{itemize}
+
+\item La log-vraisemblance conditionnelle est :
+  \[
+  \mathcal{L}_c(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) - \sum_{t=1}^{T} \frac{\varepsilon_t^2}{2\sigma^2}
+  \]
+  où $\varepsilon_t = y_t - \mu - \theta \varepsilon_{t-1}$ avec $\varepsilon_0 = 0$.\newline
+
+\item La log-vraisemblance est une fonction \textbf{non linéaire} de $\mu$ et $\theta$ : pas de solution analytique explicite.\newline
+
+\item La maximisation requiert une \textbf{optimisation numérique}.\newline
+
+\item \textbf{Condition d'inversibilité :} L'approximation conditionnelle est valide si $|\theta| < 1$. Si l'optimisation conduit à $|\hat{\theta}| > 1$, il faut recommencer avec $\hat{\theta}^{-1}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Effet de la condition initiale}
+
+\begin{itemize}
+
+\item En développant la récurrence $\varepsilon_t = y_t - \mu - \theta \varepsilon_{t-1}$ :
+  \begin{align*}
+  \varepsilon_t &= (y_t - \mu) - \theta(y_{t-1} - \mu) + \theta^2(y_{t-2} - \mu) - \cdots \\
+  &\quad + (-1)^{t-1} \theta^{t-1}(y_1 - \mu) + (-1)^t \theta^t \varepsilon_0
+  \end{align*}\newline
+
+\item Si $|\theta| < 1$, l'effet de $\varepsilon_0 = 0$ décroît géométriquement : $(-1)^t \theta^t \varepsilon_0 \to 0$.\newline
+
+\item Pour $T$ suffisamment grand, l'approximation $\varepsilon_0 = 0$ est inoffensive.\newline
+
+\item Si $|\theta|$ est proche de 1, les premières innovations $\varepsilon_t$ sont mal estimées, ce qui peut affecter l'estimation en petit échantillon.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (1/6)}
+
+\begin{itemize}
+
+\item La vraisemblance exacte traite les $T$ observations comme un vecteur gaussien $\mathbf{y} = (y_1, \ldots, y_T)'$ de loi $N(\bm{\mu}, \bm{\Omega})$.\newline
+
+\item La matrice de variance-covariance $\bm{\Omega}$ a une structure \textbf{tridiagonale} :
+  \[
+  \bm{\Omega} = \sigma^2 \begin{bmatrix} 1+\theta^2 & \theta & 0 & \cdots & 0 \\ \theta & 1+\theta^2 & \theta & \cdots & 0 \\ 0 & \theta & 1+\theta^2 & \cdots & 0 \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & 0 & \cdots & 1+\theta^2 \end{bmatrix}
+  \]\newline
+
+\item La log-vraisemblance exacte est :
+  \[
+  \mathcal{L}(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{1}{2}\log|\bm{\Omega}| - \frac{1}{2}(\mathbf{y} - \bm{\mu})'\bm{\Omega}^{-1}(\mathbf{y} - \bm{\mu})
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (2/6)}
+
+\begin{itemize}
+
+\item On cherche la \textbf{factorisation triangulaire} $\bm{\Omega} = \mathbf{A}\mathbf{D}\mathbf{A}'$ où :
+  \begin{itemize}
+    \item $\mathbf{A}$ est triangulaire inférieure avec des 1 sur la diagonale,
+    \item $\mathbf{D}$ est diagonale avec des éléments strictement positifs.
+  \end{itemize}
+
+\item Puisque $\bm{\Omega}$ est tridiagonale, $\mathbf{A}$ est \textbf{bidiagonale} : seuls les éléments diagonaux et sous-diagonaux sont non nuls.\newline
+
+\item On note $S_t = 1 + \theta^2 + \theta^4 + \cdots + \theta^{2(t-1)}$ la somme géométrique. On a $S_1 = 1$ et :
+  \[
+  S_t = \frac{1 - \theta^{2t}}{1 - \theta^2} \quad \text{si } \theta^2 \neq 1
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (3/6)}
+
+\begin{itemize}
+
+\item On obtient $\mathbf{A}$ et $\mathbf{D}$ par \textbf{élimination de Gauss} sur $\bm{\Omega}/\sigma^2$.\newline
+
+\item \textbf{Étape 1 :} Le pivot est $d_1 = (1 + \theta^2) = S_2/S_1$. On élimine le terme sous-diagonal $\theta$ en soustrayant $\frac{\theta}{1+\theta^2}$ fois la première ligne. Cela donne $a_{21} = \frac{\theta}{1+\theta^2} = \frac{\theta S_1}{S_2}$.\newline
+
+\item \textbf{Étape 2 :} Le nouveau pivot est :
+  \[
+  d_2 = (1+\theta^2) - \frac{\theta^2}{1+\theta^2} = \frac{(1+\theta^2)^2 - \theta^2}{1+\theta^2} = \frac{1+\theta^2+\theta^4}{1+\theta^2} = \frac{S_3}{S_2}
+  \]
+  Le multiplicateur est $a_{32} = \frac{\theta}{d_2} = \frac{\theta S_2}{S_3}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (4/6)}
+
+\begin{itemize}
+
+\item En poursuivant, on montre par récurrence que pour $t = 1, \ldots, T$ :
+  \[
+  \boxed{d_t = \frac{S_{t+1}}{S_t}} \quad \text{et} \quad \boxed{a_{t+1,t} = \frac{\theta \, S_t}{S_{t+1}}}
+  \]\newline
+
+\item Explicitement, les matrices sont (en factorisant $\sigma^2$ dans $\mathbf{D}$) :
+  \[
+  \mathbf{A} = \begin{bmatrix} 1 & 0 & 0 & \cdots & 0 \\[3pt] \frac{\theta S_1}{S_2} & 1 & 0 & \cdots & 0 \\[3pt] 0 & \frac{\theta S_2}{S_3} & 1 & \cdots & 0 \\[3pt] \vdots & \vdots & \vdots & \ddots & \vdots \\[3pt] 0 & 0 & 0 & \cdots & 1 \end{bmatrix}, \quad \mathbf{D} = \sigma^2 \begin{bmatrix} \frac{S_2}{S_1} & & \\[3pt] & \frac{S_3}{S_2} & \\[3pt] & & \ddots \\[3pt] & & & \frac{S_{T+1}}{S_T} \end{bmatrix}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (5/6)}
+
+\begin{itemize}
+
+\item Le vecteur transformé $\tilde{\mathbf{y}} = \mathbf{A}^{-1}(\mathbf{y} - \bm{\mu})$ a pour composantes :
+  \[
+  \tilde{y}_1 = y_1 - \mu, \qquad \tilde{y}_t = (y_t - \mu) - \frac{\theta \, S_{t-1}}{S_t}\,\tilde{y}_{t-1} \quad \text{pour } t \geq 2
+  \]\newline
+
+\item Puisque $|\mathbf{A}| = 1$ (triangulaire avec des 1 sur la diagonale) et $\bm{\Omega} = \mathbf{A}\mathbf{D}\mathbf{A}'$ :
+  \[
+  |\bm{\Omega}| = |\mathbf{D}| = \sigma^{2T} \prod_{t=1}^{T} \frac{S_{t+1}}{S_t} = \sigma^{2T}\, \frac{S_{T+1}}{S_1} = \sigma^{2T}\, S_{T+1}
+  \]
+  car le produit est télescopique.\newline
+
+\item De plus :
+  \[
+  (\mathbf{y} - \bm{\mu})'\bm{\Omega}^{-1}(\mathbf{y} - \bm{\mu}) = \tilde{\mathbf{y}}'\mathbf{D}^{-1}\tilde{\mathbf{y}} = \sum_{t=1}^{T} \frac{\tilde{y}_t^2}{d_t}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA(1) (6/6)}
+
+\begin{itemize}
+
+\item La log-vraisemblance exacte s'écrit alors :
+  \[
+  \boxed{\mathcal{L}(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{1}{2}\sum_{t=1}^{T}\log(d_t) - \frac{1}{2}\sum_{t=1}^{T}\frac{\tilde{y}_t^2}{d_t}}
+  \]
+  avec $d_t = \sigma^2 S_{t+1}/S_t$ et $S_t = 1 + \theta^2 + \cdots + \theta^{2(t-1)}$.\newline
+
+\item Cette expression est valide pour \textbf{toute} valeur de $\theta$ (pas seulement $|\theta| < 1$).\newline
+
+\item On montre que si $\theta = \hat{\theta}$ maximise cette expression, alors $\hat{\theta}^{-1}$ donne la même valeur. On retient la solution inversible : $|\hat{\theta}| < 1$.\newline
+
+\item Pour la vraisemblance conditionnelle, cette propriété n'est pas garantie.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Vraisemblance d'un processus MA($q$) gaussien}
+%==============================================================================
+
+\begin{frame}{Le modèle MA($q$) gaussien}
+
+\begin{itemize}
+
+\item On considère le processus MA($q$) gaussien :
+  \[
+  Y_t = \mu + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \theta_2 \varepsilon_{t-2} + \cdots + \theta_q \varepsilon_{t-q}
+  \]
+  avec $\varepsilon_t \sim \text{i.i.d.}\; N(0, \sigma^2)$.\newline
+
+\item Le vecteur de paramètres est $\bm{\theta} = (\mu, \theta_1, \ldots, \theta_q, \sigma^2)'$.\newline
+
+\item La matrice de variance-covariance $\bm{\Omega}$ est une matrice bande de largeur $q$ :
+  les autocovariances $\gamma_k$ sont nulles pour $k > q$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance conditionnelle du MA($q$)}
+
+\begin{itemize}
+
+\item On pose $\varepsilon_0 = \varepsilon_{-1} = \cdots = \varepsilon_{-q+1} = 0$.\newline
+
+\item Les innovations sont calculées par récurrence :
+  \[
+  \varepsilon_t = y_t - \mu - \theta_1 \varepsilon_{t-1} - \theta_2 \varepsilon_{t-2} - \cdots - \theta_q \varepsilon_{t-q}
+  \]
+  pour $t = 1, 2, \ldots, T$.\newline
+
+\item La log-vraisemblance conditionnelle est :
+  \[
+  \mathcal{L}_c(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) - \sum_{t=1}^{T}\frac{\varepsilon_t^2}{2\sigma^2}
+  \]\newline
+
+\item Cette approximation est valide si toutes les racines de $1 + \theta_1 z + \cdots + \theta_q z^q = 0$ sont de module $> 1$ (inversibilité).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte du MA($q$)}
+
+\begin{itemize}
+
+\item La structure bande de $\bm{\Omega}$ permet d'utiliser la factorisation triangulaire $\bm{\Omega} = \mathbf{A}\mathbf{D}\mathbf{A}'$.\newline
+
+\item $\mathbf{A}$ est une matrice triangulaire inférieure bande : $a_{ij} = 0$ pour $i > q + j$.\newline
+
+\item Les éléments de $\tilde{\mathbf{y}} = \mathbf{A}^{-1}(\mathbf{y} - \bm{\mu})$ se calculent récursivement par résolution d'un système triangulaire.\newline
+
+\item La log-vraisemblance exacte est :
+  \[
+  \mathcal{L}(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{1}{2}\sum_{t=1}^{T}\log(d_{tt}) - \frac{1}{2}\sum_{t=1}^{T}\frac{\tilde{y}_t^2}{d_{tt}}
+  \]\newline
+
+\item Contrairement à la vraisemblance conditionnelle, l'expression exacte est valide pour toute valeur de $(\theta_1, \ldots, \theta_q)$.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Vraisemblance d'un processus ARMA($p$, $q$) gaussien}
+%==============================================================================
+
+\begin{frame}{Le modèle ARMA($p$, $q$) gaussien}
+
+\begin{itemize}
+
+\item Le modèle ARMA($p$, $q$) gaussien s'écrit :
+  \[
+  Y_t = c + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \varepsilon_t + \theta_1 \varepsilon_{t-1} + \cdots + \theta_q \varepsilon_{t-q}
+  \]
+  avec $\varepsilon_t \sim \text{i.i.d.}\; N(0, \sigma^2)$.\newline
+
+\item Le vecteur de paramètres est $\bm{\theta} = (c, \phi_1, \ldots, \phi_p, \theta_1, \ldots, \theta_q, \sigma^2)'$.\newline
+
+\item Le nombre de paramètres est $p + q + 2$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance conditionnelle du ARMA($p$, $q$)}
+
+\begin{itemize}
+
+\item On fixe les conditions initiales :
+  \begin{itemize}
+  \item $\mathbf{y}_0 = (y_0, y_{-1}, \ldots, y_{-p+1})'$ aux valeurs observées ou à l'espérance,
+  \item $\bm{\varepsilon}_0 = (\varepsilon_0, \varepsilon_{-1}, \ldots, \varepsilon_{-q+1})' = \mathbf{0}$.
+  \end{itemize}
+
+\item Les innovations sont calculées récursivement :
+  \[
+  \varepsilon_t = y_t - c - \phi_1 y_{t-1} - \cdots - \phi_p y_{t-p} - \theta_1 \varepsilon_{t-1} - \cdots - \theta_q \varepsilon_{t-q}
+  \]
+  pour $t = 1, 2, \ldots, T$.\newline
+
+\item La log-vraisemblance conditionnelle est :
+  \[
+  \mathcal{L}_c(\bm{\theta}) = -\frac{T}{2}\log(2\pi) - \frac{T}{2}\log(\sigma^2) - \sum_{t=1}^{T} \frac{\varepsilon_t^2}{2\sigma^2}
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Conditions initiales alternatives}
+
+\begin{itemize}
+
+\item \textbf{Approche Box-Jenkins :} On fixe $y_s = c/(1 - \phi_1 - \cdots - \phi_p)$ pour $s \leq 0$ et $\varepsilon_s = 0$ pour $s \leq 0$.\newline
+
+\item \textbf{Approche alternative :} On fixe les $\varepsilon$ à zéro et les $y$ à leurs valeurs observées. On commence l'itération à $t = p + 1$ :
+  \[
+  \varepsilon_p = \varepsilon_{p-1} = \cdots = \varepsilon_{p-q+1} = 0
+  \]
+  La log-vraisemblance conditionnelle est alors :
+  \[
+  \mathcal{L}_c(\bm{\theta}) = -\frac{T-p}{2}\log(2\pi) - \frac{T-p}{2}\log(\sigma^2) - \sum_{t=p+1}^{T}\frac{\varepsilon_t^2}{2\sigma^2}
+  \]\newline
+
+\item Ces approximations sont valides si toutes les racines de $\phi(z) = 0$ et $\theta(z) = 0$ sont de module $> 1$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Vraisemblance exacte}
+
+\begin{itemize}
+
+\item L'approche la plus rigoureuse utilise le \textbf{filtre de Kalman} pour calculer la vraisemblance exacte.\newline
+
+\item Le filtre de Kalman fournit, de manière récursive, les prévisions optimales et les erreurs de prévision, ce qui permet de construire la vraisemblance par décomposition en erreurs de prévision.\newline
+
+\item Alternativement, on peut utiliser la \textbf{factorisation triangulaire} de la matrice de variance-covariance $\bm{\Omega}$, comme dans le cas MA.\newline
+
+\item Les deux approches donnent le même résultat mais diffèrent en termes d'implémentation informatique.
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Optimisation numérique}
+%==============================================================================
+
+\begin{frame}{Le problème d'optimisation}
+
+\begin{itemize}
+
+\item La log-vraisemblance est une fonction non linéaire de $\bm{\theta}$. Il faut trouver :
+  \[
+  \hat{\bm{\theta}} = \arg\max_{\bm{\theta}} \mathcal{L}(\bm{\theta})
+  \]\newline
+
+\item \textbf{Exception :} pour un processus AR pur, les estimateurs ont une solution analytique (MCO).\newline
+
+\item Dans le cas général (MA ou ARMA), il faut recourir à des méthodes d'\textbf{optimisation numérique}.\newline
+
+\item Idée : calculer numériquement $\mathcal{L}(\bm{\theta})$ pour différentes valeurs de $\bm{\theta}$ et chercher la valeur qui maximise cette fonction.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Recherche sur grille (\emph{grid search})}
+
+\begin{itemize}
+
+\item La méthode la plus simple : évaluer $\mathcal{L}(\bm{\theta})$ sur une grille de valeurs de $\bm{\theta}$.\newline
+
+\item \textbf{Exemple :} Pour un AR(1) avec $c = 0$ et $\sigma^2 = 1$, on évalue $\mathcal{L}(\phi)$ pour $\phi \in \{-0.9, -0.8, \ldots, 0.8, 0.9\}$.\newline
+
+\item On raffine la grille autour du maximum.\newline
+
+\item \textbf{Avantage :} Simple et permet de visualiser la surface de vraisemblance.\newline
+
+\item \textbf{Inconvénient :} Devient impraticable quand le nombre de paramètres augmente (malédiction de la dimension).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Gradient et méthode de plus forte pente}
+
+\begin{itemize}
+
+\item On définit le \textbf{gradient} de la log-vraisemblance :
+  \[
+  \mathbf{g}(\bm{\theta}) = \frac{\partial \mathcal{L}(\bm{\theta})}{\partial \bm{\theta}}
+  \]
+  C'est un vecteur qui pointe dans la direction d'augmentation la plus rapide de $\mathcal{L}$.\newline
+
+\item \textbf{Méthode de plus forte pente} (\emph{steepest ascent}) :
+  \[
+  \bm{\theta}^{(n+1)} = \bm{\theta}^{(n)} + \alpha_n \mathbf{g}(\bm{\theta}^{(n)})
+  \]
+  où $\alpha_n > 0$ est le \textbf{pas} de l'algorithme.\newline
+
+\item On itère jusqu'à convergence : $\|\bm{\theta}^{(n+1)} - \bm{\theta}^{(n)}\| < \epsilon$ ou $\|\mathbf{g}(\bm{\theta}^{(n)})\| < \epsilon$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Calcul du gradient}
+
+\begin{itemize}
+
+\item Le gradient peut être calculé de deux manières.\newline
+
+\item \textbf{Analytiquement :} On différencie $\mathcal{L}(\bm{\theta})$ par rapport à chaque élément de $\bm{\theta}$. C'est possible pour les modèles AR et MA, mais les expressions deviennent complexes pour les modèles ARMA.\newline
+
+\item \textbf{Numériquement :} On approxime les dérivées partielles par différences finies :
+  \[
+  \frac{\partial \mathcal{L}}{\partial \theta_i} \approx \frac{\mathcal{L}(\bm{\theta} + h \mathbf{e}_i) - \mathcal{L}(\bm{\theta} - h \mathbf{e}_i)}{2h}
+  \]
+  où $\mathbf{e}_i$ est le $i$-ème vecteur de la base canonique et $h$ est un petit incrément.\newline
+
+\item Le gradient numérique est facile à programmer mais introduit une erreur d'approximation.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Maxima locaux et globaux}
+
+\begin{itemize}
+
+\item Si la log-vraisemblance est \textbf{unimodale}, les méthodes itératives convergent vers le maximum global, quel que soit le point de départ.\newline
+
+\item En général, $\mathcal{L}(\bm{\theta})$ peut avoir plusieurs \textbf{maxima locaux}. L'algorithme converge alors vers le maximum local le plus proche du point de départ.\newline
+
+\item \textbf{Stratégies pratiques :}
+  \begin{itemize}
+    \item Essayer plusieurs points de départ différents\newline
+    \item Utiliser d'abord une recherche sur grille grossière, puis affiner avec une méthode de gradient\newline
+    \item Comparer les valeurs de $\mathcal{L}(\hat{\bm{\theta}})$ obtenues à partir de différents points de départ
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Distribution asymptotique et tests}
+%==============================================================================
+
+\begin{frame}{La fonction de score}
+
+\begin{itemize}
+
+\item On appelle \textbf{fonction de score} le gradient de la log-vraisemblance :
+  \[
+  \mathbf{s}(\bm{\theta}) = \frac{\partial \mathcal{L}(\bm{\theta})}{\partial \bm{\theta}}
+  \]
+  C'est un vecteur de dimension $(p+q+2) \times 1$.\newline
+
+\item Sous des conditions de régularité (échange dérivée/intégrale), le score a une espérance nulle évaluée en la vraie valeur :
+  \[
+  \E_{\bm{\theta}_0}\!\left[\mathbf{s}(\bm{\theta}_0)\right] = \mathbf{0}
+  \]\newline
+
+\item Intuition : à la vraie valeur des paramètres, la log-vraisemblance est en moyenne à son maximum.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Matrice d'information de Fisher}
+
+\begin{itemize}
+
+\item La \textbf{matrice d'information de Fisher} est définie par :
+  \[
+  \mathcal{I}(\bm{\theta}) = \Var_{\bm{\theta}}\!\left[\mathbf{s}(\bm{\theta})\right] = \E_{\bm{\theta}}\!\left[\mathbf{s}(\bm{\theta})\mathbf{s}(\bm{\theta})'\right]
+  \]\newline
+
+\item Sous les conditions de régularité, on a l'\textbf{égalité de l'information} :
+  \[
+  \mathcal{I}(\bm{\theta}) = -\E_{\bm{\theta}}\!\left[\frac{\partial^2 \mathcal{L}(\bm{\theta})}{\partial \bm{\theta}\, \partial \bm{\theta}'}\right] = -\E_{\bm{\theta}}\!\left[\mathbf{H}(\bm{\theta})\right]
+  \]
+  où $\mathbf{H}(\bm{\theta})$ est la matrice \textbf{hessienne} de la log-vraisemblance.\newline
+
+\item La matrice d'information mesure la quantité d'information que l'échantillon contient sur les paramètres.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Borne de Cramér-Rao}
+
+\begin{itemize}
+
+\item \textbf{Borne de Cramér-Rao :} Pour tout estimateur sans biais $\hat{\bm{\theta}}$ de $\bm{\theta}$ :
+  \[
+  \Var(\hat{\bm{\theta}}) \geq \mathcal{I}(\bm{\theta})^{-1}
+  \]
+  au sens des matrices (la différence est semi-définie positive).\newline
+
+\item L'estimateur du maximum de vraisemblance \textbf{atteint} cette borne asymptotiquement : c'est l'estimateur le plus précis (asymptotiquement) parmi les estimateurs réguliers.\newline
+
+\item Plus la courbure de la log-vraisemblance est forte autour de $\bm{\theta}_0$ (information de Fisher élevée), plus l'estimation est précise.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Distribution asymptotique de l'EMV}
+
+\begin{itemize}
+
+\item Sous des conditions de régularité (stationnarité, ergodicité, identifiabilité, $\bm{\theta}_0$ intérieur à l'espace des paramètres), l'EMV vérifie :\newline
+
+\item \textbf{Convergence :}
+  \[
+  \hat{\bm{\theta}} \xrightarrow{p} \bm{\theta}_0 \quad \text{quand } T \to \infty
+  \]\newline
+
+\item \textbf{Normalité asymptotique :}
+  \[
+  \boxed{\sqrt{T}\left(\hat{\bm{\theta}} - \bm{\theta}_0\right) \xrightarrow{d} N\!\left(\mathbf{0},\; \mathcal{I}(\bm{\theta}_0)^{-1}\right)}
+  \]\newline
+
+\item En d'autres termes, pour $T$ grand :
+  \[
+  \hat{\bm{\theta}} \;\overset{a}{\sim}\; N\!\left(\bm{\theta}_0,\; \frac{1}{T}\mathcal{I}(\bm{\theta}_0)^{-1}\right)
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Erreurs standard et intervalles de confiance}
+
+\begin{itemize}
+
+\item En pratique, on estime la matrice de variance-covariance en remplaçant la matrice d'information par la \textbf{hessienne observée} :
+  \[
+  \widehat{\Var}(\hat{\bm{\theta}}) = \left[-\mathbf{H}(\hat{\bm{\theta}})\right]^{-1} = \left[-\frac{\partial^2 \mathcal{L}}{\partial \bm{\theta}\, \partial \bm{\theta}'}\bigg|_{\bm{\theta}=\hat{\bm{\theta}}}\right]^{-1}
+  \]\newline
+
+\item L'\textbf{erreur standard} du $i$-ème paramètre est :
+  \[
+  \text{se}(\hat{\theta}_i) = \sqrt{\left[\widehat{\Var}(\hat{\bm{\theta}})\right]_{ii}}
+  \]\newline
+
+\item Un \textbf{intervalle de confiance} à 95\% pour $\theta_i$ est :
+  \[
+  \hat{\theta}_i \pm 1{,}96 \times \text{se}(\hat{\theta}_i)
+  \]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimateur OPG}
+
+\begin{itemize}
+
+\item Une alternative à la hessienne est l'estimateur \textbf{OPG} (\emph{outer product of gradients}). On décompose la log-vraisemblance en contributions individuelles :
+  \[
+  \mathcal{L}(\bm{\theta}) = \sum_{t=1}^{T} \ell_t(\bm{\theta})
+  \]\newline
+
+\item La matrice d'information est estimée par :
+  \[
+  \widehat{\mathcal{I}}_{\text{OPG}} = \sum_{t=1}^{T} \frac{\partial \ell_t(\hat{\bm{\theta}})}{\partial \bm{\theta}} \frac{\partial \ell_t(\hat{\bm{\theta}})}{\partial \bm{\theta}'}
+  \]\newline
+
+\item Cet estimateur est facile à calculer (pas besoin de dérivées secondes), mais peut être moins précis en petit échantillon.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Cas du quasi-maximum de vraisemblance}
+
+\begin{itemize}
+
+\item Si le modèle est mal spécifié (par exemple, on maximise une vraisemblance gaussienne alors que les erreurs ne sont pas gaussiennes), l'égalité de l'information \textbf{ne tient plus} :
+  \[
+  \mathbf{A} = -\E\!\left[\mathbf{H}(\bm{\theta}_0)\right] \neq \mathbf{B} = \E\!\left[\mathbf{s}(\bm{\theta}_0)\mathbf{s}(\bm{\theta}_0)'\right]
+  \]\newline
+
+\item La distribution asymptotique du QMLE est alors :
+  \[
+  \sqrt{T}\left(\hat{\bm{\theta}} - \bm{\theta}_0\right) \xrightarrow{d} N\!\left(\mathbf{0},\; \mathbf{A}^{-1}\mathbf{B}\,\mathbf{A}^{-1}\right)
+  \]\newline
+
+\item La matrice $\mathbf{A}^{-1}\mathbf{B}\,\mathbf{A}^{-1}$ est appelée \textbf{matrice sandwich} (ou estimateur de White/Huber). Il faut l'utiliser pour obtenir des erreurs standard robustes.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Estimation de la matrice sandwich}
+
+\begin{itemize}
+
+\item En pratique, on estime :
+  \[
+  \hat{\mathbf{A}} = -\frac{1}{T}\mathbf{H}(\hat{\bm{\theta}}) = -\frac{1}{T}\frac{\partial^2 \mathcal{L}}{\partial \bm{\theta}\, \partial \bm{\theta}'}\bigg|_{\hat{\bm{\theta}}}
+  \]\newline
+
+\item Et :
+  \[
+  \hat{\mathbf{B}} = \frac{1}{T}\sum_{t=1}^{T} \frac{\partial \ell_t(\hat{\bm{\theta}})}{\partial \bm{\theta}} \frac{\partial \ell_t(\hat{\bm{\theta}})}{\partial \bm{\theta}'}
+  \]\newline
+
+\item L'estimateur robuste de la variance est alors :
+  \[
+  \widehat{\Var}_{\text{rob}}(\hat{\bm{\theta}}) = \frac{1}{T}\hat{\mathbf{A}}^{-1}\hat{\mathbf{B}}\,\hat{\mathbf{A}}^{-1}
+  \]\newline
+
+\item Si le modèle est correctement spécifié, $\hat{\mathbf{A}} \approx \hat{\mathbf{B}}$ et on retrouve l'estimateur classique.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Test de Wald}
+
+\begin{itemize}
+
+\item On souhaite tester l'hypothèse linéaire $H_0 : \mathbf{R}\bm{\theta} = \mathbf{r}$ où $\mathbf{R}$ est une matrice $(r \times k)$ de rang $r$ et $k = p + q + 2$.\newline
+
+\item La \textbf{statistique de Wald} est :
+  \[
+  W = (\mathbf{R}\hat{\bm{\theta}} - \mathbf{r})'\left[\mathbf{R}\,\widehat{\Var}(\hat{\bm{\theta}})\,\mathbf{R}'\right]^{-1}(\mathbf{R}\hat{\bm{\theta}} - \mathbf{r})
+  \]\newline
+
+\item Sous $H_0$ et asymptotiquement :
+  \[
+  W \xrightarrow{d} \chi^2(r)
+  \]\newline
+
+\item \textbf{Avantage :} Ne nécessite que l'estimation du modèle \textbf{non contraint}.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Test de Wald : cas scalaire}
+
+\begin{itemize}
+
+\item Pour tester $H_0 : \theta_i = \theta_i^0$ (un seul paramètre), la statistique de Wald se simplifie en la \textbf{$t$-statistique} au carré :
+  \[
+  W = \left(\frac{\hat{\theta}_i - \theta_i^0}{\text{se}(\hat{\theta}_i)}\right)^2 \xrightarrow{d} \chi^2(1)
+  \]\newline
+
+\item De manière équivalente, la \emph{$t$-statistique} :
+  \[
+  t = \frac{\hat{\theta}_i - \theta_i^0}{\text{se}(\hat{\theta}_i)} \xrightarrow{d} N(0,1)
+  \]\newline
+
+\item \textbf{Exemple :} Pour tester si un coefficient AR ou MA est significativement différent de zéro, on calcule $t = \hat{\theta}_i / \text{se}(\hat{\theta}_i)$ et on rejette $H_0$ si $|t| > 1{,}96$ au seuil de 5\%.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Test du rapport de vraisemblance}
+
+\begin{itemize}
+
+\item On estime le modèle sous $H_0$ (contraint, $\tilde{\bm{\theta}}$) et sous $H_1$ (non contraint, $\hat{\bm{\theta}}$).\newline
+
+\item La \textbf{statistique du rapport de vraisemblance} (\emph{likelihood ratio}) est :
+  \[
+  LR = 2\left[\mathcal{L}(\hat{\bm{\theta}}) - \mathcal{L}(\tilde{\bm{\theta}})\right]
+  \]\newline
+
+\item Sous $H_0$ et asymptotiquement :
+  \[
+  LR \xrightarrow{d} \chi^2(r)
+  \]\newline
+
+\item \textbf{Avantage :} Ne nécessite pas le calcul de la matrice de variance-covariance.\newline
+
+\item \textbf{Inconvénient :} Requiert l'estimation des deux modèles (contraint et non contraint).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Test du rapport de vraisemblance : exemple}
+
+\begin{itemize}
+
+\item \textbf{Test d'un AR(1) contre un AR(2) :}
+  \begin{itemize}
+  \item Modèle non contraint : $Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \varepsilon_t$
+  \item Modèle contraint ($H_0 : \phi_2 = 0$) : $Y_t = c + \phi_1 Y_{t-1} + \varepsilon_t$
+  \end{itemize}
+
+\item On calcule :
+  \[
+  LR = 2\left[\mathcal{L}_{\text{AR}(2)}(\hat{\bm{\theta}}) - \mathcal{L}_{\text{AR}(1)}(\tilde{\bm{\theta}})\right]
+  \]\newline
+
+\item On rejette $H_0$ si $LR > \chi^2_{1, 0{,}95} = 3{,}84$ (seuil à 5\%, 1 degré de liberté).\newline
+
+\item Ce test est directement applicable à la sélection de l'ordre d'un modèle ARMA.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Test du multiplicateur de Lagrange}
+
+\begin{itemize}
+
+\item Le test du \textbf{multiplicateur de Lagrange} (ou \textbf{test du score}) utilise uniquement l'estimation sous $H_0$ :
+  \[
+  LM = \mathbf{s}(\tilde{\bm{\theta}})'\,\mathcal{I}(\tilde{\bm{\theta}})^{-1}\,\mathbf{s}(\tilde{\bm{\theta}})
+  \]
+  où $\mathbf{s}(\tilde{\bm{\theta}})$ est le score évalué à l'estimateur contraint.\newline
+
+\item Sous $H_0$ et asymptotiquement :
+  \[
+  LM \xrightarrow{d} \chi^2(r)
+  \]\newline
+
+\item \textbf{Intuition :} Si $H_0$ est vraie, le score $\mathbf{s}(\tilde{\bm{\theta}})$ doit être proche de zéro. Un score élevé (en norme) fournit une preuve contre $H_0$.\newline
+
+\item \textbf{Avantage :} Ne nécessite que l'estimation du modèle \textbf{contraint} (le plus simple).
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Comparaison des trois tests}
+
+\begin{itemize}
+
+\item Les trois tests (Wald, LR, LM) sont \textbf{asymptotiquement équivalents} sous $H_0$ : ils ont la même distribution limite $\chi^2(r)$.\newline
+
+\item En échantillon fini, ils peuvent donner des résultats différents. On montre que :
+  \[
+  W \geq LR \geq LM
+  \]
+  Le test de Wald rejette le plus souvent, le test LM le moins.\newline
+
+\item \textbf{Choix pratique :}
+  \begin{itemize}
+  \item Test de Wald : facile si le modèle non contraint est déjà estimé,
+  \item Test LR : le plus couramment utilisé pour comparer des modèles emboîtés,
+  \item Test LM : utile quand le modèle contraint est beaucoup plus simple.
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Critères d'information}
+
+\begin{itemize}
+
+\item Pour comparer des modèles \textbf{non emboîtés}, on utilise des critères d'information qui pénalisent la complexité.\newline
+
+\item \textbf{Critère d'Akaike} (AIC, 1973) :
+  \[
+  \text{AIC} = -2\mathcal{L}(\hat{\bm{\theta}}) + 2k
+  \]
+  où $k$ est le nombre de paramètres estimés.\newline
+
+\item \textbf{Critère bayésien de Schwarz} (BIC, 1978) :
+  \[
+  \text{BIC} = -2\mathcal{L}(\hat{\bm{\theta}}) + k\log T
+  \]\newline
+
+\item On sélectionne le modèle qui \textbf{minimise} le critère. Le BIC pénalise davantage la complexité ($\log T > 2$ dès que $T \geq 8$) et sélectionne des modèles plus parcimonieux.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Critères d'information : propriétés}
+
+\begin{itemize}
+
+\item \textbf{AIC :} Minimise asymptotiquement l'erreur quadratique moyenne de prévision. Tend à sélectionner des modèles légèrement sur-paramétrés.\newline
+
+\item \textbf{BIC :} Sélectionne le vrai modèle avec probabilité tendant vers 1 quand $T \to \infty$ (\textbf{consistant}). Tend à sélectionner des modèles sous-paramétrés en petit échantillon.\newline
+
+\item \textbf{En pratique :}
+  \begin{itemize}
+  \item Si l'objectif est la \textbf{prévision}, l'AIC est souvent préféré.
+  \item Si l'objectif est l'\textbf{identification} du vrai modèle, le BIC est plus adapté.
+  \item On estime plusieurs modèles ARMA($p$, $q$) pour $p, q \in \{0, 1, \ldots, p_{\max}\}$ et on retient celui qui minimise le critère choisi.
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+%==============================================================================
+\section{Identification et sélection de modèles}
+%==============================================================================
+
+\begin{frame}{Approche de Box-Jenkins}
+
+\begin{itemize}
+
+\item Box et Jenkins (1976) proposent une procédure en quatre étapes :\newline
+
+\item \textbf{(1) Transformation :} Transformer les données pour obtenir une série approximativement stationnaire (différenciation, logarithme).\newline
+
+\item \textbf{(2) Identification :} Choisir les ordres $p$ et $q$ à l'aide des autocorrélations et autocorrélations partielles empiriques.\newline
+
+\item \textbf{(3) Estimation :} Estimer les paramètres $\phi(L)$ et $\theta(L)$ par maximum de vraisemblance.\newline
+
+\item \textbf{(4) Diagnostic :} Vérifier que le modèle estimé est compatible avec les données observées.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Autocorrélations empiriques}
+
+\begin{itemize}
+
+\item L'\textbf{autocorrélation empirique} d'ordre $j$ est :
+  \[
+  \hat{\rho}_j = \frac{\hat{\gamma}_j}{\hat{\gamma}_0}
+  \]
+  où
+  \[
+  \hat{\gamma}_j = \frac{1}{T} \sum_{t=j+1}^{T} (y_t - \bar{y})(y_{t-j} - \bar{y}), \quad \bar{y} = \frac{1}{T}\sum_{t=1}^{T} y_t
+  \]\newline
+
+\item Si les données proviennent d'un processus MA($q$), alors $\rho_j = 0$ pour $j > q$. On s'attend donc à ce que $\hat{\rho}_j \approx 0$ pour $j > q$.\newline
+
+\item Sous l'hypothèse de bruit blanc, $\hat{\rho}_j$ est approximativement distribué selon $N(0, 1/T)$. L'intervalle de confiance à 95\% est $\pm 2/\sqrt{T}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Autocorrélations partielles empiriques}
+
+\begin{itemize}
+
+\item L'\textbf{autocorrélation partielle} empirique d'ordre $m$ est le dernier coefficient $\hat{\alpha}_m^{(m)}$ dans la régression :
+  \[
+  y_{t+1} = \hat{c} + \hat{\alpha}_1^{(m)} y_t + \hat{\alpha}_2^{(m)} y_{t-1} + \cdots + \hat{\alpha}_m^{(m)} y_{t-m+1} + \hat{e}_t
+  \]\newline
+
+\item Si les données proviennent d'un processus AR($p$), alors l'autocorrélation partielle est nulle pour $m > p$ :
+  \[
+  \alpha_m^{(m)} = 0 \quad \text{pour } m > p
+  \]\newline
+
+\item Sous cette hypothèse, $\Var(\hat{\alpha}_m^{(m)}) \approx 1/T$ et l'intervalle de confiance à 95\% est $\pm 2/\sqrt{T}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Règles d'identification}
+
+\begin{itemize}
+
+\item \textbf{Processus MA($q$) :} Les autocorrélations $\hat{\rho}_j$ sont significativement non nulles pour $j \leq q$, puis deviennent nulles au-delà. Les autocorrélations partielles décroissent progressivement.\newline
+
+\item \textbf{Processus AR($p$) :} Les autocorrélations partielles $\hat{\alpha}_m^{(m)}$ sont significativement non nulles pour $m \leq p$, puis deviennent nulles au-delà. Les autocorrélations décroissent progressivement (mélange d'exponentielles ou de sinusoïdes amorties).\newline
+
+\item \textbf{Processus ARMA($p$, $q$) :} Les deux fonctions décroissent progressivement. L'identification est plus difficile et demande souvent d'essayer plusieurs spécifications.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Philosophie de la parcimonie}
+
+\begin{itemize}
+
+\item Box et Jenkins insistent sur le principe de \textbf{parcimonie} : utiliser le moins de paramètres possible.\newline
+
+\item Un modèle avec trop de paramètres :
+  \begin{itemize}
+    \item s'ajuste bien aux données historiques (sur-ajustement),
+    \item mais prévoit mal hors échantillon.
+  \end{itemize}
+
+\item La découverte que des modèles ARMA avec de petites valeurs de $p$ et $q$ produisent souvent de meilleures prévisions que les grands modèles macroéconométriques a été un résultat marquant.\newline
+
+\item En pratique, des valeurs de $p$ et $q$ inférieures ou égales à 2 ou 3 suffisent pour la plupart des applications.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Résumé}
+
+\begin{itemize}
+
+\item Le \textbf{maximum de vraisemblance} est le principe d'estimation dominant.
+
+\item Pour les processus \textbf{AR purs}, l'estimation se réduit aux MCO.
+
+\item Pour les processus \textbf{MA} et \textbf{ARMA}, la vraisemblance est non linéaire et nécessite une optimisation numérique.
+
+\item La vraisemblance \textbf{conditionnelle} simplifie les calculs mais nécessite l'inversibilité. La vraisemblance \textbf{exacte} est plus robuste.
+
+\item L'EMV est \textbf{asymptotiquement normal} avec une variance atteignant la borne de Cramér-Rao.
+
+\item Les tests de \textbf{Wald}, du \textbf{rapport de vraisemblance} et du \textbf{multiplicateur de Lagrange} permettent de tester des hypothèses sur les paramètres.
+
+\item Les critères \textbf{AIC} et \textbf{BIC} complètent l'identification par les autocorrélations pour la sélection de modèles.
+
+\end{itemize}
+
+\end{frame}
+
+\end{document}
