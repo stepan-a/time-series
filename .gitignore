@@ -1,4 +1,8 @@
-ds/auto
 *.aux
 *.log
 *.pdf
+
+ds/auto
+
+cours/auto/*
+cours/git.hash
