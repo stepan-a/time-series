@@ -10,5 +10,5 @@
  - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-1.pdf][Chapitre 1]]. Processus stochastiques stationnaires.
  - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-2.pdf][Chapitre 2]]. Modèles ARMA.
  - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-3.pdf][Chapitre 3]]. Estimation des modèles ARMA.
-
+ - [[https://le-mans.adjemian.eu/séries-temporelles/chapitre-4.pdf][Chapitre 4]]. Modèles état-mesure et filtre de Kalman.
 \\
