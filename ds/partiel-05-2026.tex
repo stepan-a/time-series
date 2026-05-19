@@ -1,0 +1,148 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[french]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Mans (Examen, L3)}}
+\date{}
+
+\pagenumbering{gobble}
+
+\maketitle
+
+\exercice{1} Soit le processus AR(2) défini par~:
+\[
+  Y_t = \frac{3}{8} + \frac{3}{4}Y_{t-1} - \frac{1}{8}Y_{t-2} + \varepsilon_t
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{1} Montrer que ce processus est asymptotiquement stationnaire
+au second ordre.\newline
+
+\question{2} Calculer son espérance.\newline
+
+\question{3} Écrire les équations de Yule-Walker et en déduire les
+expressions des autocovariances $\gamma(0)$, $\gamma(1)$ et
+$\gamma(2)$ en fonction de $\sigma_{\varepsilon}^2$.\newline
+
+\question{4} Donner la relation de récurrence vérifiée par
+l'autocovariance $\gamma(h)$ pour tout $h\geq 1$, puis en déduire la
+forme générale de $\gamma(h)$.\newline
+
+\bigskip
+
+\exercice{2} Supposons que $\{y_t,t\in\mathbb Z\}$ soit un ARMA($1,1$)
+de la forme~:
+\[
+y_t = 1 - \frac{1}{2}y_{t-1} + \varepsilon_t + \frac{1}{4} \varepsilon_{t-1}
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance
+1.\newline
+
+\question{1} Le processus est-il asymptotiquement stationnaire au
+second ordre et inversible~? Justifiez votre réponse.\newline
+
+On suppose que les conditions initiales sont telles que le processus
+est stationnaire au second ordre.\newline
+
+\question{2} Quelles sont les implications de cette hypothèse sur les
+moments d'ordre 1 et 2~? \question{3} Calculez l'espérance (on notera
+$\mu$). \question{4} Calculez les autocovariances $\gamma(0)$ et
+$\gamma(1)$. \question{5} Établir la relation de récurrence vérifiée
+par $\gamma(h)$ pour $h\geq 2$ et en déduire une expression
+explicite. \question{6} Que peut-on dire du signe de la fonction
+d'autocorrélation $\rho(h)$ lorsque $h$ varie~?\newline
+
+\bigskip
+
+\exercice{3} Soit le processus AR(2) gaussien~:
+\[
+y_t = c + \varphi_1 y_{t-1} + \varphi_2 y_{t-2} + \varepsilon_t
+\]
+avec $\varepsilon_t \sim \mathcal{N}(0,\sigma_{\varepsilon}^2)$,
+indépendants entre eux. On note $\mathcal Y_T \equiv
+\{y_1,y_2,\dots,y_T\}$ l'échantillon observé et
+$\bm{\theta}=(c,\varphi_1,\varphi_2,\sigma_{\varepsilon}^2)'$ le
+vecteur des paramètres. On supposera dans tout l'exercice que le
+processus est stationnaire.\newline
+
+\question{1} En utilisant le théorème de Bayes, écrire la
+décomposition de la vraisemblance exacte. Pourquoi cette vraisemblance
+est-elle plus délicate à manipuler que dans le cas d'un AR(1)~?\newline
+
+\question{2} Définir et écrire la vraisemblance conditionnelle (on
+conditionnera par rapport aux deux premières observations $y_1$ et
+$y_2$). En quoi diffère-t-elle de la vraisemblance exacte et quel est
+son intérêt pratique~?\newline
+
+\question{3} Donner l'expression de la log-vraisemblance
+conditionnelle. Montrer qu'à $\sigma_{\varepsilon}^2$ fixé, la
+maximisation de la log-vraisemblance conditionnelle par rapport à
+$(c,\varphi_1,\varphi_2)$ équivaut à un problème de moindres carrés
+ordinaires. En déduire l'estimateur correspondant sous forme
+matricielle.\newline
+
+\bigskip
+
+\exercice{4} Soit $\{x_t,t\in\mathbb Z\}$ un processus AR(1)
+stationnaire~:
+\[
+x_t = \rho x_{t-1} + \eta_t,\qquad |\rho|<1
+\]
+où $\eta_t$ est un bruit blanc d'espérance nulle et de variance
+$\sigma_{\eta}^2$. On observe en réalité $x_t$ avec une erreur de
+mesure~:
+\[
+y_t = x_t + \varepsilon_t
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$, indépendant du processus
+$\{\eta_s,\,s\in\mathbb Z\}$.\newline
+
+\question{1} En utilisant le polynôme retard, montrer que le processus
+$y_t$ vérifie~:
+\[
+(1-\rho L) y_t = \eta_t + \varepsilon_t - \rho\varepsilon_{t-1}
+\]
+
+\question{2} Calculer la fonction d'autocovariance du membre de droite
+$\xi_t \equiv \eta_t + \varepsilon_t - \rho\varepsilon_{t-1}$. En
+déduire que $\xi_t$ admet une représentation MA(1) du type $\xi_t =
+u_t - \theta u_{t-1}$ où $u_t$ est un bruit blanc de variance
+$\sigma_u^2$.\newline
+
+\question{3} En déduire que $y_t$ est un processus ARMA(1,1) que l'on
+explicitera. Donner le système d'équations vérifié par les paramètres
+$\theta$ et $\sigma_u^2$ de la représentation.\newline
+
+\question{4} Le processus $y_t$ est-il stationnaire au second ordre~?
+Est-il inversible~? Justifier.
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
