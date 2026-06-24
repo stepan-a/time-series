@@ -1,0 +1,377 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[11pt,a4paper,notitlepage]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[french]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}\\(Éléments de correction)}
+\author{\textsc{Université du Mans (2\textsuperscript{nde} session, L3)}}
+\date{Mardi 16 juin 2026}
+
+
+\maketitle
+
+\exercice{1}\newline
+
+\question{1} Le processus s'écrit $Y_t = \Theta(L)\varepsilon_t$ avec
+$\Theta(L) = 1 - \frac{5}{6}L + \frac{1}{6}L^2$, c'est-à-dire comme une
+combinaison linéaire \emph{finie} d'un bruit blanc. La suite des
+coefficients $(1,-\frac{5}{6},\frac{1}{6},0,0,\dots)$ est trivialement
+absolument sommable~: un processus MA d'ordre fini est
+\emph{toujours} stationnaire au second ordre, sans aucune condition sur
+les coefficients. Aucun calcul n'est nécessaire.\newline
+
+\question{2} Posons $\theta_1 = -\frac{5}{6}$ et $\theta_2 =
+\frac{1}{6}$, de sorte que $Y_t = \varepsilon_t + \theta_1
+\varepsilon_{t-1} + \theta_2\varepsilon_{t-2}$.\newline
+
+\textbf{Espérance.} Par linéarité, $\mathbb E[Y_t] = (1 + \theta_1 +
+\theta_2)\,\mathbb E[\varepsilon_t] = 0$.\newline
+
+\textbf{Autocovariances.} Comme les innovations sont non corrélées et
+de variance $\sigma_{\varepsilon}^2$, seuls les croisements de même
+date subsistent~:
+\[
+\gamma(0) = (1+\theta_1^2+\theta_2^2)\sigma_{\varepsilon}^2
+= \left(1+\tfrac{25}{36}+\tfrac{1}{36}\right)\sigma_{\varepsilon}^2
+= \frac{31}{18}\sigma_{\varepsilon}^2,
+\]
+\[
+\gamma(1) = (\theta_1 + \theta_1\theta_2)\sigma_{\varepsilon}^2
+= \theta_1(1+\theta_2)\sigma_{\varepsilon}^2
+= -\frac{5}{6}\cdot\frac{7}{6}\,\sigma_{\varepsilon}^2
+= -\frac{35}{36}\sigma_{\varepsilon}^2,
+\]
+\[
+\gamma(2) = \theta_2\,\sigma_{\varepsilon}^2 = \frac{1}{6}\sigma_{\varepsilon}^2.
+\]
+Pour $h\geq 3$, les trois termes de $Y_t$ et les trois termes de
+$Y_{t-h}$ ne partagent aucune innovation commune, donc~:
+\[
+\gamma(h) = 0,\qquad h\geq 3.
+\]
+On retrouve la propriété caractéristique d'un MA($q$)~: la fonction
+d'autocovariance est nulle au-delà de l'ordre $q=2$ (\emph{courte
+mémoire}).\newline
+
+\question{3} La fonction d'autocorrélation $\rho(h) =
+\gamma(h)/\gamma(0)$ vaut~:
+\[
+\rho(0)=1,\quad
+\rho(1) = \frac{-35/36}{31/18} = -\frac{35}{62},\quad
+\rho(2) = \frac{1/6}{31/18} = \frac{3}{31},
+\]
+et $\rho(h)=0$ pour $h\geq 3$.\newline
+
+\question{4} Le polynôme retard moyenne mobile est $\Theta(L) = 1 -
+\frac{5}{6}L + \frac{1}{6}L^2$. Ses racines vérifient $\frac{1}{6}L^2 -
+\frac{5}{6}L + 1 = 0$, soit $L^2 - 5L + 6 = 0$, dont les racines sont
+$L_1 = 2$ et $L_2 = 3$. Toutes deux sont strictement supérieures à 1 en
+module~: le processus est \textbf{inversible}. On a la
+factorisation~:
+\[
+\Theta(L) = \frac{1}{6}(L-2)(L-3)
+= \left(1-\frac{1}{2}L\right)\left(1-\frac{1}{3}L\right).
+\]
+Comme les racines sont $>1$, on peut réécrire $\{Y_t\}$ sous la forme
+d'un AR($\infty$)~: $\Theta(L)^{-1}Y_t = \varepsilon_t$.
+
+\bigskip
+
+\exercice{2}\newline
+
+\question{1} Le polynôme retard auto-régressif est $\Phi(L) = 1 - L +
+\frac{1}{2}L^2$. Ses racines vérifient $\frac{1}{2}L^2 - L + 1 = 0$,
+soit $L^2 - 2L + 2 = 0$, de discriminant $\Delta = 4 - 8 = -4 < 0$. Les
+racines sont \emph{complexes conjuguées}~:
+\[
+L_{1,2} = \frac{2 \pm 2i}{2} = 1 \pm i,
+\]
+de module $|L_{1,2}| = \sqrt{1^2+1^2} = \sqrt{2} > 1$. Les deux racines
+étant de module strictement supérieur à 1, le processus est
+asymptotiquement stationnaire au second ordre. La particularité ici est
+que ces racines sont \emph{complexes}, ce qui annonce une fonction
+d'autocovariance \emph{pseudo-périodique} (oscillations amorties).\newline
+
+\question{2} Sous stationnarité, $\mathbb E[Y_t] = \mu$ pour tout $t$.
+En prenant l'espérance de l'équation du processus~:
+\[
+\mu = 1 + \mu - \frac{1}{2}\mu \;\Longrightarrow\;
+\frac{1}{2}\mu = 1 \;\Longrightarrow\; \mu = 2.
+\]
+\newline
+
+\question{3} Posons $\tilde Y_t = Y_t - \mu$, qui vérifie $\tilde Y_t =
+\tilde Y_{t-1} - \frac{1}{2}\tilde Y_{t-2} + \varepsilon_t$. En
+multipliant par $\tilde Y_{t-h}$ et en prenant l'espérance, on obtient
+les équations de Yule-Walker. Pour $h\geq 1$ (en utilisant
+$\gamma(-h)=\gamma(h)$ et $\mathbb E[\varepsilon_t\tilde Y_{t-h}]=0$)~:
+\[
+\gamma(h) = \gamma(h-1) - \frac{1}{2}\gamma(h-2),
+\]
+et pour $h=0$ (avec $\mathbb E[\varepsilon_t\tilde Y_t] =
+\sigma_{\varepsilon}^2$)~:
+\[
+\gamma(0) = \gamma(1) - \frac{1}{2}\gamma(2) + \sigma_{\varepsilon}^2.
+\]
+
+\textbf{Pour $h=1$~:} $\gamma(1) = \gamma(0) - \frac{1}{2}\gamma(1)$,
+soit $\frac{3}{2}\gamma(1) = \gamma(0)$, d'où~:
+\[
+\gamma(1) = \frac{2}{3}\gamma(0).
+\]
+
+\textbf{Pour $h=2$~:} $\gamma(2) = \gamma(1) - \frac{1}{2}\gamma(0) =
+\frac{2}{3}\gamma(0) - \frac{1}{2}\gamma(0) = \frac{1}{6}\gamma(0)$,
+soit~:
+\[
+\gamma(2) = \frac{1}{6}\gamma(0).
+\]
+
+\textbf{Pour $h=0$~:} en substituant ces relations,
+\[
+\gamma(0) = \frac{2}{3}\gamma(0) - \frac{1}{2}\cdot\frac{1}{6}\gamma(0)
++ \sigma_{\varepsilon}^2
+= \frac{7}{12}\gamma(0) + \sigma_{\varepsilon}^2,
+\]
+soit $\frac{5}{12}\gamma(0) = \sigma_{\varepsilon}^2$. Finalement~:
+\[
+\gamma(0) = \frac{12}{5}\sigma_{\varepsilon}^2,\quad
+\gamma(1) = \frac{8}{5}\sigma_{\varepsilon}^2,\quad
+\gamma(2) = \frac{2}{5}\sigma_{\varepsilon}^2.
+\]
+\newline
+
+\question{4} La relation de récurrence est, pour tout $h\geq 1$~:
+\[
+\gamma(h) = \gamma(h-1) - \frac{1}{2}\gamma(h-2).
+\]
+L'équation caractéristique associée est $r^2 - r + \frac{1}{2} = 0$,
+dont les racines sont $r_{1,2} = \frac{1\pm i}{2}$ (inverses des racines
+$L_{1,2}=1\pm i$). En module et argument~:
+\[
+r_{1,2} = \frac{1}{\sqrt 2}\,e^{\pm i\pi/4},\qquad
+|r_{1,2}| = \frac{1}{\sqrt 2},\quad \arg = \pm\frac{\pi}{4}.
+\]
+La solution générale d'une récurrence à racines complexes conjuguées
+s'écrit~:
+\[
+\gamma(h) = \left(\frac{1}{\sqrt 2}\right)^{h}
+\left[A\cos\!\left(\frac{\pi}{4}h\right) + B\sin\!\left(\frac{\pi}{4}h\right)\right].
+\]
+Les constantes se déterminent par les conditions initiales $\gamma(0) =
+\frac{12}{5}\sigma_{\varepsilon}^2$ et $\gamma(1) =
+\frac{8}{5}\sigma_{\varepsilon}^2$. En $h=0$~: $A = \gamma(0) =
+\frac{12}{5}\sigma_{\varepsilon}^2$. En $h=1$~: $\frac{1}{\sqrt 2}
+\cdot\frac{\sqrt 2}{2}(A+B) = \frac{1}{2}(A+B) = \gamma(1)$, donc $A+B =
+\frac{16}{5}\sigma_{\varepsilon}^2$ et $B =
+\frac{4}{5}\sigma_{\varepsilon}^2$. Ainsi~:
+\[
+\gamma(h) = \left(\frac{1}{\sqrt 2}\right)^{h}
+\left[\frac{12}{5}\cos\!\left(\frac{\pi}{4}h\right)
++ \frac{4}{5}\sin\!\left(\frac{\pi}{4}h\right)\right]\sigma_{\varepsilon}^2.
+\]
+\textbf{Commentaire.} La fonction d'autocorrélation $\rho(h) =
+\gamma(h)/\gamma(0)$ décroît en module comme $(1/\sqrt 2)^h$ (la
+mémoire s'estompe), mais en \emph{oscillant}~: les racines complexes
+d'argument $\pm\pi/4$ engendrent une composante pseudo-périodique de
+période $2\pi/(\pi/4) = 8$. Le processus présente donc des cycles
+amortis d'une longueur d'environ 8 périodes.
+
+\bigskip
+
+\exercice{3}\newline
+
+\question{1} En appliquant le théorème de Bayes de manière itérée~:
+\[
+f(\mathcal Y_T;\bm\theta) = f(y_1;\bm\theta)\prod_{t=2}^T
+f(y_t \mid y_{t-1},\dots,y_1;\bm\theta).
+\]
+Pour un AR(1), la propriété de Markov assure que $f(y_t\mid
+y_{t-1},\dots,y_1) = f(y_t\mid y_{t-1})$, avec
+\[
+y_t\mid y_{t-1} \sim \mathcal N\!\left(c+\varphi y_{t-1},\,
+\sigma_{\varepsilon}^2\right).
+\]
+La première observation suit, elle, sa loi marginale
+\emph{stationnaire}~:
+\[
+y_1 \sim \mathcal N\!\left(\mu,\,\gamma(0)\right),\qquad
+\mu = \frac{c}{1-\varphi},\quad \gamma(0)=\frac{\sigma_{\varepsilon}^2}{1-\varphi^2}.
+\]
+La vraisemblance exacte s'écrit donc~:
+\[
+\mathcal L(\bm\theta;\mathcal Y_T) =
+\underbrace{\frac{1}{\sqrt{2\pi\gamma(0)}}
+e^{-\frac{(y_1-\mu)^2}{2\gamma(0)}}}_{f(y_1;\bm\theta)}
+\prod_{t=2}^T \frac{1}{\sqrt{2\pi\sigma_{\varepsilon}^2}}
+e^{-\frac{(y_t-c-\varphi y_{t-1})^2}{2\sigma_{\varepsilon}^2}}.
+\]
+\newline
+
+\question{2} La vraisemblance conditionnelle s'obtient en traitant
+$y_1$ comme donné (déterministe) plutôt qu'aléatoire, c'est-à-dire en
+omettant le facteur $f(y_1;\bm\theta)$~:
+\[
+\mathcal L_c(\bm\theta;\mathcal Y_T\mid y_1) = \prod_{t=2}^T
+\frac{1}{\sqrt{2\pi\sigma_{\varepsilon}^2}}
+e^{-\frac{(y_t-c-\varphi y_{t-1})^2}{2\sigma_{\varepsilon}^2}}.
+\]
+La log-vraisemblance conditionnelle est~:
+\[
+\ln\mathcal L_c = -\frac{T-1}{2}\ln(2\pi\sigma_{\varepsilon}^2)
+- \frac{1}{2\sigma_{\varepsilon}^2}\sum_{t=2}^T (y_t-c-\varphi y_{t-1})^2.
+\]
+\newline
+
+\question{3} À $\sigma_{\varepsilon}^2$ fixé, seul le dernier terme
+dépend de $(c,\varphi)$, et le maximiser revient à \emph{minimiser} la
+somme des carrés des résidus~:
+\[
+S(c,\varphi) = \sum_{t=2}^T (y_t-c-\varphi y_{t-1})^2.
+\]
+C'est exactement le critère des moindres carrés ordinaires pour la
+régression de $y_t$ sur une constante et $y_{t-1}$, à partir de
+$t=2$. En posant~:
+\[
+\bm{y} = \begin{pmatrix} y_2 \\ y_3 \\ \vdots \\ y_T \end{pmatrix},\qquad
+\bm{X} = \begin{pmatrix} 1 & y_1 \\ 1 & y_2 \\ \vdots & \vdots \\ 1 & y_{T-1} \end{pmatrix},
+\]
+$\bm X$ étant de dimension $(T-1)\times 2$, l'estimateur est~:
+\[
+\widehat{\bm\beta} = \begin{pmatrix}\hat c\\ \hat\varphi\end{pmatrix}
+= (\bm X'\bm X)^{-1}\bm X'\bm y.
+\]
+On obtient enfin l'estimateur de $\sigma_{\varepsilon}^2$ par la
+condition de premier ordre par rapport à $\sigma_{\varepsilon}^2$, en
+remplaçant $(c,\varphi)$ par leurs estimations~:
+\[
+\widehat{\sigma_{\varepsilon}^2} = \frac{1}{T-1}\sum_{t=2}^T
+\left(y_t-\hat c-\hat\varphi y_{t-1}\right)^2.
+\]
+\newline
+
+\question{4} Sous $H_0:\varphi=0$, la variance asymptotique
+$1-\varphi^2$ vaut $1$. La loi limite donne donc directement, en
+remplaçant l'écart-type asymptotique par $\sqrt{1-\hat\varphi^2}$, la
+statistique de test (de type Wald / ratio de Student)~:
+\[
+t = \frac{\hat\varphi}{\sqrt{(1-\hat\varphi^2)/T}}
+= \frac{\sqrt T\,\hat\varphi}{\sqrt{1-\hat\varphi^2}}
+\;\xrightarrow[H_0]{d}\; \mathcal N(0,1).
+\]
+De façon équivalente, $t^2 \xrightarrow{d}\chi^2(1)$. \textbf{Règle de
+décision} au seuil de 5~\%~: on rejette $H_0$ (présence de dynamique
+auto-régressive) si $|t| > 1{,}96$, et on ne rejette pas sinon. Sous
+$H_0$, le processus se réduit à $y_t = c + \varepsilon_t$, c'est-à-dire
+un bruit blanc d'espérance $c$.
+
+\bigskip
+
+\exercice{4}\newline
+
+\question{1} Pour $\{Y_t\}$ avec $\theta = 2$~:
+\[
+\gamma_Y(0) = (1+\theta^2)\sigma_{\varepsilon}^2 = 5\sigma_{\varepsilon}^2,\qquad
+\gamma_Y(1) = \theta\sigma_{\varepsilon}^2 = 2\sigma_{\varepsilon}^2,
+\]
+et $\gamma_Y(h)=0$ pour $h\geq 2$. D'où~:
+\[
+\rho_Y(1) = \frac{\gamma_Y(1)}{\gamma_Y(0)} = \frac{2}{5}.
+\]
+\newline
+
+\question{2} Pour $\{\tilde Y_t\}$ avec coefficient $\frac{1}{2}$ et
+variance d'innovation $\sigma_u^2 = 4\sigma_{\varepsilon}^2$~:
+\[
+\gamma_{\tilde Y}(0) = \left(1+\tfrac{1}{4}\right)\sigma_u^2
+= \frac{5}{4}\cdot 4\sigma_{\varepsilon}^2 = 5\sigma_{\varepsilon}^2,
+\]
+\[
+\gamma_{\tilde Y}(1) = \frac{1}{2}\,\sigma_u^2
+= \frac{1}{2}\cdot 4\sigma_{\varepsilon}^2 = 2\sigma_{\varepsilon}^2,
+\]
+et $\gamma_{\tilde Y}(h)=0$ pour $h\geq 2$. Les deux processus ont donc
+exactement la \emph{même} fonction d'autocovariance (et la même
+autocorrélation $\rho(1)=\frac{2}{5}$).\newline
+
+\textbf{Conclusion.} Les moments d'ordre 1 et 2 ne suffisent pas à
+identifier de manière unique un processus MA~: à toute représentation
+de paramètre $\theta$ et de variance $\sigma_{\varepsilon}^2$
+correspond une représentation « jumelle » de paramètre $1/\theta$ et de
+variance $\theta^2\sigma_{\varepsilon}^2$ possédant les mêmes
+autocovariances. Plus généralement, remplacer une racine du polynôme
+$\Theta(L)$ par son inverse (en ajustant la variance) laisse la
+structure de covariance inchangée.\newline
+
+\question{3} \textbf{Définition.} Un processus MA($q$) est
+\emph{inversible} s'il peut se réécrire comme un AR($\infty$),
+c'est-à-dire si l'innovation s'exprime comme une combinaison linéaire
+\emph{convergente} du présent et du passé du processus observé. La
+condition est que toutes les racines du polynôme $\Theta(z)$ soient de
+module strictement supérieur à 1.\newline
+
+Pour $\{Y_t\}$, $\Theta(L) = 1 + 2L$ a pour racine $L = -\frac{1}{2}$,
+de module $\frac{1}{2} < 1$~: cette représentation \textbf{n'est pas
+inversible}. Pour $\{\tilde Y_t\}$, $\Theta(L) = 1 + \frac{1}{2}L$ a
+pour racine $L = -2$, de module $2 > 1$~: c'est la représentation
+\textbf{inversible}, celle que l'on retient. On a alors $\tilde Y_t =
+(1+\frac{1}{2}L)u_t$, d'où, en inversant le polynôme retard (licite
+car $|\frac{1}{2}|<1$)~:
+\[
+u_t = \frac{1}{1+\frac{1}{2}L}\,\tilde Y_t
+= \sum_{i=0}^{\infty}\left(-\frac{1}{2}\right)^i \tilde Y_{t-i}
+= \tilde Y_t - \frac{1}{2}\tilde Y_{t-1} + \frac{1}{4}\tilde Y_{t-2} - \cdots
+\]
+La série des coefficients $((-1/2)^i)_i$ est absolument sommable, ce
+qui garantit la convergence de cette représentation AR($\infty$).\newline
+
+\question{4} La condition d'inversibilité est imposée pour deux raisons
+liées. \emph{(i) Identification}~: comme le montre la question 2,
+plusieurs jeux de paramètres engendrent la même fonction
+d'autocovariance~; en se restreignant à la représentation inversible
+(racines $>1$ en module), on sélectionne une représentation
+\emph{unique}, ce qui rend les paramètres identifiables à partir des
+données. \emph{(ii) Reconstruction de l'innovation et prévision}~:
+seule la représentation inversible permet d'écrire l'innovation
+courante $u_t$ comme une fonction convergente du passé \emph{observable}
+$\{Y_t,Y_{t-1},\dots\}$~; c'est indispensable pour reconstruire les
+résidus lors de l'estimation et pour former des prévisions à partir de
+l'information disponible.
+
+\bigskip
+
+\textit{Remarque.} Les exercices 1, 2 et 4 illustrent la dualité
+fondamentale du cours~: un AR stationnaire admet une représentation
+MA($\infty$) (inversion du polynôme auto-régressif quand ses racines
+sont $>1$), et un MA inversible admet une représentation AR($\infty$)
+(inversion du polynôme moyenne mobile quand ses racines sont $>1$). La
+fonction d'autocovariance d'un MA s'annule au-delà de l'ordre $q$
+(courte mémoire), tandis que celle d'un AR décroît géométriquement sans
+jamais s'annuler --- en oscillant lorsque les racines sont complexes.
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

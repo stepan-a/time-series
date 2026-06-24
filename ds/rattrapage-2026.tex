@@ -1,0 +1,146 @@
+% stephane [DOT] adjemian [AT] univ [DASH] lemans [DOT] fr
+\documentclass[10pt,a4paper,notitlepage,twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{palatino}
+\usepackage{scrtime}
+\usepackage[french]{babel}
+\usepackage{float}
+\usepackage{nicefrac}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exercice}[1]{\textsc{\textbf{Exercice}} #1}
+\newcommand{\question}[1]{\textbf{(#1)}}
+\setlength{\parindent}{0cm}
+
+
+
+\begin{document}
+
+
+\title{\textsc{Séries temporelles}}
+\author{\textsc{Université du Mans (2\textsuperscript{nde} session, L3)}}
+\date{Mardi 16 juin 2026}
+
+\pagenumbering{gobble}
+
+\maketitle
+
+\exercice{1} Soit le processus moyenne mobile MA(2)~:
+\[
+  Y_t = \varepsilon_t - \frac{5}{6}\varepsilon_{t-1} + \frac{1}{6}\varepsilon_{t-2}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{1} Ce processus est-il stationnaire au second ordre~?
+Justifier sans calcul.\newline
+
+\question{2} Calculer l'espérance et les autocovariances $\gamma(0)$,
+$\gamma(1)$, $\gamma(2)$ ainsi que $\gamma(h)$ pour $h\geq 3$.\newline
+
+\question{3} En déduire la fonction d'autocorrélation $\rho(h)$.\newline
+
+\question{4} Le processus est-il inversible~? On déterminera les
+racines du polynôme retard moyenne mobile et on donnera sa
+factorisation.\newline
+
+\bigskip
+
+\exercice{2} Soit le processus AR(2)~:
+\[
+  Y_t = 1 + Y_{t-1} - \frac{1}{2}Y_{t-2} + \varepsilon_t
+\]
+avec $\varepsilon_t$ un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{1} Montrer que ce processus est asymptotiquement
+stationnaire au second ordre. Que remarque-t-on sur les racines du
+polynôme retard~?\newline
+
+On suppose dans toute la suite que le processus est stationnaire au
+second ordre.\newline
+
+\question{2} Calculer son espérance.\newline
+
+\question{3} Écrire les équations de Yule-Walker et en déduire
+$\gamma(0)$, $\gamma(1)$ et $\gamma(2)$ en fonction de
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{4} Donner la relation de récurrence vérifiée par $\gamma(h)$
+pour $h\geq 1$. En résolvant cette récurrence, donner la forme générale
+de $\gamma(h)$ et commenter le comportement de la fonction
+d'autocorrélation lorsque $h$ varie.\newline
+
+\bigskip
+
+\exercice{3} Soit le processus AR(1) gaussien~:
+\[
+  y_t = c + \varphi y_{t-1} + \varepsilon_t,\qquad |\varphi|<1
+\]
+avec $\varepsilon_t \sim \mathcal{N}(0,\sigma_{\varepsilon}^2)$,
+indépendants entre eux. On note $\mathcal Y_T \equiv
+\{y_1,y_2,\dots,y_T\}$ l'échantillon observé et
+$\bm{\theta}=(c,\varphi,\sigma_{\varepsilon}^2)'$ le vecteur des
+paramètres. On supposera le processus stationnaire.\newline
+
+\question{1} À l'aide du théorème de Bayes, écrire la décomposition de
+la vraisemblance exacte. On précisera la loi marginale de la première
+observation $y_1$.\newline
+
+\question{2} Définir la vraisemblance conditionnelle (on conditionnera
+par rapport à $y_1$) et donner l'expression de la log-vraisemblance
+conditionnelle.\newline
+
+\question{3} Montrer qu'à $\sigma_{\varepsilon}^2$ fixé, la
+maximisation de la log-vraisemblance conditionnelle par rapport à
+$(c,\varphi)$ équivaut à un problème de moindres carrés ordinaires. En
+déduire l'estimateur sous forme matricielle, puis l'estimateur de
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{4} On souhaite tester l'absence de dynamique, c'est-à-dire
+$H_0:\varphi=0$ contre $H_1:\varphi\neq 0$. Sachant que
+$\sqrt{T}(\hat\varphi-\varphi)\xrightarrow{d}\mathcal
+N(0,1-\varphi^2)$, proposer une statistique de test et donner sa loi
+asymptotique sous $H_0$. Quelle est la règle de décision au seuil de
+5~\%~?\newline
+
+\bigskip
+
+\exercice{4} Soit le processus MA(1)~:
+\[
+  Y_t = \varepsilon_t + 2\,\varepsilon_{t-1}
+\]
+où $\varepsilon_t$ est un bruit blanc d'espérance nulle et de variance
+$\sigma_{\varepsilon}^2$.\newline
+
+\question{1} Calculer la fonction d'autocovariance puis
+l'autocorrélation d'ordre 1 de $\{Y_t\}$.\newline
+
+\question{2} On considère le processus $\tilde Y_t = u_t +
+\frac{1}{2}u_{t-1}$ où $u_t$ est un bruit blanc d'espérance nulle et
+de variance $\sigma_u^2 = 4\sigma_{\varepsilon}^2$. Montrer que
+$\{\tilde Y_t\}$ et $\{Y_t\}$ ont la même fonction d'autocovariance.
+Que peut-on en conclure sur l'identification d'un processus MA à partir
+de ses moments d'ordre 1 et 2~?\newline
+
+\question{3} Rappeler la définition de l'inversibilité d'un processus
+MA. Parmi les deux représentations précédentes, laquelle est
+inversible~? Pour cette représentation, exprimer (à l'aide du polynôme
+retard) l'innovation en fonction du présent et du passé du processus
+observé.\newline
+
+\question{4} Pourquoi impose-t-on la condition d'inversibilité lors de
+l'estimation d'un modèle MA~?
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
